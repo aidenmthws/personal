@@ -1,0 +1,238 @@
+@import "tailwindcss";
+
+/* Raw palette (PLAN.md section 4). Components use the semantic tokens below. */
+:root {
+  --mist: #f3ede0;
+  --kasavu-gold: #c8a24a;
+  --backwater-teal: #1f7a74;
+  --deep-canal: #0f3b3a;
+  --palm-green: #4b7b3c;
+  --laterite-red: #b4492b;
+  --husk-brown: #6f5237;
+  --ink: #14221f;
+
+  /* Teal as text: #1f7a74 is 4.40:1 on Mist, so link text uses this darker step. */
+  --backwater-teal-text: #1a6e68;
+  /* Mist tinted with Husk, for quiet fills. */
+  --mist-shade: #e8dfcc;
+
+  --background: var(--mist);
+  --foreground: var(--ink);
+  --card: var(--mist);
+  --card-foreground: var(--ink);
+  --muted: var(--mist-shade);
+  --muted-foreground: var(--husk-brown);
+  --accent: var(--laterite-red);
+  --accent-foreground: var(--mist);
+  --secondary: var(--deep-canal);
+  --secondary-foreground: var(--mist);
+  --link: var(--backwater-teal-text);
+  --border: var(--kasavu-gold);
+  --ring: var(--kasavu-gold);
+  --ring-contrast: var(--ink);
+}
+
+/* The stacked page is the default. `data-ride` opts in to the pinned Ride, and
+   lib/ride.ts decides when to set it. */
+@custom-variant ride (&:where([data-ride], [data-ride] *));
+
+/* Set by RideController, so this means the page's script is running. */
+@custom-variant hydrated (&:where([data-ride-ready] *));
+
+/* Clearing the defaults keeps the system enforced: the stock Tailwind colors,
+   shadows, radii, and type sizes do not exist in this project. */
+@theme {
+  --color-*: initial;
+  --shadow-*: initial;
+  --drop-shadow-*: initial;
+  --radius-*: initial;
+  --text-*: initial;
+
+  --radius-sm: 4px;
+
+  /* Type scale */
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.5;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.6;
+  --text-lead: 1.375rem;
+  --text-lead--line-height: 1.4;
+  --text-heading: 1.5rem;
+  --text-heading--line-height: 1.25;
+  --text-title: 2rem;
+  --text-title--line-height: 1.2;
+  --text-display: clamp(2.75rem, 2rem + 4vw, 4.5rem);
+  --text-display--line-height: 1.05;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-link: var(--link);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    background-color: var(--background);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  a {
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Gold alone is 2.06:1 on Mist. The ink band carries the contrast on light
+     surfaces and the gold carries it on dark ones. */
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--ring-contrast);
+  }
+}
+
+html[data-ride] {
+  scroll-behavior: smooth;
+}
+
+/* The stacked page keeps a sticky header, so anchors and focus stop below it. */
+html:has(#ride):not([data-ride]) {
+  scroll-padding-top: 4.75rem;
+}
+
+/* One day on the water. Each stop paints the sky and the water, so the banks
+   in every scene meet the same waterline at 70% of the height. */
+@layer components {
+  .sky {
+    background-image: linear-gradient(
+      to bottom,
+      var(--sky-top),
+      var(--sky-bottom) 70%,
+      var(--water-top) 70%,
+      var(--water-bottom)
+    );
+  }
+
+  .sky-predawn {
+    --sky-top: #a9bcc4;
+    --sky-bottom: #e9e4d8;
+    --water-top: #9fb5b3;
+    --water-bottom: #6f9290;
+  }
+
+  .sky-sunrise {
+    --sky-top: #eeb48c;
+    --sky-bottom: #fbe6c8;
+    --water-top: #9fbcae;
+    --water-bottom: #5f9690;
+  }
+
+  .sky-gold {
+    --sky-top: #efd892;
+    --sky-bottom: #fbf2d4;
+    --water-top: #6fae9f;
+    --water-bottom: #2f8a80;
+  }
+
+  .sky-bright {
+    --sky-top: #6dbdb9;
+    --sky-bottom: #d6efe2;
+    --water-top: #3a9a90;
+    --water-bottom: #1f7a74;
+  }
+
+  .sky-amber {
+    --sky-top: #e29a52;
+    --sky-bottom: #f6d79a;
+    --water-top: #3f8074;
+    --water-bottom: #1f5f58;
+  }
+
+  .sky-dusk {
+    --sky-top: #0f3b3a;
+    --sky-bottom: #2f6a63;
+    --water-top: #174a47;
+    --water-bottom: #0b2c2b;
+  }
+}
+
+/* A slow rock and spreading rings. Paused by the water control, and absent when
+   motion is reduced because the boat only exists on the full Ride. */
+@keyframes boat-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes wake-ring {
+  from {
+    opacity: 0.35;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .boat-bob {
+    animation: boat-bob 4s ease-in-out infinite;
+  }
+
+  .wake-ring {
+    animation: wake-ring 3s ease-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+}
+
+[data-ambient="paused"] .boat-bob,
+[data-ambient="paused"] .wake-ring {
+  animation-play-state: paused;
+}
+
+@utility border-keyline {
+  border-width: 1.5px;
+}
+
+/* The woven stripe on a kasavu card header. */
+@utility kasavu-cap {
+  height: 8px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--kasavu-gold) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+/* Until the script runs, neighboring scenes wait off to the right. */
+[data-ride] [data-scene] {
+  transform: translate3d(calc(var(--landing) * 100vw), 0, 0);
+}
