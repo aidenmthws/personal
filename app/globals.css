@@ -216,7 +216,91 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+@keyframes sway {
+  from {
+    transform: rotate(-1.4deg);
+  }
+  to {
+    transform: rotate(1.4deg);
+  }
+}
+
+@keyframes mist-drift {
+  from {
+    transform: translate3d(-18px, 0, 0);
+  }
+  to {
+    transform: translate3d(18px, 0, 0);
+  }
+}
+
+@keyframes ripple-drift {
+  from {
+    transform: translate3d(-8px, 0, 0);
+  }
+  to {
+    transform: translate3d(8px, 0, 0);
+  }
+}
+
+@keyframes duck-paddle {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(26px, 0, 0);
+  }
+}
+
+@keyframes rising {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translate3d(0, 3px, 0);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+@keyframes falling {
+  from {
+    opacity: 0.2;
+    transform: translate3d(0, -12px, 0);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate3d(0, 22px, 0);
+  }
+}
+
+/* Scene loops run only on the full Ride, whose off-screen scenes are hidden. */
 @media (prefers-reduced-motion: no-preference) {
+  [data-ride] .sway {
+    animation: sway 8s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .mist {
+    animation: mist-drift 28s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .ripples {
+    animation: ripple-drift 7s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .ducks {
+    animation: duck-paddle 16s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .steam {
+    animation: rising 6s ease-in-out infinite;
+  }
+
+  [data-ride] .fall {
+    animation: falling 2.8s linear infinite;
+  }
+
   .cloud-drift {
     animation: cloud-drift 70s ease-in-out infinite alternate;
   }
@@ -236,6 +320,7 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+/* Water and air alike stop for the visitor's pause button. */
 [data-ambient="paused"] .ambient,
 [data-ambient="paused"] .boat-bob,
 [data-ambient="paused"] .wake-ring {
