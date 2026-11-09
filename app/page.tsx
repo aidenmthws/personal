@@ -2,7 +2,8 @@ import type { CSSProperties } from "react";
 
 import Link from "next/link";
 
-import { LandingCardBody, LandingMeta } from "@/components/landing-details";
+import { LandingCardBody } from "@/components/landing-card-body";
+import { LandingMeta } from "@/components/landing-details";
 import { Boat } from "@/components/ride/boat";
 import { RideController } from "@/components/ride/ride-controller";
 import { RouteMap } from "@/components/ride/route-map";
