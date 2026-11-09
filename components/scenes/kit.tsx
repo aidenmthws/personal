@@ -3,40 +3,65 @@ import type { ReactNode } from "react";
 /** The waterline in far and mid layers, whose viewBox is 1600 by 630. */
 export const WATERLINE = 630;
 
-const OUTLINE = "#14221F";
+export const OUTLINE = "#14221F";
 
 export type Tint = {
   far: string;
   bank: string;
+  lip: string;
   leaf: string;
+  shade: string;
   trunk: string;
   roof: string;
   wall: string;
   glow: string;
 };
 
+const round = (value: number) => Math.round(value * 10) / 10;
+
 /**
  * Every landform tapers to the waterline at both ends, so neighboring scenes
- * can slide past each other without a seam.
+ * can slide past each other without a seam. The top edge is uneven, and a
+ * darker lip marks where the land meets the water.
  */
 export function Bank({
   x,
   width,
   height,
   fill,
+  lip,
+  seed = 1,
 }: {
   x: number;
   width: number;
   height: number;
   fill: string;
+  lip?: string;
+  seed?: number;
 }) {
   const top = WATERLINE - height;
-  const shoulder = Math.min(width * 0.2, 120);
+  const shoulder = Math.min(width * 0.18, 110);
+  const steps = Math.max(2, Math.round((width - shoulder * 2) / 70));
+  const edge = Array.from({ length: steps + 1 }, (_, index) => {
+    const px = x + shoulder + ((width - shoulder * 2) * index) / steps;
+    return [round(px), round(top + (noise(index, seed) - 0.5) * height * 0.22)];
+  });
+  const line = edge.map(([px, py]) => `L${px} ${py}`).join("");
+  const lipHeight = Math.min(height * 0.26, 16);
   return (
-    <path
-      d={`M${x} ${WATERLINE}Q${x + shoulder * 0.5} ${top} ${x + shoulder * 1.5} ${top}L${x + width - shoulder * 1.5} ${top}Q${x + width - shoulder * 0.5} ${top} ${x + width} ${WATERLINE}Z`}
-      fill={fill}
-    />
+    <>
+      <path
+        d={`M${x} ${WATERLINE}Q${round(x + shoulder * 0.35)} ${top} ${x + shoulder} ${edge[0][1]}${line}Q${round(x + width - shoulder * 0.35)} ${top} ${x + width} ${WATERLINE}Z`}
+        fill={fill}
+        strokeLinejoin="round"
+      />
+      {lip && (
+        <path
+          d={`M${x + shoulder * 0.3} ${WATERLINE}Q${x + shoulder} ${WATERLINE - lipHeight} ${x + shoulder * 2} ${WATERLINE - lipHeight}L${x + width - shoulder * 2} ${WATERLINE - lipHeight}Q${x + width - shoulder} ${WATERLINE - lipHeight} ${x + width - shoulder * 0.3} ${WATERLINE}Z`}
+          fill={lip}
+        />
+      )}
+    </>
   );
 }
 
@@ -59,285 +84,179 @@ export function Hill({
   );
 }
 
+/** A long ridge through [x, height] points, for the Ghats. */
+export function Ridge({ points, fill }: { points: [number, number][]; fill: string }) {
+  const at = ([x, height]: [number, number]) => `${x} ${WATERLINE - height}`;
+  const curve = points
+    .slice(1)
+    .map((point, index) => {
+      const before = points[index];
+      const mid: [number, number] = [(before[0] + point[0]) / 2, (before[1] + point[1]) / 2];
+      return `Q${at(before)} ${at(mid)}`;
+    })
+    .join("");
+  const last = points[points.length - 1];
+  return (
+    <path
+      d={`M${points[0][0]} ${WATERLINE}L${at(points[0])}${curve}L${at(last)}L${last[0]} ${WATERLINE}Z`}
+      fill={fill}
+    />
+  );
+}
+
+/** A band of rounded tree crowns, drawn as one path. */
+export function Forest({
+  x,
+  width,
+  base,
+  size = 22,
+  fill,
+  seed = 1,
+}: {
+  x: number;
+  width: number;
+  base: number;
+  size?: number;
+  fill: string;
+  seed?: number;
+}) {
+  const count = Math.round(width / (size * 1.25));
+  const crowns = Array.from({ length: count }, (_, index) => {
+    const r = round(size * (0.7 + noise(index, seed) * 0.6));
+    const cx = round(x + (width * index) / count);
+    return `M${cx - r} ${base}a${r} ${r} 0 1 1 ${2 * r} 0Z`;
+  });
+  return (
+    <path
+      d={`${crowns.join("")}M${x} ${base}h${width}v${size}h${-width}Z`}
+      fill={fill}
+    />
+  );
+}
+
+/** A coconut palm. Pass `sway` for the slow ambient movement of its crown. */
 export function Palm({
   x,
   base,
   height,
   lean = 24,
   tint,
+  sway,
 }: {
   x: number;
   base: number;
   height: number;
   lean?: number;
   tint: Tint;
+  sway?: "sway";
 }) {
   const topX = x + lean;
   const topY = base - height;
-  const reach = height * 0.42;
-  const fronds = [-1, -0.62, -0.25, 0.25, 0.62, 1];
+  const reach = height * 0.47;
+  const low = Math.max(4, height * 0.05) / 2;
+  const high = Math.max(2.4, height * 0.022) / 2;
+  const bendX = x + lean * 0.12;
+  const bendY = base - height * 0.6;
+  const fronds = [-1.04, 0.98, -0.8, 0.74, -0.5, 0.44, -0.2, 0.16];
 
   return (
     <g>
       <path
-        d={`M${x} ${base}Q${x + lean * 0.1} ${base - height * 0.6} ${topX} ${topY}`}
-        fill="none"
-        stroke={tint.trunk}
-        strokeWidth={height * 0.05}
-        strokeLinecap="round"
-      />
-      {fronds.map((side) => {
-        const endX = topX + side * reach;
-        const endY = topY + reach * 0.55 * (1 - Math.abs(side) * 0.25) - 8;
-        const midX = topX + side * reach * 0.55;
-        const midY = topY - reach * (0.42 - Math.abs(side) * 0.26);
-        return (
-          <path
-            key={side}
-            d={`M${topX} ${topY}Q${midX} ${midY} ${endX} ${endY}Q${midX} ${midY + reach * 0.3} ${topX} ${topY}Z`}
-            fill={tint.leaf}
-          />
-        );
-      })}
-    </g>
-  );
-}
-
-export function House({
-  x,
-  base,
-  width = 110,
-  tint,
-  lit,
-}: {
-  x: number;
-  base: number;
-  width?: number;
-  tint: Tint;
-  lit?: "lit";
-}) {
-  const height = width * 0.5;
-  const overhang = width * 0.12;
-  const pitch = width * 0.34;
-  const wallTop = base - height;
-  return (
-    <g>
-      <rect x={x} y={wallTop} width={width} height={height} fill={tint.wall} />
-      <path
-        d={`M${x - overhang} ${wallTop}L${x + width * 0.18} ${wallTop - pitch}L${x + width * 0.82} ${wallTop - pitch}L${x + width + overhang} ${wallTop}Z`}
-        fill={tint.roof}
-      />
-      <rect
-        x={x + width * 0.42}
-        y={base - height * 0.68}
-        width={width * 0.18}
-        height={height * 0.68}
+        d={`M${x - low} ${base}Q${bendX - low} ${bendY} ${topX - high} ${topY}L${topX + high} ${topY}Q${bendX + low} ${bendY} ${x + low} ${base}Z`}
         fill={tint.trunk}
       />
-      <rect
-        x={x + width * 0.12}
-        y={base - height * 0.68}
-        width={width * 0.16}
-        height={height * 0.32}
-        fill={lit ? tint.glow : tint.trunk}
-      />
-      <rect
-        x={x + width * 0.72}
-        y={base - height * 0.68}
-        width={width * 0.16}
-        height={height * 0.32}
-        fill={lit ? tint.glow : tint.trunk}
-      />
+      <g
+        className={sway ? "sway ambient" : undefined}
+        style={sway ? { transformOrigin: `${topX}px ${topY}px` } : undefined}
+      >
+        {fronds.map((side, index) => {
+          const spread = Math.abs(side);
+          const endX = round(topX + side * reach);
+          const endY = round(topY + reach * (0.72 * spread ** 1.6 - 0.1));
+          const midX = round(topX + side * reach * 0.55);
+          const midY = round(topY - reach * (0.34 - spread * 0.14));
+          return (
+            <path
+              key={side}
+              d={`M${topX} ${topY}Q${midX} ${midY} ${endX} ${endY}Q${midX} ${round(midY + reach * 0.3)} ${topX} ${topY}Z`}
+              fill={index < 4 ? tint.shade : tint.leaf}
+            />
+          );
+        })}
+      </g>
+      {height > 170 && (
+        <g fill={tint.trunk}>
+          <circle cx={topX - 7} cy={topY + 8} r={height * 0.018} />
+          <circle cx={topX + 6} cy={topY + 10} r={height * 0.018} />
+        </g>
+      )}
     </g>
   );
 }
 
-export function Bird({ x, y, color }: { x: number; y: number; color: string }) {
-  return (
-    <path
-      d={`M${x - 14} ${y - 4}Q${x - 6} ${y - 10} ${x} ${y}Q${x + 6} ${y - 10} ${x + 14} ${y - 4}`}
-      fill="none"
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinecap="round"
-    />
-  );
-}
-
-export function Mist({ y, color }: { y: number; color: string }) {
-  return <ellipse cx="900" cy={y} rx="680" ry="12" fill={color} opacity="0.45" />;
-}
-
-/** A wooden jetty on posts, drawn in the mid layer at the waterline. */
-export function Jetty({
+/** A distant line of palms and scrub, drawn as one path. */
+export function GroveLine({
   x,
   width,
-  deck = WATERLINE - 26,
+  base,
+  height,
+  fill,
+  seed = 1,
 }: {
   x: number;
   width: number;
-  deck?: number;
-}) {
-  const posts = Array.from({ length: Math.floor(width / 70) + 1 }, (_, i) => x + i * 70);
-  return (
-    <g fill="#6F5237" stroke={OUTLINE} strokeWidth="2">
-      {posts.map((post) => (
-        <rect key={post} x={post} y={deck} width="10" height={WATERLINE + 2 - deck} />
-      ))}
-      <rect x={x - 12} y={deck - 12} width={width + 34} height="14" />
-    </g>
-  );
-}
-
-/** A cantilevered fishing net, with its poles and hanging cloth. */
-export function FishingNet({ x, base }: { x: number; base: number }) {
-  const tipX = x + 210;
-  const tipY = base - 250;
-  return (
-    <g fill="none" stroke={OUTLINE} strokeWidth="2" strokeLinecap="round">
-      <path d={`M${x} ${base}L${tipX} ${tipY}`} strokeWidth="7" stroke="#6F5237" />
-      <path d={`M${x + 70} ${base}L${x + 96} ${base - 130}`} strokeWidth="7" stroke="#6F5237" />
-      <path d={`M${tipX - 150} ${tipY + 66}Q${tipX} ${tipY + 240} ${tipX + 150} ${tipY + 66}`} fill="#F3EDE0" fillOpacity="0.8" />
-      <path d={`M${tipX - 150} ${tipY + 66}L${tipX} ${tipY}L${tipX + 150} ${tipY + 66}`} />
-      <path d={`M${tipX - 75} ${tipY + 33}L${tipX - 74} ${tipY + 152}M${tipX} ${tipY}L${tipX} ${tipY + 174}M${tipX + 75} ${tipY + 33}L${tipX + 74} ${tipY + 152}`} strokeWidth="1.5" />
-      <path d={`M${x + 34} ${base - 62}L${x - 30} ${base - 8}`} />
-    </g>
-  );
-}
-
-/** A houseboat with a woven arched cabin. */
-export function Houseboat({ x, base, width = 300 }: { x: number; base: number; width?: number }) {
-  const height = width * 0.28;
-  return (
-    <g stroke={OUTLINE} strokeWidth="2">
-      <path
-        d={`M${x + width * 0.08} ${base - height * 0.3}C${x + width * 0.14} ${base - height * 1.2} ${x + width * 0.86} ${base - height * 1.2} ${x + width * 0.92} ${base - height * 0.3}Z`}
-        fill="#C8A24A"
-      />
-      {[0.3, 0.5, 0.7].map((ratio) => (
-        <path
-          key={ratio}
-          d={`M${x + width * ratio} ${base - height * 0.3}L${x + width * ratio} ${base - height * 0.9}`}
-          fill="none"
-        />
-      ))}
-      <path
-        d={`M${x - width * 0.06} ${base - height * 0.42}Q${x + width * 0.04} ${base - height * 0.28} ${x + width * 0.12} ${base - height * 0.3}L${x + width * 0.88} ${base - height * 0.3}Q${x + width * 0.96} ${base - height * 0.28} ${x + width * 1.06} ${base - height * 0.42}Q${x + width * 0.9} ${base + 4} ${x + width * 0.5} ${base + 4}Q${x + width * 0.1} ${base + 4} ${x - width * 0.06} ${base - height * 0.42}Z`}
-        fill="#6F5237"
-      />
-    </g>
-  );
-}
-
-export function Basket({ x, base, size = 34 }: { x: number; base: number; size?: number }) {
-  return (
-    <path
-      d={`M${x} ${base - size}L${x + size} ${base - size}L${x + size * 0.84} ${base}L${x + size * 0.16} ${base}Z`}
-      fill="#C8A24A"
-      stroke={OUTLINE}
-      strokeWidth="2"
-    />
-  );
-}
-
-export function Jar({ x, base, fill }: { x: number; base: number; fill: string }) {
-  return (
-    <path
-      d={`M${x + 6} ${base - 34}L${x + 22} ${base - 34}L${x + 20} ${base - 28}Q${x + 32} ${base - 20} ${x + 26} ${base}L${x + 2} ${base}Q${x - 4} ${base - 20} ${x + 8} ${base - 28}Z`}
-      fill={fill}
-      stroke={OUTLINE}
-      strokeWidth="2"
-    />
-  );
-}
-
-/** A market stall with a striped awning and four jars on its counter. */
-export function Stall({
-  x,
-  base,
-  awning,
-  jars,
-}: {
-  x: number;
   base: number;
-  awning: string;
-  jars: string[];
+  height: number;
+  fill: string;
+  seed?: number;
 }) {
-  const width = 170;
+  const count = Math.round(width / (height * 0.5));
+  const palms = Array.from({ length: count }, (_, index) => {
+    const cx = round(x + (width * (index + noise(index, seed) * 0.6)) / count);
+    const tall = round(height * (0.55 + noise(index, seed + 1) * 0.45));
+    const tip = round(base - tall);
+    const reach = round(tall * 0.34);
+    const lean = round((noise(index, seed + 2) - 0.5) * tall * 0.3);
+    const crown = cx + lean;
+    return (
+      `M${cx - 1.5} ${base}L${crown - 1} ${tip}L${crown + 1} ${tip}L${cx + 1.5} ${base}Z` +
+      `M${crown} ${tip}Q${crown - reach * 0.6} ${tip - reach * 0.4} ${crown - reach} ${round(tip + reach * 0.5)}Q${crown - reach * 0.5} ${tip} ${crown} ${tip}Z` +
+      `M${crown} ${tip}Q${crown + reach * 0.6} ${tip - reach * 0.4} ${crown + reach} ${round(tip + reach * 0.5)}Q${crown + reach * 0.5} ${tip} ${crown} ${tip}Z` +
+      `M${crown} ${tip}Q${crown - reach * 0.2} ${tip - reach * 0.7} ${crown - reach * 0.5} ${tip - reach * 0.5}Q${crown - reach * 0.2} ${tip - reach * 0.3} ${crown} ${tip}Z` +
+      `M${crown} ${tip}Q${crown + reach * 0.2} ${tip - reach * 0.7} ${crown + reach * 0.5} ${tip - reach * 0.5}Q${crown + reach * 0.2} ${tip - reach * 0.3} ${crown} ${tip}Z`
+    );
+  });
   return (
-    <g>
-      <rect x={x + 8} y={base - 140} width="8" height="140" fill="#6F5237" />
-      <rect x={x + width - 16} y={base - 140} width="8" height="140" fill="#6F5237" />
-      <path
-        d={`M${x - 10} ${base - 120}L${x + 16} ${base - 170}L${x + width - 16} ${base - 170}L${x + width + 10} ${base - 120}Z`}
-        fill={awning}
-        stroke={OUTLINE}
-        strokeWidth="2"
-      />
-      <rect x={x} y={base - 54} width={width} height="54" fill="#6F5237" stroke={OUTLINE} strokeWidth="2" />
-      {jars.map((fill, index) => (
-        <Jar key={`${fill}-${index}`} x={x + 12 + index * 38} base={base - 54} fill={fill} />
-      ))}
-    </g>
+    <>
+      <path d={palms.join("")} fill={fill} />
+      <Forest x={x} width={width} base={base} size={height * 0.14} fill={fill} seed={seed} />
+    </>
   );
 }
 
-export function Lamp({ x, base, height = 120, lit }: { x: number; base: number; height?: number; lit?: "lit" }) {
-  const top = base - height;
+/** Flat bands of mist that drift very slowly. */
+export function Mist({ x = 220, y, width = 1200, color }: { x?: number; y: number; width?: number; color: string }) {
   return (
-    <g>
-      {lit && <circle cx={x} cy={top} r="46" fill="#C8A24A" opacity="0.28" />}
-      <rect x={x - 3} y={top} width="6" height={height} fill="#14221F" />
-      <rect x={x - 11} y={top - 18} width="22" height="26" rx="2" fill={lit ? "#F3D98B" : "#6F5237"} stroke={OUTLINE} strokeWidth="2" />
-    </g>
-  );
-}
-
-/** A small veranda with a standing lamp, unlit, and a glass of chai on a stool. */
-export function Veranda({ x, base, tint }: { x: number; base: number; tint: Tint }) {
-  return (
-    <g>
-      <rect x={x} y={base - 16} width="340" height="16" fill={tint.trunk} />
-      <rect x={x + 20} y={base - 176} width="300" height="160" fill={tint.wall} />
-      <rect x={x + 134} y={base - 136} width="72" height="120" fill={tint.trunk} />
-      <path d={`M${x - 36} ${base - 176}L${x + 40} ${base - 244}L${x + 300} ${base - 244}L${x + 376} ${base - 176}Z`} fill={tint.roof} />
-      <rect x={x + 8} y={base - 176} width="12" height="160" fill={tint.trunk} />
-      <rect x={x + 320} y={base - 176} width="12" height="160" fill={tint.trunk} />
-      <g stroke={OUTLINE} strokeWidth="2">
-        <path d={`M${x + 60} ${base - 16}l26 0l-8 -10l-3 0l0 -62l-4 0l0 62l-3 0Z`} fill="#C8A24A" />
-        <path d={`M${x + 58} ${base - 92}q15 12 30 0Z`} fill="#C8A24A" />
-        <rect x={x + 244} y={base - 52} width="44" height="36" fill="#6F5237" />
-        <path d={`M${x + 258} ${base - 72}l16 0l-2 20l-12 0Z`} fill="#B4492B" />
-      </g>
-    </g>
-  );
-}
-
-export function Footbridge({ x, width, base }: { x: number; width: number; base: number }) {
-  const rise = 90;
-  return (
-    <g fill="none" stroke={OUTLINE} strokeWidth="2">
-      <path d={`M${x} ${base}Q${x + width / 2} ${base - rise * 2} ${x + width} ${base}`} stroke="#6F5237" strokeWidth="14" />
-      <path d={`M${x + 8} ${base - 34}Q${x + width / 2} ${base - rise * 2 - 34} ${x + width - 8} ${base - 34}`} />
-      {[0.25, 0.5, 0.75].map((ratio) => {
-        const px = x + width * ratio;
-        const py = base - 2 * rise * 2 * ratio * (1 - ratio);
-        return <path key={ratio} d={`M${px} ${py}L${px} ${py - 34}`} />;
-      })}
+    <g className="mist ambient" fill={color}>
+      <rect x={x} y={y} width={width} height="14" rx="7" opacity="0.5" />
+      <rect x={x + width * 0.22} y={y - 22} width={width * 0.52} height="10" rx="5" opacity="0.38" />
+      <rect x={x + width * 0.08} y={y + 24} width={width * 0.6} height="9" rx="4.5" opacity="0.32" />
     </g>
   );
 }
 
 /* Foreground parts, for the band below the waterline (viewBox 1600 by 270). */
 
+/** Stems run well past the bottom of the box, so they reach the screen edge. */
 export function Reeds({ x, base = 270, color }: { x: number; base?: number; color: string }) {
   const blades = [-34, -22, -8, 6, 18, 30, 42];
+  const below = base + 260;
   return (
     <g fill="none" stroke={color} strokeWidth="5" strokeLinecap="round">
       {blades.map((offset, index) => (
         <path
           key={offset}
-          d={`M${x + offset} ${base}Q${x + offset + 4} ${base - 60} ${x + offset * 1.7} ${base - 92 - (index % 3) * 22}`}
+          d={`M${x + offset} ${below}L${x + offset} ${base}Q${x + offset + 4} ${base - 60} ${x + offset * 1.7} ${base - 92 - (index % 3) * 22}`}
         />
       ))}
     </g>
@@ -346,7 +265,7 @@ export function Reeds({ x, base = 270, color }: { x: number; base?: number; colo
 
 export function Ripples({ color, lines }: { color: string; lines: [number, number, number][] }) {
   return (
-    <g stroke={color} strokeWidth="3" strokeLinecap="round" opacity="0.5">
+    <g className="ripples ambient" stroke={color} strokeWidth="3" strokeLinecap="round" opacity="0.5">
       {lines.map(([x, y, length]) => (
         <path key={`${x}-${y}`} d={`M${x} ${y}h${length}`} />
       ))}
@@ -357,6 +276,29 @@ export function Ripples({ color, lines }: { color: string; lines: [number, numbe
 export function Stone({ x, y, width, fill }: { x: number; y: number; width: number; fill: string }) {
   return (
     <ellipse cx={x} cy={y} rx={width} ry={width * 0.42} fill={fill} stroke={OUTLINE} strokeWidth="2" />
+  );
+}
+
+/** Long fronds reaching in from the top corners, close to the viewer. */
+export function FrameFronds({ side, fill }: { side: "left" | "right"; fill: string }) {
+  const leaves: [number, number, number][] = [
+    [0, 330, 170],
+    [40, 420, 90],
+    [120, 470, 34],
+    [210, 400, 0],
+    [340, 300, -14],
+  ];
+  return (
+    <g transform={side === "right" ? "translate(1600 0) scale(-1 1)" : undefined} fill={fill}>
+      <g className="sway ambient" style={{ transformOrigin: "0px 0px" }}>
+        {leaves.map(([startX, length, drop]) => (
+          <path
+            key={startX}
+            d={`M${startX} -30Q${startX + length * 0.5} ${drop * 0.4 - 10} ${startX + length} ${drop + 70}Q${startX + length * 0.45} ${drop * 0.4 + 34} ${startX} -30Z`}
+          />
+        ))}
+      </g>
+    </g>
   );
 }
 
@@ -411,11 +353,13 @@ export function SceneLayers({
   far,
   mid,
   fore,
+  frame,
 }: {
   name: string;
   far: ReactNode;
   mid: ReactNode;
   fore: ReactNode;
+  frame?: ReactNode;
 }) {
   const art = `art-${name}`;
   return (
@@ -434,6 +378,11 @@ export function SceneLayers({
       <svg data-layer="fore" viewBox="0 0 1600 270">
         {fore}
       </svg>
+      {frame && (
+        <svg data-layer="frame" viewBox="0 0 1600 630">
+          {frame}
+        </svg>
+      )}
     </>
   );
 }
