@@ -12,7 +12,7 @@ Goals:
 - Be memorable enough that interviewers bring it up.
 - Show front-end craft (illustration, motion, accessibility) next to the backend and AI work on the resume.
 
-Audience: recruiters and engineers hiring for full-time roles and internships (Aiden graduates May 2028), plus peers and classmates.
+Audience: recruiters and engineers hiring for full-time roles and internships, plus peers and classmates.
 
 This replaces the current site at aidenmathews.vercel.app, and that URL keeps working.
 
@@ -68,7 +68,7 @@ All figures come from the resume as written. For the MVP, only the scene and con
 ### 3. The source (Virginia Tech)
 
 - Scene: misty hills and a stream. Blacksburg sits in the Appalachians and Kerala's rivers begin in the Western Ghats. The stream widens as the boat enters.
-- Content: Virginia Tech, B.S. in Computer Science, GPA 3.72, expected May 2028. Coursework as stones in the stream: Computer Systems, Introduction to AI, Machine Learning, Data Structures and Algorithms, Computer Organization, Discrete Mathematics, Cloud Software Development, Probability and Statistics.
+- Content: Virginia Tech, B.S. in Computer Science, GPA 3.72. Coursework as stones in the stream: Computer Systems, Introduction to AI, Machine Learning, Data Structures and Algorithms, Computer Organization, Discrete Mathematics, Cloud Software Development, Probability and Statistics.
 
 ### 4. First canal (Bunchful Enterprise, Sep 2024 to Jan 2025)
 
