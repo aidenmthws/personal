@@ -12,7 +12,7 @@ Goals:
 - Be memorable enough that interviewers bring it up.
 - Show front-end craft (illustration, motion, accessibility) next to the backend and AI work on the resume.
 
-Audience: recruiters and engineers hiring for full-time roles and internships (Aiden graduates May 2027), plus peers and classmates.
+Audience: recruiters and engineers hiring for full-time roles and internships (Aiden graduates May 2028), plus peers and classmates.
 
 This replaces the current site at aidenmathews.vercel.app, and that URL keeps working.
 
@@ -62,13 +62,13 @@ All figures come from the resume as written. For the MVP, only the scene and con
 ### 2. The boatman (about)
 
 - Scene: a small veranda on the bank with an unlit oil lamp (nilavilakku) and a glass of chai.
-- Content: 80 to 120 words on who Aiden is, what he builds for fun, and what he wants next, including a line or two on his family being from Kerala, kept light. Photo is optional and an add-on. Aiden supplies this copy; use a clearly marked placeholder until then.
+- Content: 80 to 120 words on who Aiden is, what he builds for fun, and what he wants next, including a line or two on his family being from Kerala, kept light. Photo is optional and an add-on. The MVP uses a short general note from Aiden until the longer one is written.
 - Add-on interaction: tap the lamp to light it and reveal a "currently" line.
 
 ### 3. The source (Virginia Tech)
 
 - Scene: misty hills and a stream. Blacksburg sits in the Appalachians and Kerala's rivers begin in the Western Ghats. The stream widens as the boat enters.
-- Content: Virginia Tech, B.S. in Computer Science, GPA 3.72, expected May 2027. Coursework as stones in the stream: Computer Systems, Introduction to AI, Machine Learning, Data Structures and Algorithms, Computer Organization, Discrete Mathematics, Cloud Software Development, Probability and Statistics.
+- Content: Virginia Tech, B.S. in Computer Science, GPA 3.72, expected May 2028. Coursework as stones in the stream: Computer Systems, Introduction to AI, Machine Learning, Data Structures and Algorithms, Computer Organization, Discrete Mathematics, Cloud Software Development, Probability and Statistics.
 
 ### 4. First canal (Bunchful Enterprise, Sep 2024 to Jan 2025)
 
@@ -150,17 +150,17 @@ Kasavu card: Mist fill, 1.5 px gold border with a thin inner rule, and a woven-s
 
 ## 5. Interaction and motion (MVP)
 
-- Full Ride (1024 by 700 and up, without reduced motion): scene and card layers are pinned with `position: fixed` while the landing sections stay in normal flow, so hash links, focus, and find on page work. Scroll progress maps to the world sliding sideways past a boat near center. Each landing gets about 110svh of scroll.
+- Full Ride (1024 by 700 and up, without reduced motion): scene and card layers are pinned with `position: fixed` while the landing sections stay in normal flow, so hash links, focus, and find on page work. Scroll position maps to the world sliding sideways past a boat near center. Each landing gets about 110svh of page height.
 - Stacked page: the default, used on phones, in small windows, with reduced motion, and if scripts fail. An inline script in `<head>` opts in to the full Ride before first paint, and opts back out if the Ride's script errors or has not started 3 seconds after load (8 seconds at most).
-- Docking: one continuous curve slows the world to 8% of scroll speed at each landing, so the card can be read, with no stall on the way out. The world glides toward the scroll position, settling within 300 ms, which smooths wheel steps. If scrolling stops between two landings, the Ride smooth-scrolls on to the next landing in that direction once input has been still for 160 ms, so a card is always readable at rest. New input cancels it. CSS scroll snapping was tried and rejected: Firefox skipped landings and Chromium snapped slow scrolls back. The route map follows what is on screen. Each dock sits at its section's top, so hash links land docked.
+- Moving: one scroll gesture, swipe, or key press is one landing. The page jumps straight to that landing's dock, which is invisible because everything is pinned, and the world travels there on a critically damped spring that eases in and out in about a second, with no pause at any point. A trackpad's momentum belongs to the step already taken; a new push during momentum, or a reversal, takes another step and the spring carries its speed through the change of target. Native scrolling between landings was tried and rejected, because it could stop between two landings and had to wait for input to go still before finishing the trip. CSS scroll snapping was also rejected: Firefox skipped landings and Chromium snapped slow scrolls back. A dragged scrollbar still works, and settles on a landing if it stops between two. The footer scrolls normally past the last landing. The route map follows what is on screen. Each dock sits at its section's top, so hash links land docked. The Shore card says to scroll or use the arrow keys.
 - Cards are headed by the organization or a plain title (About, Projects, Skills, Contact). Landing names appear only on the route map.
 - Phones: the stacked page is the MVP experience. Scenes stack at 100svh or taller.
 - Boat: an SVG sprite positioned along a gently winding path, rotated to the path tangent. It bobs about 3 px on a 4 second loop. The wake is capped at 12 ring elements.
 - Route map: a thin river line with nine dots, fixed at bottom center on the full Ride. On the stacked page it is a strip in normal flow, with 44 by 44 px targets, so it never covers content. The current landing is highlighted. Dots are real links, so it doubles as navigation.
 - Sky: six static layers, one per stop, crossfaded with opacity only. Each paints the sky and the water.
 - Deep links: each landing has a hash URL such as `#lake`, updated with `replaceState` as the visitor scrolls.
-- Keyboard: standard scroll keys work. `[` and `]` jump to the previous and next landing, Home and End go to the Shore and Harbor, and every interactive object is reachable by Tab.
-- Timing: scene reveals 600 to 900 ms on a slow ease-out. Ripples loop 2 to 3 seconds. Scroll-linked values lag no more than about 300 ms. Nothing flashes.
+- Keyboard: arrow keys, Page Up, Page Down, Space, `[`, and `]` move one landing, Home and End go to the Shore and Harbor, and every interactive object is reachable by Tab.
+- Timing: scene reveals 600 to 900 ms on a slow ease-out. Ripples loop 2 to 3 seconds. A trip between landings takes about a second. Nothing flashes.
 - Reduced motion: the stacked page, with the same illustrated scenes and no animation.
 - Loading: all nine scenes ship inline in the page, with no lazy loading. Together they add about 28 KB gzipped.
 
