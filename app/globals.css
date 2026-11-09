@@ -322,6 +322,9 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+/* A scene's loops hold still until the boat is docked there, so nothing in the
+   art repaints during a trip. */
+[data-ride] [data-landing]:not([data-arrived]) .ambient,
 /* Water and air alike stop for the visitor's pause button. */
 [data-ambient="paused"] .ambient,
 [data-ambient="paused"] .boat-bob,
