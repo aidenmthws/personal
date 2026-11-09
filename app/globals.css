@@ -228,6 +228,44 @@ html:has(#ride):not([data-ride]) {
   );
 }
 
+/* Scene art. The width is 1600 units, so every layer shares one scale and the
+   art always fills the width. Below 900 px the art stays that wide and crops to
+   the landing's focal point. Layers meet at the waterline, 70% of the height. */
+[data-scene] {
+  --art-w: max(100vw, 900px);
+  --art-x: clamp(100vw - var(--art-w), 50vw - var(--art-w) * var(--focus, 0.5), 0px);
+}
+
+[data-layer] {
+  position: absolute;
+  left: var(--art-x);
+  width: var(--art-w);
+}
+
+[data-layer="mid"] {
+  bottom: 30%;
+  height: calc(var(--art-w) * 0.39375);
+}
+
+/* Inset, so its parallax drift never brings a neighbor's hills into view. */
+[data-layer="far"] {
+  bottom: 30%;
+  left: calc(var(--art-x) + var(--art-w) * 0.125);
+  width: calc(var(--art-w) * 0.75);
+  height: calc(var(--art-w) * 0.2953);
+}
+
+[data-layer="reflect"],
+[data-layer="fore"] {
+  top: 70%;
+  height: calc(var(--art-w) * 0.16875);
+}
+
+/* Reeds and posts run past the bottom of the box, so they reach the screen edge. */
+[data-layer="fore"] {
+  overflow: visible;
+}
+
 /* Until the script runs, neighboring scenes wait off to the right. */
 [data-ride] [data-scene] {
   transform: translate3d(calc(var(--landing) * 100vw), 0, 0);

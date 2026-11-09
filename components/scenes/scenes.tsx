@@ -80,6 +80,7 @@ function ShoreScene() {
   const tint = dawn;
   return (
     <SceneLayers
+      name="shore"
       far={
         <>
           <Hill x={380} width={760} height={90} fill={tint.far} />
@@ -111,6 +112,7 @@ function BoatmanScene() {
   const tint = dawn;
   return (
     <SceneLayers
+      name="boatman"
       far={<Hill x={220} width={1200} height={100} fill={tint.far} />}
       mid={
         <>
@@ -135,6 +137,7 @@ function BoatmanScene() {
 function SourceScene() {
   return (
     <SceneLayers
+      name="source"
       far={
         <>
           <Hill x={0} width={720} height={250} fill="#d9b7a0" />
@@ -170,6 +173,7 @@ function CanalScene() {
   const tint = morning;
   return (
     <SceneLayers
+      name="canal"
       far={
         <>
           <Palm x={520} base={base} height={250} tint={{ ...tint, leaf: "#a8b878", trunk: "#a8b878" }} />
@@ -205,6 +209,7 @@ function WaterScene() {
   const tint = midday;
   return (
     <SceneLayers
+      name="water"
       far={
         <>
           <Hill x={0} width={700} height={50} fill={tint.far} />
@@ -232,6 +237,7 @@ function LakeScene() {
   const tint = midday;
   return (
     <SceneLayers
+      name="lake"
       far={<Hill x={280} width={1320} height={44} fill={tint.far} />}
       mid={
         <>
@@ -262,6 +268,7 @@ function ChannelsScene() {
   const tint = golden;
   return (
     <SceneLayers
+      name="channels"
       far={<Hill x={560} width={1040} height={110} fill={tint.far} />}
       mid={
         <>
@@ -290,6 +297,7 @@ function MarketScene() {
   const spice = ["#b4492b", "#c8a24a", "#4b7b3c", "#6f5237"];
   return (
     <SceneLayers
+      name="market"
       far={
         <>
           <Hill x={200} width={1400} height={80} fill={tint.far} />
@@ -320,6 +328,7 @@ function HarborScene() {
   const tint = nightfall;
   return (
     <SceneLayers
+      name="harbor"
       far={
         <>
           <Hill x={0} width={800} height={70} fill={tint.far} />

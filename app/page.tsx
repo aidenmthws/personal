@@ -7,6 +7,7 @@ import { Boat } from "@/components/ride/boat";
 import { RideController } from "@/components/ride/ride-controller";
 import { RouteMap } from "@/components/ride/route-map";
 import { Sky } from "@/components/ride/sky";
+import { ReflectionDefs } from "@/components/scenes/kit";
 import { scenes } from "@/components/scenes/scenes";
 import { SiteHeader } from "@/components/site-header";
 import { buttonStyles } from "@/components/ui/button-styles";
@@ -26,6 +27,7 @@ export default function RidePage() {
       <SiteHeader current="ride" />
       <main id="main" className="flex-1">
         <Sky />
+        <ReflectionDefs />
         <RouteMap />
         <Boat />
         <div id="ride" className="ride:-mt-19">

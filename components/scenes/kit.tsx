@@ -360,26 +360,78 @@ export function Stone({ x, y, width, fill }: { x: number; y: number; width: numb
   );
 }
 
-/** The three layers. The Ride moves each at its own speed for parallax. */
+/** A repeatable pseudo-random value from 0 to 1, so server output never varies. */
+export function noise(index: number, seed = 0) {
+  const value = Math.sin(index * 12.9898 + seed * 78.233) * 43758.5453;
+  return value - Math.floor(value);
+}
+
+/**
+ * Fades a reflection away from the bank in flat steps and cuts it into broken
+ * strips. Shared by every scene, so it is defined once on the page.
+ */
+export function ReflectionDefs() {
+  const bands: [number, number, string][] = [
+    [0, 44, "#909090"],
+    [44, 96, "#6c6c6c"],
+    [96, 156, "#484848"],
+    [156, 222, "#262626"],
+  ];
+  const cuts = Array.from({ length: 120 }, (_, index) => {
+    const row = index % 20;
+    const depth = row / 20;
+    return {
+      x: Math.round(noise(index, 1) * 1600) - 60,
+      y: 8 + row * 11,
+      width: Math.round(50 + noise(index, 2) * (90 + depth * 170)),
+    };
+  });
+
+  return (
+    <svg aria-hidden="true" width="0" height="0" className="absolute">
+      <mask id="reflection-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="270">
+        {bands.map(([y, end, fill]) => (
+          <rect key={y} x="0" y={y} width="1600" height={end - y} fill={fill} />
+        ))}
+        {cuts.map(({ x, y, width }) => (
+          <rect key={`${x}-${y}`} x={x} y={y} width={width} height="4" fill="#000" />
+        ))}
+      </mask>
+    </svg>
+  );
+}
+
+/**
+ * The scene's layers. The Ride moves far and fore at their own speeds for
+ * parallax. The reflection repeats the mid layer, flipped at the waterline and
+ * foreshortened, without copying its markup. Sizes live in globals.css.
+ */
 export function SceneLayers({
+  name,
   far,
   mid,
   fore,
 }: {
+  name: string;
   far: ReactNode;
   mid: ReactNode;
   fore: ReactNode;
 }) {
-  const shared = "absolute inset-x-0 w-full";
+  const art = `art-${name}`;
   return (
     <>
-      <svg data-layer="far" viewBox="0 0 1600 630" preserveAspectRatio="xMidYMax meet" className="absolute top-0 left-[12.5%] h-[70%] w-3/4">
+      <svg data-layer="far" viewBox="0 0 1600 630">
         {far}
       </svg>
-      <svg data-layer="mid" viewBox="0 0 1600 630" preserveAspectRatio="xMidYMax meet" className={`${shared} top-0 h-[70%]`}>
-        {mid}
+      <svg data-layer="mid" viewBox="0 0 1600 630">
+        <g id={art}>{mid}</g>
       </svg>
-      <svg data-layer="fore" viewBox="0 0 1600 270" preserveAspectRatio="xMidYMin meet" className={`${shared} bottom-0 h-[30%]`}>
+      <svg data-layer="reflect" viewBox="0 0 1600 270">
+        <g mask="url(#reflection-mask)" opacity="0.55">
+          <use href={`#${art}`} transform="matrix(1 0 0 -0.6 0 378)" />
+        </g>
+      </svg>
+      <svg data-layer="fore" viewBox="0 0 1600 270">
         {fore}
       </svg>
     </>
