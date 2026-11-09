@@ -302,8 +302,23 @@ export function RideController() {
       return direction > 0 ? window.scrollY >= end - 1 : window.scrollY > end + 1;
     }
 
+    /* The page behind an open dialog stays where it is. */
+    function dialogOpen() {
+      return ride!.querySelector("dialog[open]") !== null;
+    }
+
+    /* A tall card scrolls on its own before the river moves. */
+    function scrollsInside(target: EventTarget | null, direction: number) {
+      const card = (target as Element | null)?.closest?.<HTMLElement>("[data-card]");
+      if (!card || card.scrollHeight <= card.clientHeight + 1) return false;
+      return direction > 0
+        ? card.scrollTop + card.clientHeight < card.scrollHeight - 1
+        : card.scrollTop > 0;
+    }
+
     function onWheel(event: WheelEvent) {
-      if (!stage.matches || event.ctrlKey) return;
+      if (!stage.matches || event.ctrlKey || dialogOpen()) return;
+      if (scrollsInside(event.target, Math.sign(event.deltaY))) return;
       if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
 
       const delta = wheelPixels(event.deltaY, event.deltaMode, window.innerHeight);
@@ -322,8 +337,10 @@ export function RideController() {
     }
 
     function onTouchMove(event: TouchEvent) {
-      if (!stage.matches || touchY === null || event.touches.length > 1) return;
-      if (!leavesRide(touchY > event.touches[0].clientY ? 1 : -1)) event.preventDefault();
+      if (!stage.matches || touchY === null || event.touches.length > 1 || dialogOpen()) return;
+      const swipe = touchY > event.touches[0].clientY ? 1 : -1;
+      if (scrollsInside(event.target, swipe)) return;
+      if (!leavesRide(swipe)) event.preventDefault();
     }
 
     function onTouchEnd(event: TouchEvent) {
@@ -331,11 +348,12 @@ export function RideController() {
       const travel = touchY - event.changedTouches[0].clientY;
       touchY = null;
       const step = travel > 0 ? 1 : -1;
+      if (dialogOpen() || scrollsInside(event.target, step)) return;
       if (Math.abs(travel) >= SWIPE_PX && !leavesRide(step)) move(step);
     }
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.metaKey || event.ctrlKey || event.altKey || dialogOpen()) return;
       /* A skill group's arrow keys move between its jars. */
       if ((event.target as Element).closest?.('[role="toolbar"]')) return;
       if (event.key === "]" || event.key === "[") {

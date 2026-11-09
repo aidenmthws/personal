@@ -3,6 +3,7 @@ import { CopyEmail } from "@/components/copy-email";
 import { NetCatch } from "@/components/net-catch";
 import { ResumeLink } from "@/components/resume-link";
 import { SkillJars } from "@/components/skill-jars";
+import { SortCargo } from "@/components/sort-cargo";
 import { TagList } from "@/components/tag-list";
 import { landings, site, type Landing as LandingContent } from "@/content/landings";
 
@@ -107,6 +108,14 @@ export function LandingCardBody({ landing }: { landing: LandingContent }) {
         </NetCatch>
       ) : (
         metric && <Headline value={metric.value} label={metric.label} />
+      )}
+
+      {landing.cargo && (
+        <SortCargo
+          labels={site.cargo}
+          baskets={landing.cargo.baskets}
+          requests={landing.cargo.requests}
+        />
       )}
 
       {landing.coursework && <TagList items={landing.coursework} />}
