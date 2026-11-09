@@ -187,8 +187,8 @@ export const landings: Landing[] = [
     id: "boatman",
     title: "The boatman",
     dryTitle: "About",
-    // PLACEHOLDER: replace with Aiden's 80 to 120 word note (PLAN.md section 3).
-    summary: "Placeholder: Aiden's about note goes here.",
+    summary:
+      "I am a computer science student at Virginia Tech who loves software development, ethical cybersecurity, and AI. I look for challenging projects that push my limits, even when they mean late-night coding. If you want to build something great together, let's connect.",
     bullets: [],
     metrics: [],
     skills: [],

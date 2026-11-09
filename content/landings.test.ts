@@ -6,6 +6,10 @@ import { dryLandLandings, landings, site } from "./landings.ts";
 const wordCount = (text: string) => text.trim().split(/\s+/).length;
 const everything = JSON.stringify({ landings, site });
 
+test("no placeholder copy ships", () => {
+  assert.doesNotMatch(everything, /placeholder/i);
+});
+
 test("the nine landings run in route order", () => {
   assert.deepEqual(
     landings.map((landing) => landing.id),
