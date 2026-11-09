@@ -5,7 +5,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { buttonStyles } from "@/components/ui/button-styles";
 
 type NetCatchProps = {
-  labels: { lower: string; raise: string; label: string };
+  labels: { lower: string; hint: string; raise: string; label: string };
   results: { value: string; label: string; story: string }[];
   /** The card's headline number, shown until the net comes up. */
   children: ReactNode;
@@ -44,10 +44,11 @@ export function NetCatch({ labels, results, children }: NetCatchProps) {
       ) : (
         children
       )}
-      <div className="invisible hydrated:visible">
+      <div className="invisible flex flex-wrap items-center gap-4 hydrated:visible">
         <button type="button" onClick={toggle} className={buttonStyles.outline}>
           {caught ? labels.raise : labels.lower}
         </button>
+        {!caught && <p className="text-label text-muted-foreground">{labels.hint}</p>}
       </div>
     </div>
   );

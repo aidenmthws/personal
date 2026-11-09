@@ -111,6 +111,7 @@ export const site = {
   },
   net: {
     lower: "Lower the net",
+    hint: "See the other two results.",
     raise: "Empty the basket",
     label: "The catch",
   },
