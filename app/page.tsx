@@ -70,6 +70,9 @@ export default function RidePage() {
                               {site.actions.dryLand}
                             </Link>
                           </div>
+                          <p className="hidden text-label text-muted-foreground ride:block">
+                            {site.ride.hint}
+                          </p>
                         </>
                       ) : (
                         <LandingCardBody landing={landing} />

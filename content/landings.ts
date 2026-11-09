@@ -100,6 +100,7 @@ export const site = {
     stack: "Stack",
   },
   ride: {
+    hint: "Scroll or use the arrow keys to move.",
     routeLabel: "Route map",
     pause: "Pause water",
     play: "Play water",
