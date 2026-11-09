@@ -36,7 +36,7 @@ export function RouteMap() {
           >
             <path d={riverPath()} fill="none" stroke="#1f7a74" strokeWidth="4" strokeLinecap="round" />
           </svg>
-          <ol className="route-stops relative flex flex-wrap justify-center ride:flex-nowrap">
+          <ol className="route-stops relative flex max-w-55 flex-wrap justify-center min-[420px]:max-w-none ride:flex-nowrap">
             {landings.map((landing, index) => (
               <li key={landing.id} className="relative">
                 <a
