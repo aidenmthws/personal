@@ -2,17 +2,11 @@
 
 A personal portfolio site themed as a boat ride down a Kerala backwater. The resume is the route: each job, project, and skill set is a landing along the river, from a mountain stream (Virginia Tech) to a harbor at dusk (contact). The full spec is in `PLAN.md` in the repo root. Read it before building anything.
 
-## Scope: build the MVP only
+## Scope
 
-The MVP is a complete, deployable site that can be built in two to three days:
+The MVP and the living-river pass have shipped: all nine landings with resume content, the Ride, Dry Land (`/dry-land`), Harbor contact, the stacked page, and on top of those a per-landing scene kit with people and reflections, a sun that crosses the sky, arrival events, an illustrated route map, and three interactions (the Broad water net, Spice market skill lighting, and Sort the cargo).
 
-- All nine landings, with resume content, drawn from one shared SVG scene kit (water, bank, palms, houses, reeds) recolored and recomposed per landing, three layers each.
-- The ride: pinned scene and card layers, a boat that follows scroll, a sky that shifts from dawn to dusk, and a route map with clickable dots.
-- A Dry Land page (`/dry-land`): the same content as plain, fast HTML, newest work first, with a header toggle between Ride and Dry Land and a resume PDF link.
-- Harbor contact: copy-email button, LinkedIn, resume download.
-- A stacked page for phones, small windows, reduced motion, and failed scripts, plus keyboard and contrast checks.
-
-Do not build these yet (add-ons, in priority order): left-rail boat and top-left route map on phones, fishing-net interaction, "Sort the cargo" demo, Spice Market skill lighting, Before/After toggle, unique art per landing, lamp and "currently" line, project links, sound, WebGL water, easter eggs, custom domain, Malayalam text.
+Do not build these yet (add-ons, in priority order): left-rail boat and top-left route map on phones, Before/After toggle, lamp and "currently" line, project links, easter eggs, custom domain, Malayalam text. Sound and WebGL water were considered and rejected: the first adds little for a recruiter, and the second breaks the flat style and the Lighthouse target.
 
 ## Stack
 
@@ -35,7 +29,9 @@ This is Next.js 16. Check the bundled guides in `node_modules/next/dist/docs/` b
 - Client components never import `content/landings.ts`, because that ships all copy as JS. Server components pass them strings as props. `content/error-copy.ts` is the one exception, for the error page.
 - The landing sections stay in normal flow, so hash links, focus, and find on page work. The stacked page is the default. An inline script in `<head>` sets `data-ride` before first paint at 1024 by 700 and up without reduced motion, and removes it if the Ride's script fails.
 - All text lives in the DOM as real HTML, never inside canvas or images. The Ride is progressive enhancement on top of that HTML.
-- Scenes are code-built SVG components in `components/scenes/`, one per landing, sharing a kit of reusable parts. All nine ship inline, with no lazy loading.
+- Scenes are code-built SVG components in `components/scenes/`, one per landing, sharing a kit (`kit.tsx` for land and layers, `kit-craft.tsx` for built things, `kit-life.tsx` for people and animals). All nine ship inline, with no lazy loading. Each reflection reuses its mid layer with `<use>`, so it adds no markup.
+- Scene loops carry the `ambient` class. They run only at the landing where the boat is docked, because running them through a trip stalls WebKit enough to split one trackpad flick into two steps.
+- `components/landing-card-body.tsx` holds the Ride's interactive pieces. Keep it out of anything Dry Land imports, so Dry Land does not download them.
 
 ## Design and engineering rules
 
