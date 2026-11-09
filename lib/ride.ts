@@ -126,6 +126,8 @@ const WHEEL_REARM_MS = 250;
 const WHEEL_PUSH_RATIO = 3;
 const WHEEL_PUSH_SIZE = 16;
 const WHEEL_LINE_PX = 16;
+/** A busy frame can hold up momentum for this long and still be one gesture. */
+const WHEEL_STALL_MS = 700;
 
 /** Browsers report wheel deltas in pixels, lines, or pages. */
 export function wheelPixels(delta: number, deltaMode: number, pageHeight: number) {
@@ -155,6 +157,19 @@ function isSecondPush(gesture: WheelGesture, time: number, size: number) {
 }
 
 /**
+ * Events stopped mid-momentum, then came back at the level they had faded to.
+ * The fade tells this apart from a mouse wheel, whose notches are all one size.
+ */
+function isStalledMomentum(gesture: WheelGesture, time: number, size: number) {
+  return (
+    gesture.stepped &&
+    gesture.floor <= gesture.peak * 0.6 &&
+    time - gesture.at <= WHEEL_STALL_MS &&
+    size <= gesture.floor * 2 + 8
+  );
+}
+
+/**
  * Turns the stream of wheel events into one step per gesture. A trackpad keeps
  * sending momentum for a second or more after the finger lifts, and all of that
  * belongs to the step already taken.
@@ -174,7 +189,7 @@ export function readWheel(gesture: WheelGesture | null, time: number, delta: num
   const isNew =
     !gesture ||
     reversed ||
-    (time - gesture.at > WHEEL_GAP_MS && !justStepped) ||
+    (time - gesture.at > WHEEL_GAP_MS && !justStepped && !isStalledMomentum(gesture, time, size)) ||
     isSecondPush(gesture, time, size);
   const base: WheelGesture = isNew
     ? { at: time, direction, travelled: 0, stepped: false, steppedAt: 0, peak: size, floor: size }

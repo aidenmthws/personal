@@ -342,3 +342,30 @@ test("the route map's marker reaches every stop and stays on the river", () => {
     assert.ok(Math.abs(routePoint(world).y - 44) <= 4);
   }
 });
+
+function steps(events: [number, number][]) {
+  let gesture: WheelGesture | null = null;
+  let total = 0;
+  for (const [time, delta] of events) {
+    const read = readWheel(gesture, time, delta);
+    gesture = read.gesture;
+    total += Math.abs(read.step);
+  }
+  return total;
+}
+
+test("a stall in the middle of a flick's momentum is still one gesture", () => {
+  const rise: [number, number][] = [[0, 10], [16, 35], [32, 60], [48, 85]];
+  const fade: [number, number][] = Array.from({ length: 40 }, (_, frame) => [
+    64 + frame * 16,
+    Math.max(1, Math.round(85 * Math.exp(-frame / 16))),
+  ]);
+  const last = fade[fade.length - 1];
+  const afterStall: [number, number][] = [[last[0] + 354, last[1]], [last[0] + 370, last[1]]];
+
+  assert.equal(steps([...rise, ...fade, ...afterStall]), 1);
+});
+
+test("mouse wheel notches stay separate steps however far apart", () => {
+  assert.equal(steps([[0, 100], [300, 100], [600, 100]]), 3);
+});
