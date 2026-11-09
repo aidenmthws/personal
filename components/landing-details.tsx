@@ -1,5 +1,4 @@
 import { ContactLinks } from "@/components/contact-links";
-import { CopyEmail } from "@/components/copy-email";
 import { ResumeLink } from "@/components/resume-link";
 import { TagList } from "@/components/tag-list";
 import { site, type Landing as LandingContent } from "@/content/landings";
@@ -65,51 +64,6 @@ export function LandingDetails({ landing }: { landing: LandingContent }) {
       {landing.id === "harbor" && (
         <>
           <ContactLinks />
-          <ResumeLink variant="outline" />
-        </>
-      )}
-    </>
-  );
-}
-
-/** A Ride card's content. Full bullets stay on Dry Land. */
-export function LandingCardBody({ landing }: { landing: LandingContent }) {
-  const metric = landing.metrics[0];
-
-  return (
-    <>
-      <p>{landing.summary}</p>
-
-      {metric && (
-        <p>
-          <span className="block font-display text-title">{metric.value}</span>
-          <span className="text-label text-muted-foreground">{metric.label}</span>
-        </p>
-      )}
-
-      {landing.coursework && <TagList items={landing.coursework} />}
-
-      {landing.projects?.map((project) => (
-        <div key={project.name}>
-          <h3 className="font-medium">{project.name}</h3>
-          <p className="text-label text-muted-foreground">
-            {project.status ? `${project.dates}. ${project.status}.` : project.dates}
-          </p>
-          <TagList items={project.stack} />
-        </div>
-      ))}
-
-      {landing.skillGroups?.map((group) => (
-        <div key={group.name}>
-          <h3 className="font-medium">{group.name}</h3>
-          <TagList items={group.skills} />
-        </div>
-      ))}
-
-      {landing.id === "harbor" && (
-        <>
-          <ContactLinks />
-          <CopyEmail email={site.email} labels={site.copyEmail} />
           <ResumeLink variant="outline" />
         </>
       )}

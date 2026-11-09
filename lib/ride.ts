@@ -225,6 +225,30 @@ export function skyOpacity(layer: number, world: number, order: LandingId[]) {
   return clamp(position - layer + 1);
 }
 
+/** The sky's height above the waterline, as a share of the viewport height. */
+const HORIZON_VH = 70;
+const SUN_RADIUS_VH = 8;
+/** The share of the route the sun has crossed starts after the Shore, in the dark. */
+const SUNRISE = 0.06;
+const DAYLIGHT = 0.92;
+
+/**
+ * One day along the route. The sun is below the water at the Shore, climbs to
+ * its peak around Broad water, and has set by the Harbor.
+ */
+export function sunPose(world: number, last: number) {
+  const arc = clamp((clamp(world / last) - SUNRISE) / DAYLIGHT);
+  const height = Math.sin(Math.PI * arc) ** 1.4;
+  return {
+    xVw: 84 - 52 * arc,
+    yVh: HORIZON_VH + SUN_RADIUS_VH - height * 62,
+    /** How far the disc has paled from sunrise orange toward midday. */
+    pale: clamp((height - 0.35) / 0.4),
+    /** Light on the water, gone once the sun is down. */
+    glitter: Math.round(clamp(height * 3) * 1000) / 1000,
+  };
+}
+
 /** A card holds still at its dock and fades out as the world moves on. */
 export function cardPose(index: number, world: number) {
   const distance = Math.abs(index - world);
@@ -232,6 +256,99 @@ export function cardPose(index: number, world: number) {
     opacity: clamp(1 - (distance - 0.07) / 0.17),
     shiftVw: (index - world) * 16,
   };
+}
+
+/**
+ * How the boat answers its speed, in landings per second. It leans back as it
+ * pulls away, trails a wake, and settles as the spring brings it to the dock.
+ */
+export function boatMotion(velocity: number) {
+  const direction = velocity < 0 ? -1 : 1;
+  const speed = Math.abs(velocity);
+  return {
+    lean: -direction * clamp(speed * 2, 0, 4),
+    wake: clamp(speed / 1.6),
+    direction,
+  };
+}
+
+/** The pole swings through one stroke per landing and is upright at a dock. */
+export function poleAngle(world: number) {
+  return 9 * Math.sin(world * 2 * Math.PI);
+}
+
+/** Space between stops on the route map, in pixels. */
+export const ROUTE_STEP = 64;
+export const ROUTE_HEIGHT = 58;
+const ROUTE_WAVE = [3, -3, 4, -2, 3, -4, 2, -3, 2];
+
+/** A point on the route map's river. Stops are `ROUTE_STEP` apart. */
+export function routePoint(world: number) {
+  const last = ROUTE_WAVE.length - 1;
+  const index = clamp(Math.floor(world), 0, last);
+  const next = Math.min(index + 1, last);
+  const t = clamp(world - index);
+  const eased = t * t * (3 - 2 * t);
+  return {
+    x: ROUTE_STEP / 2 + world * ROUTE_STEP,
+    y: 44 + ROUTE_WAVE[index] + (ROUTE_WAVE[next] - ROUTE_WAVE[index]) * eased,
+  };
+}
+
+export type LandingStage = {
+  /** Which side of the screen holds the card, so the art can fill the other. */
+  side: "left" | "right";
+  /** Where the boat docks, as the center of the boat in viewport widths. */
+  boatVw: number;
+  /** Wide cards hold long lists, so they stay short enough for small windows. */
+  card?: "wide";
+  /** The part of the art a narrow screen crops to, from 0 (left) to 1 (right). */
+  focus: number;
+};
+
+export const landingStage: Record<LandingId, LandingStage> = {
+  shore: { side: "left", boatVw: 68, focus: 0.74 },
+  boatman: { side: "right", boatVw: 42, focus: 0.24 },
+  source: { side: "left", boatVw: 58, focus: 0.74 },
+  canal: { side: "right", boatVw: 40, focus: 0.26 },
+  water: { side: "left", boatVw: 52, focus: 0.8 },
+  lake: { side: "right", boatVw: 42, focus: 0.22 },
+  channels: { side: "left", boatVw: 53, focus: 0.7 },
+  market: { side: "right", boatVw: 34, focus: 0.3, card: "wide" },
+  harbor: { side: "left", boatVw: 58, focus: 0.74 },
+};
+
+const CARD_INSET_VW = 6;
+const CARD_INSET_MIN_PX = 32;
+const CARD_WIDTH_PX = 512;
+const WIDE_CARD_WIDTH_PX = 672;
+const BOAT_CLEARANCE_PX = 24;
+
+/** The boat's width in pixels. It grows with the art on wide screens. */
+export function boatWidth(viewport: number) {
+  return Math.max(240, viewport / 6);
+}
+
+/** Where the boat docks at one landing, kept clear of that landing's card. */
+export function boatDock(id: LandingId, viewport: number) {
+  const { side, boatVw, card } = landingStage[id];
+  const center = (boatVw / 100) * viewport;
+  const cardEdge = Math.max(CARD_INSET_MIN_PX, (CARD_INSET_VW / 100) * viewport) +
+    (card === "wide" ? WIDE_CARD_WIDTH_PX : CARD_WIDTH_PX);
+  const clearance = cardEdge + BOAT_CLEARANCE_PX + boatWidth(viewport) / 2;
+  return side === "left"
+    ? Math.max(center, clearance)
+    : Math.min(center, viewport - clearance);
+}
+
+/** The boat's center between docks, in pixels from the left of the screen. */
+export function boatX(world: number, order: LandingId[], viewport: number) {
+  const index = clamp(Math.floor(world), 0, order.length - 1);
+  const next = Math.min(index + 1, order.length - 1);
+  const t = clamp(world - index);
+  const eased = t * t * (3 - 2 * t);
+  const from = boatDock(order[index], viewport);
+  return from + (boatDock(order[next], viewport) - from) * eased;
 }
 
 /** The boat's gently winding path, in pixels and degrees. */

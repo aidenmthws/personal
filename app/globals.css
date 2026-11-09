@@ -61,6 +61,8 @@
   --text-heading--line-height: 1.25;
   --text-title: 2rem;
   --text-title--line-height: 1.2;
+  --text-metric: clamp(3rem, 2.5rem + 2vw, 4.25rem);
+  --text-metric--line-height: 1;
   --text-display: clamp(2.75rem, 2rem + 4vw, 4.5rem);
   --text-display--line-height: 1.05;
 }
@@ -197,7 +199,118 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+@keyframes cloud-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-4vw, 0, 0);
+  }
+}
+
+@keyframes glitter {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes sway {
+  from {
+    transform: rotate(-1.4deg);
+  }
+  to {
+    transform: rotate(1.4deg);
+  }
+}
+
+@keyframes mist-drift {
+  from {
+    transform: translate3d(-18px, 0, 0);
+  }
+  to {
+    transform: translate3d(18px, 0, 0);
+  }
+}
+
+@keyframes ripple-drift {
+  from {
+    transform: translate3d(-8px, 0, 0);
+  }
+  to {
+    transform: translate3d(8px, 0, 0);
+  }
+}
+
+@keyframes duck-paddle {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(26px, 0, 0);
+  }
+}
+
+@keyframes rising {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translate3d(0, 3px, 0);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+@keyframes falling {
+  from {
+    opacity: 0.2;
+    transform: translate3d(0, -12px, 0);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate3d(0, 22px, 0);
+  }
+}
+
+/* Scene loops run only on the full Ride, whose off-screen scenes are hidden. */
 @media (prefers-reduced-motion: no-preference) {
+  [data-ride] .sway {
+    animation: sway 8s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .mist {
+    animation: mist-drift 28s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .ripples {
+    animation: ripple-drift 7s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .ducks {
+    animation: duck-paddle 16s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .steam {
+    animation: rising 6s ease-in-out infinite;
+  }
+
+  [data-ride] .fall {
+    animation: falling 2.8s linear infinite;
+  }
+
+  .cloud-drift {
+    animation: cloud-drift 70s ease-in-out infinite alternate;
+  }
+
+  .glitter {
+    animation: glitter 5s ease-in-out infinite;
+  }
+
   .boat-bob {
     animation: boat-bob 4s ease-in-out infinite;
   }
@@ -209,9 +322,136 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+/* A scene's loops hold still until the boat is docked there, so nothing in the
+   art repaints during a trip. */
+[data-ride] [data-landing]:not([data-arrived]) .ambient,
+/* Water and air alike stop for the visitor's pause button. */
+[data-ambient="paused"] .ambient,
 [data-ambient="paused"] .boat-bob,
 [data-ambient="paused"] .wake-ring {
   animation-play-state: paused;
+}
+
+/* Arrivals. These states exist only on the running Ride, so without its script
+   the lamps stay lit and the birds stay in the sky. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-ride] .arrive-lamp {
+    transition: opacity 0.7s ease-out calc(0.15s + var(--i, 0) * 0.2s);
+  }
+
+  [data-ride] .arrive-lift {
+    transition:
+      opacity 0.7s ease-out,
+      transform 0.9s ease-out;
+  }
+
+  [data-ride] .cast-rope,
+  [data-ride] .cast-mist {
+    transition:
+      opacity 0.5s ease-out,
+      transform 0.5s ease-out;
+  }
+
+  [data-ride] .boat-nudge {
+    transition: transform 0.5s ease-in;
+  }
+}
+
+[data-ride-ready][data-ride] [data-landing]:not([data-arrived]) .arrive-lamp {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+[data-ride-ready][data-ride] [data-landing]:not([data-arrived]) .arrive-lift {
+  opacity: 0;
+  transform: translate3d(-24px, 56px, 0);
+}
+
+[data-casting-off] .cast-rope {
+  opacity: 0;
+}
+
+[data-casting-off] .cast-mist {
+  opacity: 0;
+  transform: translate3d(0, -42px, 0);
+}
+
+[data-casting-off] .boat-nudge {
+  transform: translate3d(22px, 0, 0);
+}
+
+[data-landing]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+dialog::backdrop {
+  background-color: rgb(20 34 31 / 0.65);
+}
+
+/* The stall selling the skill you are pointing at. */
+.stall-glow {
+  transition: opacity 0.2s ease-out;
+}
+
+[data-lit-stall="0"] [data-stall="0"] .stall-glow,
+[data-lit-stall="1"] [data-stall="1"] .stall-glow,
+[data-lit-stall="2"] [data-stall="2"] .stall-glow,
+[data-lit-stall="3"] [data-stall="3"] .stall-glow {
+  opacity: 0.55;
+}
+
+/* The net dips to the water and comes back with the catch. */
+.catch-fish {
+  opacity: 0;
+}
+
+[data-net="down"] .catch-fish {
+  opacity: 1;
+}
+
+@keyframes net-haul {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  45%,
+  58% {
+    transform: rotate(-24deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .catch-fish {
+    transition: opacity 0.4s ease-out;
+  }
+
+  [data-net="down"] .catch-fish {
+    transition-delay: 1.3s;
+  }
+
+  [data-net="down"] .net-arm {
+    animation: net-haul 1.8s ease-in-out;
+  }
+}
+
+/* The name of the landing you are at, unless you are pointing at another. */
+[data-ride] .route-name {
+  opacity: 0;
+}
+
+[data-ride] .route-stop:hover .route-name,
+[data-ride] .route-stop:focus-visible .route-name,
+[data-ride] .route-stop[aria-current] .route-name {
+  opacity: 1;
+}
+
+[data-ride] .route-stops:hover .route-stop[aria-current]:not(:hover) .route-name {
+  opacity: 0;
 }
 
 @utility border-keyline {
@@ -226,6 +466,51 @@ html:has(#ride):not([data-ride]) {
     var(--kasavu-gold) 0 4px,
     transparent 4px 8px
   );
+}
+
+/* Scene art. The width is 1600 units, so every layer shares one scale and the
+   art always fills the width. Below 900 px the art stays that wide and crops to
+   the landing's focal point. Layers meet at the waterline, 70% of the height. */
+[data-scene] {
+  --art-w: max(100vw, 900px);
+  --art-x: clamp(100vw - var(--art-w), 50vw - var(--art-w) * var(--focus, 0.5), 0px);
+}
+
+[data-layer] {
+  position: absolute;
+  left: var(--art-x);
+  width: var(--art-w);
+}
+
+[data-layer="mid"] {
+  bottom: 30%;
+  height: calc(var(--art-w) * 0.39375);
+}
+
+/* Inset, so its parallax drift never brings a neighbor's hills into view. */
+[data-layer="far"] {
+  bottom: 30%;
+  left: calc(var(--art-x) + var(--art-w) * 0.125);
+  width: calc(var(--art-w) * 0.75);
+  height: calc(var(--art-w) * 0.2953);
+}
+
+[data-layer="reflect"],
+[data-layer="fore"] {
+  top: 70%;
+  height: calc(var(--art-w) * 0.16875);
+}
+
+/* Fronds hang from just under the sticky header at any window shape. */
+[data-layer="frame"] {
+  top: 4.75rem;
+  height: calc(var(--art-w) * 0.39375);
+  overflow: visible;
+}
+
+/* Reeds and posts run past the bottom of the box, so they reach the screen edge. */
+[data-layer="fore"] {
+  overflow: visible;
 }
 
 /* Until the script runs, neighboring scenes wait off to the right. */

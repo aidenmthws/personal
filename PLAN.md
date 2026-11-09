@@ -141,7 +141,7 @@ Type:
 
 Illustration rules:
 
-- Up to five layers per scene on desktop (sky, far hills and palms, mid bank, water, foreground reeds). The MVP uses three, and mobile uses two or three.
+- Five layers per scene (far hills and groves, mid bank, reflection, water and reeds, and a fast frame of overhanging fronds), over a shared moving sky. Every layer uses one scale, so the art always fills the width, and below 900 px it crops to the landing's focal point.
 - Flat color fields from the palette. Bold dark outlines only on foreground objects (boat, nets, jars), in the spirit of Kerala mural painting without copying it.
 - A 3% paper-grain overlay, pre-rendered as a small tile rather than computed live.
 - Reusable parts (palms, houses, reeds, birds) are shared across scenes. Scenes are code-built SVG.
@@ -153,11 +153,13 @@ Kasavu card: Mist fill, 1.5 px gold border with a thin inner rule, and a woven-s
 - Full Ride (1024 by 700 and up, without reduced motion): scene and card layers are pinned with `position: fixed` while the landing sections stay in normal flow, so hash links, focus, and find on page work. Scroll position maps to the world sliding sideways past a boat near center. Each landing gets about 110svh of page height.
 - Stacked page: the default, used on phones, in small windows, with reduced motion, and if scripts fail. An inline script in `<head>` opts in to the full Ride before first paint, and opts back out if the Ride's script errors or has not started 3 seconds after load (8 seconds at most).
 - Moving: one scroll gesture, swipe, or key press is one landing. The page jumps straight to that landing's dock, which is invisible because everything is pinned, and the world travels there on a critically damped spring that eases in and out in about a second, with no pause at any point. A trackpad's momentum belongs to the step already taken; a new push during momentum, or a reversal, takes another step and the spring carries its speed through the change of target. Native scrolling between landings was tried and rejected, because it could stop between two landings and had to wait for input to go still before finishing the trip. CSS scroll snapping was also rejected: Firefox skipped landings and Chromium snapped slow scrolls back. A dragged scrollbar still works, and settles on a landing if it stops between two. The footer scrolls normally past the last landing. The route map follows what is on screen. Each dock sits at its section's top, so hash links land docked. The Shore card says to scroll or use the arrow keys.
-- Cards are headed by the organization or a plain title (About, Projects, Skills, Contact). Landing names appear only on the route map.
-- Phones: the stacked page is the MVP experience. Scenes stack at 100svh or taller.
-- Boat: an SVG sprite positioned along a gently winding path, rotated to the path tangent. It bobs about 3 px on a 4 second loop. The wake is capped at 12 ring elements.
-- Route map: a thin river line with nine dots, fixed at bottom center on the full Ride. On the stacked page it is a strip in normal flow, with 44 by 44 px targets, so it never covers content. The current landing is highlighted. Dots are real links, so it doubles as navigation.
-- Sky: six static layers, one per stop, crossfaded with opacity only. Each paints the sky and the water.
+- Cards are headed by the organization or a plain title (About, Projects, Skills, Contact). Landing names appear only on the route map. Cards alternate sides so each scene composes around its own art, and the Skills card is wider so it fits short windows.
+- Phones: the stacked page, with each scene in its own band above its card.
+- Boat: an SVG sprite with a boatman, positioned along a gently winding path, rotated to the path tangent, and docked clear of each card. It bobs about 3 px on a 4 second loop, leans and trails a wake with speed, and the pole strokes once per landing.
+- Route map: a winding river with one glyph per landing and a small boat that follows the ride, fixed at bottom center on the full Ride. On the stacked page it is a strip in normal flow, with 44 by 44 px targets, so it never covers content. The current landing is highlighted and named. Stops are real links, so it doubles as navigation.
+- Sky: six static layers, one per stop, crossfaded with opacity only. Each paints the sky, the water, and its own clouds. A sun crosses the route, rising after the Shore and setting by the Harbor, with a moon and stars at the Harbor.
+- Arrivals: each landing plays one small event as the boat docks, such as birds lifting or the Harbor lamps coming on in turn. Cast off drops the mooring and lifts the mist before the first trip. Without the Ride's script everything simply stays lit.
+- Ambient loops: palms, mist, ripples, ducks, steam, and water run only at the docked landing and stop with the pause control.
 - Deep links: each landing has a hash URL such as `#lake`, updated with `replaceState` as the visitor scrolls.
 - Keyboard: arrow keys, Page Up, Page Down, Space, `[`, and `]` move one landing, Home and End go to the Shore and Harbor, and every interactive object is reachable by Tab.
 - Timing: scene reveals 600 to 900 ms on a slow ease-out. Ripples loop 2 to 3 seconds. A trip between landings takes about a second. Nothing flashes.
@@ -251,15 +253,13 @@ Dry Land comes first so the content is proven after Day 1, and the Ride is built
 Add-ons after the MVP, in priority order (each can ship on its own):
 
 1. Phone Ride: a left-rail boat and a top-left route map.
-2. Fishing-net "catch" interaction at Broad water.
-3. "Sort the cargo" demo at the Lake.
-4. Spice market skill lighting on the route map.
-5. Before/After toggle at the First canal.
-6. Unique art per landing.
-7. Lamp-lighting, "currently" line, and a photo in About.
-8. Project links and results once repos or demos exist, and Harness results once measured.
-9. Sound, WebGL water, easter eggs (kingfisher dive, snake-boat race), and Malayalam words (reviewed by a speaker first).
-10. A custom domain.
+2. Before/After toggle at the First canal.
+3. Lamp-lighting, "currently" line, and a photo in About.
+4. Project links and results once repos or demos exist, and Harness results once measured.
+5. Easter eggs (kingfisher dive, snake-boat race) and Malayalam words (reviewed by a speaker first).
+6. A custom domain.
+
+Shipped after the MVP: the fishing-net catch, Sort the cargo, Spice market skill lighting, and unique art per landing. Sound and WebGL water were dropped: sound adds little for a recruiter, and WebGL breaks the flat style and risks the Lighthouse target.
 
 ## 10. Risks
 

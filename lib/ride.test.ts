@@ -3,17 +3,25 @@ import { test } from "node:test";
 
 import { landings } from "../content/landings.ts";
 import {
+  boatDock,
+  boatMotion,
   boatPose,
+  boatWidth,
+  boatX,
   cardPose,
   easeDock,
   landingAfter,
+  landingStage,
+  poleAngle,
   rawPosition,
   readWheel,
   restingLanding,
   rideOptInScript,
+  routePoint,
   skyOpacity,
   skyStops,
   spring,
+  sunPose,
   wheelPixels,
   worldPosition,
   type WheelGesture,
@@ -271,4 +279,66 @@ test("a running Ride is never switched off by the fallback", () => {
   dataset.rideReady = "on";
   timers.forEach((timer) => timer());
   assert.equal(dataset.ride, "on");
+});
+
+test("the sun is under the water at both ends of the day and highest midway", () => {
+  const horizon = 70;
+  assert.ok(sunPose(0, 8).yVh - 8 >= horizon, "dark at the Shore");
+  assert.ok(sunPose(8, 8).yVh - 8 >= horizon, "set at the Harbor");
+  assert.equal(sunPose(0, 8).glitter, 0);
+  assert.equal(sunPose(8, 8).glitter, 0);
+
+  const heights = order.map((_, world) => sunPose(world, 8).yVh);
+  assert.equal(heights.indexOf(Math.min(...heights)), 4);
+});
+
+test("the sun crosses the sky in one direction", () => {
+  for (let world = 0; world < 8; world += 0.25) {
+    assert.ok(sunPose(world + 0.25, 8).xVw <= sunPose(world, 8).xVw);
+  }
+});
+
+test("the boat docks clear of the card at every window size", () => {
+  for (const viewport of [1024, 1280, 1440, 1920, 2560]) {
+    for (const id of order) {
+      const cardEdge = Math.max(32, viewport * 0.06) + (landingStage[id].card ? 672 : 512);
+      const center = boatDock(id, viewport);
+      const halfBoat = boatWidth(viewport) / 2;
+      if (landingStage[id].side === "left") {
+        assert.ok(center - halfBoat >= cardEdge, `${id} at ${viewport}`);
+      } else {
+        assert.ok(center + halfBoat <= viewport - cardEdge, `${id} at ${viewport}`);
+      }
+    }
+  }
+});
+
+test("the boat moves smoothly between docks and stops on them", () => {
+  assert.equal(boatX(3, order, 1440), boatDock("canal", 1440));
+  assert.equal(boatX(4, order, 1440), boatDock("water", 1440));
+  const middle = boatX(3.5, order, 1440);
+  const [low, high] = [boatDock("canal", 1440), boatDock("water", 1440)].sort((a, b) => a - b);
+  assert.ok(middle > low && middle < high);
+});
+
+test("the boat is level and wakeless at rest, and leans within limits at speed", () => {
+  assert.equal(boatMotion(0).wake, 0);
+  assert.equal(Math.abs(boatMotion(0).lean), 0);
+  assert.equal(boatMotion(5).wake, 1);
+  assert.ok(Math.abs(boatMotion(5).lean) <= 4);
+  assert.ok(boatMotion(2).lean < 0 && boatMotion(-2).lean > 0);
+});
+
+test("the pole is at rest on every dock", () => {
+  for (let dock = 0; dock <= 8; dock += 1) {
+    assert.ok(Math.abs(poleAngle(dock)) < 1e-9);
+  }
+});
+
+test("the route map's marker reaches every stop and stays on the river", () => {
+  assert.equal(routePoint(0).x, 32);
+  assert.equal(routePoint(8).x, 32 + 8 * 64);
+  for (let world = 0; world <= 8; world += 0.1) {
+    assert.ok(Math.abs(routePoint(world).y - 44) <= 4);
+  }
 });

@@ -23,7 +23,7 @@ function LandingScene({ className = "", ...props }: ComponentProps<"div">) {
 }
 
 function LandingCard({ className = "", ...props }: ComponentProps<typeof Card>) {
-  return <Card data-card className={`relative ${className}`} {...props} />;
+  return <Card data-card className={`relative ride:max-h-[calc(100svh-14rem)] ride:overflow-y-auto ${className}`} {...props} />;
 }
 
 type LandingTitleProps = ComponentProps<"h2"> & { as?: "h1" | "h2" };

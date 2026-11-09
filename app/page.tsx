@@ -2,18 +2,20 @@ import type { CSSProperties } from "react";
 
 import Link from "next/link";
 
-import { LandingCardBody, LandingMeta } from "@/components/landing-details";
+import { LandingCardBody } from "@/components/landing-card-body";
+import { LandingMeta } from "@/components/landing-details";
 import { Boat } from "@/components/ride/boat";
 import { RideController } from "@/components/ride/ride-controller";
 import { RouteMap } from "@/components/ride/route-map";
-import { Sky } from "@/components/ride/sky";
+import { LandingSky, Sky } from "@/components/ride/sky";
+import { ReflectionDefs } from "@/components/scenes/kit";
 import { scenes } from "@/components/scenes/scenes";
 import { SiteHeader } from "@/components/site-header";
 import { buttonStyles } from "@/components/ui/button-styles";
 import { Card } from "@/components/ui/card";
 import { Landing } from "@/components/ui/landing";
 import { landings, site } from "@/content/landings";
-import { landingSky } from "@/lib/ride";
+import { landingSky, landingStage } from "@/lib/ride";
 
 /**
  * The sections stay in normal document flow, so hash links, focus, and find on
@@ -26,27 +28,36 @@ export default function RidePage() {
       <SiteHeader current="ride" />
       <main id="main" className="flex-1">
         <Sky />
+        <ReflectionDefs />
         <RouteMap />
         <Boat />
         <div id="ride" className="ride:-mt-19">
           {landings.map((landing, index) => {
             const Scene = scenes[landing.scene];
             const isShore = index === 0;
+            const stage = landingStage[landing.id];
+            const edge =
+              stage.side === "left" ? "ride:left-[max(2rem,6vw)]" : "ride:right-[max(2rem,6vw)]";
 
             return (
               <Landing
                 key={landing.id}
                 id={landing.id}
-                className="relative isolate flex min-h-svh flex-col justify-center px-4 py-12 md:px-6 ride:static ride:isolation-auto ride:block ride:h-[110svh] ride:min-h-0 ride:p-0 ride:last:h-svh"
+                className={`sky-${landingSky[landing.id]} relative isolate flex flex-col px-4 pt-[44svh] pb-12 max-md:bg-(--water-bottom) md:min-h-svh md:justify-center md:px-6 md:py-12 ride:static ride:isolation-auto ride:block ride:h-[110svh] ride:min-h-0 ride:bg-transparent ride:p-0 ride:last:h-svh`}
               >
                 <Landing.Scene
-                  className={`sky sky-${landingSky[landing.id]}`}
-                  style={{ "--landing": index } as CSSProperties}
+                  className={`sky sky-${landingSky[landing.id]} max-md:bottom-auto max-md:h-[56svh]`}
+                  style={{ "--landing": index, "--focus": stage.focus } as CSSProperties}
                 >
+                  <LandingSky
+                    stop={landingSky[landing.id]}
+                    index={index}
+                    last={landings.length - 1}
+                  />
                   <Scene />
                 </Landing.Scene>
                 <Landing.Card
-                  className={`mx-auto w-full max-w-xl ride:fixed ride:top-1/2 ride:left-[max(2rem,6vw)] ride:z-30 ride:mx-0 ride:max-w-lg ride:-translate-y-[calc(50%+0.5rem)] ${
+                  className={`mx-auto w-full max-w-xl not-ride:lg:mx-[6vw] ${stage.side === "left" ? "not-ride:lg:self-start" : "not-ride:lg:self-end"} ride:fixed ride:top-1/2 ${edge} ride:z-30 ride:mx-0 ${stage.card ? "ride:max-w-2xl" : "ride:max-w-lg"} ride:-translate-y-[calc(50%+0.5rem)] ${
                     isShore ? "" : "ride:opacity-0"
                   }`}
                 >
@@ -63,7 +74,7 @@ export default function RidePage() {
                           <p className="text-lead">{landing.summary}</p>
                           <p className="text-label text-muted-foreground">{landing.location}</p>
                           <div className="flex flex-wrap gap-4">
-                            <a href={`#${landings[1].id}`} className={buttonStyles.accent}>
+                            <a href={`#${landings[1].id}`} data-cast-off className={buttonStyles.accent}>
                               {site.actions.castOff}
                             </a>
                             <Link href="/dry-land" className={buttonStyles.outline}>

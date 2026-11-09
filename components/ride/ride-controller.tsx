@@ -5,14 +5,19 @@ import { useLayoutEffect } from "react";
 import type { LandingId } from "@/content/landings";
 import {
   RIDE_QUERY,
+  boatMotion,
   boatPose,
+  boatX,
   cardPose,
   landingAfter,
+  poleAngle,
   rawPosition,
   readWheel,
   restingLanding,
+  routePoint,
   skyOpacity,
   spring,
+  sunPose,
   wheelPixels,
   worldPosition,
   type Drift,
@@ -26,6 +31,13 @@ const FAR_DRIFT_VW = 12;
 /** How long a dragged scrollbar must be still before it settles on a landing. */
 const SETTLE_AFTER_MS = 160;
 const FORE_DRIFT_VW = 20;
+const FRAME_DRIFT_VW = 34;
+/** Clouds sit far off, so they slide a little across the whole route. */
+const CLOUD_DRIFT_VW = 7;
+/** How close to a dock the boat must be for that landing's arrival to play. */
+const ARRIVE_WITHIN = 0.08;
+/** The mooring comes loose before the first trip starts. */
+const CAST_OFF_MS = 520;
 /** How far a finger must travel to count as a swipe. */
 const SWIPE_PX = 40;
 
@@ -56,12 +68,20 @@ export function RideController() {
     const dots = [...document.querySelectorAll<HTMLElement>("[data-route-dot]")];
     const skies = [...document.querySelectorAll<HTMLElement>("[data-sky-layer]")];
     const boat = document.querySelector<HTMLElement>("[data-boat]");
+    const routeBoat = document.querySelector<HTMLElement>("[data-route-boat]");
+    const pole = boat?.querySelector<SVGElement>("[data-pole]");
+    const wake = boat?.querySelector<SVGElement>("[data-wake]");
+    const clouds = [...document.querySelectorAll<HTMLElement>("[data-clouds]")];
+    const sun = document.querySelector<HTMLElement>("[data-sun]");
+    const sunPale = document.querySelector<SVGElement>("[data-sun-pale]");
+    const glitter = document.querySelector<HTMLElement>("[data-glitter]");
     const scenes = sections.map((section) => {
       const scene = section.querySelector<HTMLElement>("[data-scene]");
       return {
         scene,
         far: scene?.querySelector<SVGElement>('[data-layer="far"]'),
         fore: scene?.querySelector<SVGElement>('[data-layer="fore"]'),
+        frame: scene?.querySelector<SVGElement>('[data-layer="frame"]'),
       };
     });
     const cards = sections.map((section) =>
@@ -72,6 +92,8 @@ export function RideController() {
     let tops: number[] = [];
     let frame = 0;
     let current = -1;
+    let arrived = -1;
+    let castOffTimer = 0;
     let drift: Drift = { position: 0, velocity: 0 };
     let lastFrame = 0;
     let gliding = false;
@@ -100,6 +122,7 @@ export function RideController() {
       if (index === current) return;
       const first = current === -1;
       current = index;
+      if (index === 0 && !castOffTimer) delete root.dataset.castingOff;
       dots.forEach((dot, position) => {
         if (position === index) dot.setAttribute("aria-current", "location");
         else dot.removeAttribute("aria-current");
@@ -107,8 +130,19 @@ export function RideController() {
       if (!first) window.history.replaceState(null, "", `#${order[index]}`);
     }
 
-    function paintStage(world: number) {
-      scenes.forEach(({ scene, far, fore }, index) => {
+    /* A landing's small event plays once the boat is almost docked. */
+    function markArrival(world: number) {
+      const nearest = Math.round(world);
+      const landing = Math.abs(world - nearest) < ARRIVE_WITHIN ? nearest : -1;
+      if (landing === arrived) return;
+      sections[arrived]?.removeAttribute("data-arrived");
+      arrived = landing;
+      sections[arrived]?.setAttribute("data-arrived", "on");
+    }
+
+    function paintStage(world: number, velocity = 0) {
+      markArrival(world);
+      scenes.forEach(({ scene, far, fore, frame }, index) => {
         if (!scene) return;
         const offset = index - world;
         const nearby = Math.abs(offset) < 1.6;
@@ -117,6 +151,7 @@ export function RideController() {
         scene.style.transform = `translate3d(${offset * 100}vw,0,0)`;
         if (far) far.style.transform = `translate3d(${-offset * FAR_DRIFT_VW}vw,0,0)`;
         if (fore) fore.style.transform = `translate3d(${offset * FORE_DRIFT_VW}vw,0,0)`;
+        if (frame) frame.style.transform = `translate3d(${offset * FRAME_DRIFT_VW}vw,0,0)`;
       });
 
       cards.forEach((card, index) => {
@@ -131,15 +166,39 @@ export function RideController() {
         sky.style.opacity = String(skyOpacity(layer, world, order));
       });
 
+      if (routeBoat) {
+        const { x, y } = routePoint(world);
+        routeBoat.style.transform = `translate3d(${x}px,${y}px,0)`;
+      }
+
+      clouds.forEach((bank) => {
+        bank.style.transform = `translate3d(${-world * CLOUD_DRIFT_VW}vw,0,0)`;
+      });
+
+      const light = sunPose(world, sections.length - 1);
+      if (sun) sun.style.transform = `translate3d(${light.xVw}vw,${light.yVh}vh,0)`;
+      if (sunPale) sunPale.style.opacity = String(light.pale);
+      if (glitter) {
+        glitter.style.transform = `translate3d(${light.xVw}vw,0,0)`;
+        glitter.style.opacity = String(light.glitter);
+      }
+
       if (boat) {
         const { x, y, angle } = boatPose(world);
-        boat.style.transform = `translate3d(${x}px,${y}px,0) rotate(${angle}deg)`;
+        const motion = boatMotion(velocity);
+        const center = boatX(world, order, window.innerWidth);
+        boat.style.transform = `translate3d(${center + x}px,${y}px,0) rotate(${angle + motion.lean}deg)`;
+        if (pole) pole.style.transform = `rotate(${poleAngle(world)}deg)`;
+        if (wake) {
+          wake.style.opacity = String(motion.wake);
+          wake.style.transform = `scaleX(${motion.direction})`;
+        }
       }
     }
 
     function clearStage() {
       const moved = [
-        ...scenes.flatMap(({ scene, far, fore }) => [scene, far, fore]),
+        ...scenes.flatMap(({ scene, far, fore, frame }) => [scene, far, fore, frame]),
         ...cards,
         boat,
       ];
@@ -169,7 +228,7 @@ export function RideController() {
       gliding = drift.position !== goal || drift.velocity !== 0;
       /* The map and the URL follow what is on screen, not where the trip ends. */
       setCurrent(Math.round(drift.position));
-      paintStage(drift.position);
+      paintStage(drift.position, drift.velocity);
       if (gliding) frame = requestAnimationFrame(paint);
     }
 
@@ -194,6 +253,20 @@ export function RideController() {
         sections.length - 1,
       );
       if (landing !== null) goTo(landing);
+    }
+
+    /* On the full Ride, Cast off unties the boat first. The link still works
+       as a plain hash link everywhere else. */
+    function onClick(event: MouseEvent) {
+      if (!stage.matches || castOffTimer) return;
+      if (!(event.target as Element).closest?.("[data-cast-off]")) return;
+      event.preventDefault();
+      root.dataset.castingOff = "on";
+      castOffTimer = window.setTimeout(() => {
+        castOffTimer = 0;
+        goTo(1);
+        sections[1].focus({ preventScroll: true });
+      }, CAST_OFF_MS);
     }
 
     function onScroll() {
@@ -229,8 +302,23 @@ export function RideController() {
       return direction > 0 ? window.scrollY >= end - 1 : window.scrollY > end + 1;
     }
 
+    /* The page behind an open dialog stays where it is. */
+    function dialogOpen() {
+      return ride!.querySelector("dialog[open]") !== null;
+    }
+
+    /* A tall card scrolls on its own before the river moves. */
+    function scrollsInside(target: EventTarget | null, direction: number) {
+      const card = (target as Element | null)?.closest?.<HTMLElement>("[data-card]");
+      if (!card || card.scrollHeight <= card.clientHeight + 1) return false;
+      return direction > 0
+        ? card.scrollTop + card.clientHeight < card.scrollHeight - 1
+        : card.scrollTop > 0;
+    }
+
     function onWheel(event: WheelEvent) {
-      if (!stage.matches || event.ctrlKey) return;
+      if (!stage.matches || event.ctrlKey || dialogOpen()) return;
+      if (scrollsInside(event.target, Math.sign(event.deltaY))) return;
       if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
 
       const delta = wheelPixels(event.deltaY, event.deltaMode, window.innerHeight);
@@ -249,8 +337,10 @@ export function RideController() {
     }
 
     function onTouchMove(event: TouchEvent) {
-      if (!stage.matches || touchY === null || event.touches.length > 1) return;
-      if (!leavesRide(touchY > event.touches[0].clientY ? 1 : -1)) event.preventDefault();
+      if (!stage.matches || touchY === null || event.touches.length > 1 || dialogOpen()) return;
+      const swipe = touchY > event.touches[0].clientY ? 1 : -1;
+      if (scrollsInside(event.target, swipe)) return;
+      if (!leavesRide(swipe)) event.preventDefault();
     }
 
     function onTouchEnd(event: TouchEvent) {
@@ -258,11 +348,14 @@ export function RideController() {
       const travel = touchY - event.changedTouches[0].clientY;
       touchY = null;
       const step = travel > 0 ? 1 : -1;
+      if (dialogOpen() || scrollsInside(event.target, step)) return;
       if (Math.abs(travel) >= SWIPE_PX && !leavesRide(step)) move(step);
     }
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.metaKey || event.ctrlKey || event.altKey || dialogOpen()) return;
+      /* A skill group's arrow keys move between its jars. */
+      if ((event.target as Element).closest?.('[role="toolbar"]')) return;
       if (event.key === "]" || event.key === "[") {
         move(event.key === "]" ? 1 : -1);
         return;
@@ -275,7 +368,7 @@ export function RideController() {
       if (!stage.matches) return;
 
       /* Space belongs to a focused link or button. */
-      const onControl = (event.target as Element).closest?.("a, button");
+      const onControl = (event.target as Element).closest?.("a, button, summary");
       const spaceStep = onControl ? 0 : event.shiftKey ? -1 : 1;
       const step = event.key === " " ? spaceStep : (pinnedKeySteps[event.key] ?? 0);
       if (step === 0 || leavesRide(step)) return;
@@ -292,6 +385,7 @@ export function RideController() {
       if (index !== -1 && index !== current) goTo(index);
     }
 
+    sections[1].tabIndex = -1;
     root.dataset.rideReady = "on";
     syncLayout();
     measure();
@@ -300,6 +394,7 @@ export function RideController() {
     const resizes = new ResizeObserver(remeasure);
     resizes.observe(ride);
 
+    ride.addEventListener("click", onClick);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -313,7 +408,9 @@ export function RideController() {
     return () => {
       if (frame) cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
+      window.clearTimeout(castOffTimer);
       resizes.disconnect();
+      ride.removeEventListener("click", onClick);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
@@ -324,6 +421,7 @@ export function RideController() {
       document.removeEventListener("focusin", onFocusIn);
       stage.removeEventListener("change", remeasure);
       delete root.dataset.ambient;
+      delete root.dataset.castingOff;
       delete root.dataset.ride;
       delete root.dataset.rideReady;
     };
