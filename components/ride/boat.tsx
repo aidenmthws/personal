@@ -6,10 +6,10 @@ export function Boat() {
     <div
       aria-hidden="true"
       data-boat
-      className="pointer-events-none fixed top-[70%] left-[60%] z-20 hidden -translate-y-1/2 ride:block"
+      className="pointer-events-none fixed top-[70%] left-0 z-20 hidden ride:block"
     >
-      <div className="boat-bob">
-        <svg viewBox="0 0 300 96" width="240" height="77" className="block overflow-visible">
+      <div className="boat-bob -translate-x-1/2 -translate-y-1/2">
+        <svg viewBox="0 0 300 96" className="block h-auto w-[max(240px,16.667vw)] overflow-visible">
           {rings.map((ring) => (
             <ellipse
               key={ring}

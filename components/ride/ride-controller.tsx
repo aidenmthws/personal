@@ -6,6 +6,7 @@ import type { LandingId } from "@/content/landings";
 import {
   RIDE_QUERY,
   boatPose,
+  boatX,
   cardPose,
   landingAfter,
   rawPosition,
@@ -152,7 +153,8 @@ export function RideController() {
 
       if (boat) {
         const { x, y, angle } = boatPose(world);
-        boat.style.transform = `translate3d(${x}px,${y}px,0) rotate(${angle}deg)`;
+        const center = boatX(world, order, window.innerWidth);
+        boat.style.transform = `translate3d(${center + x}px,${y}px,0) rotate(${angle}deg)`;
       }
     }
 

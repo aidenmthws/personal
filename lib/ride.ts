@@ -258,6 +258,58 @@ export function cardPose(index: number, world: number) {
   };
 }
 
+export type LandingStage = {
+  /** Which side of the screen holds the card, so the art can fill the other. */
+  side: "left" | "right";
+  /** Where the boat docks, as the center of the boat in viewport widths. */
+  boatVw: number;
+  /** The part of the art a narrow screen crops to, from 0 (left) to 1 (right). */
+  focus: number;
+};
+
+export const landingStage: Record<LandingId, LandingStage> = {
+  shore: { side: "left", boatVw: 68, focus: 0.74 },
+  boatman: { side: "right", boatVw: 42, focus: 0.24 },
+  source: { side: "left", boatVw: 58, focus: 0.74 },
+  canal: { side: "right", boatVw: 40, focus: 0.26 },
+  water: { side: "left", boatVw: 52, focus: 0.8 },
+  lake: { side: "right", boatVw: 42, focus: 0.22 },
+  channels: { side: "left", boatVw: 53, focus: 0.7 },
+  market: { side: "right", boatVw: 34, focus: 0.3 },
+  harbor: { side: "left", boatVw: 58, focus: 0.74 },
+};
+
+const CARD_INSET_VW = 6;
+const CARD_INSET_MIN_PX = 32;
+const CARD_WIDTH_PX = 512;
+const BOAT_CLEARANCE_PX = 24;
+
+/** The boat's width in pixels. It grows with the art on wide screens. */
+export function boatWidth(viewport: number) {
+  return Math.max(240, viewport / 6);
+}
+
+/** Where the boat docks at one landing, kept clear of that landing's card. */
+export function boatDock(id: LandingId, viewport: number) {
+  const { side, boatVw } = landingStage[id];
+  const center = (boatVw / 100) * viewport;
+  const cardEdge = Math.max(CARD_INSET_MIN_PX, (CARD_INSET_VW / 100) * viewport) + CARD_WIDTH_PX;
+  const clearance = cardEdge + BOAT_CLEARANCE_PX + boatWidth(viewport) / 2;
+  return side === "left"
+    ? Math.max(center, clearance)
+    : Math.min(center, viewport - clearance);
+}
+
+/** The boat's center between docks, in pixels from the left of the screen. */
+export function boatX(world: number, order: LandingId[], viewport: number) {
+  const index = clamp(Math.floor(world), 0, order.length - 1);
+  const next = Math.min(index + 1, order.length - 1);
+  const t = clamp(world - index);
+  const eased = t * t * (3 - 2 * t);
+  const from = boatDock(order[index], viewport);
+  return from + (boatDock(order[next], viewport) - from) * eased;
+}
+
 /** The boat's gently winding path, in pixels and degrees. */
 export function boatPose(world: number) {
   const swing = 1.1;

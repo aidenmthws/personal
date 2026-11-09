@@ -3,10 +3,14 @@ import { test } from "node:test";
 
 import { landings } from "../content/landings.ts";
 import {
+  boatDock,
   boatPose,
+  boatWidth,
+  boatX,
   cardPose,
   easeDock,
   landingAfter,
+  landingStage,
   rawPosition,
   readWheel,
   restingLanding,
@@ -289,4 +293,27 @@ test("the sun crosses the sky in one direction", () => {
   for (let world = 0; world < 8; world += 0.25) {
     assert.ok(sunPose(world + 0.25, 8).xVw <= sunPose(world, 8).xVw);
   }
+});
+
+test("the boat docks clear of the card at every window size", () => {
+  for (const viewport of [1024, 1280, 1440, 1920, 2560]) {
+    for (const id of order) {
+      const cardEdge = Math.max(32, viewport * 0.06) + 512;
+      const center = boatDock(id, viewport);
+      const halfBoat = boatWidth(viewport) / 2;
+      if (landingStage[id].side === "left") {
+        assert.ok(center - halfBoat >= cardEdge, `${id} at ${viewport}`);
+      } else {
+        assert.ok(center + halfBoat <= viewport - cardEdge, `${id} at ${viewport}`);
+      }
+    }
+  }
+});
+
+test("the boat moves smoothly between docks and stops on them", () => {
+  assert.equal(boatX(3, order, 1440), boatDock("canal", 1440));
+  assert.equal(boatX(4, order, 1440), boatDock("water", 1440));
+  const middle = boatX(3.5, order, 1440);
+  const [low, high] = [boatDock("canal", 1440), boatDock("water", 1440)].sort((a, b) => a - b);
+  assert.ok(middle > low && middle < high);
 });

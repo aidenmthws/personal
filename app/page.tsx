@@ -14,7 +14,7 @@ import { buttonStyles } from "@/components/ui/button-styles";
 import { Card } from "@/components/ui/card";
 import { Landing } from "@/components/ui/landing";
 import { landings, site } from "@/content/landings";
-import { landingSky } from "@/lib/ride";
+import { landingSky, landingStage } from "@/lib/ride";
 
 /**
  * The sections stay in normal document flow, so hash links, focus, and find on
@@ -34,6 +34,9 @@ export default function RidePage() {
           {landings.map((landing, index) => {
             const Scene = scenes[landing.scene];
             const isShore = index === 0;
+            const stage = landingStage[landing.id];
+            const edge =
+              stage.side === "left" ? "ride:left-[max(2rem,6vw)]" : "ride:right-[max(2rem,6vw)]";
 
             return (
               <Landing
@@ -43,7 +46,7 @@ export default function RidePage() {
               >
                 <Landing.Scene
                   className={`sky sky-${landingSky[landing.id]}`}
-                  style={{ "--landing": index } as CSSProperties}
+                  style={{ "--landing": index, "--focus": stage.focus } as CSSProperties}
                 >
                   <LandingSky
                     stop={landingSky[landing.id]}
@@ -53,7 +56,7 @@ export default function RidePage() {
                   <Scene />
                 </Landing.Scene>
                 <Landing.Card
-                  className={`mx-auto w-full max-w-xl ride:fixed ride:top-1/2 ride:left-[max(2rem,6vw)] ride:z-30 ride:mx-0 ride:max-w-lg ride:-translate-y-[calc(50%+0.5rem)] ${
+                  className={`mx-auto w-full max-w-xl ride:fixed ride:top-1/2 ${edge} ride:z-30 ride:mx-0 ride:max-w-lg ride:-translate-y-[calc(50%+0.5rem)] ${
                     isShore ? "" : "ride:opacity-0"
                   }`}
                 >
