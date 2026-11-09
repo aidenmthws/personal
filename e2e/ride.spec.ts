@@ -147,7 +147,9 @@ test.describe("the living river", () => {
     await readyToRide(page);
 
     const open = page.locator("#lake").getByRole("button", { name: "Sort the cargo" });
-    await open.click();
+    /* Safari does not focus a button on click, so open it from the keyboard. */
+    await open.focus();
+    await page.keyboard.press("Enter");
     await expect(page.getByText("These requests are made up")).toBeVisible();
 
     await page.keyboard.press("ArrowDown");
