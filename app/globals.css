@@ -380,6 +380,21 @@ html:has(#ride):not([data-ride]) {
   box-shadow: none;
 }
 
+/* The name of the landing you are at, unless you are pointing at another. */
+[data-ride] .route-name {
+  opacity: 0;
+}
+
+[data-ride] .route-stop:hover .route-name,
+[data-ride] .route-stop:focus-visible .route-name,
+[data-ride] .route-stop[aria-current] .route-name {
+  opacity: 1;
+}
+
+[data-ride] .route-stops:hover .route-stop[aria-current]:not(:hover) .route-name {
+  opacity: 0;
+}
+
 @utility border-keyline {
   border-width: 1.5px;
 }

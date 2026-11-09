@@ -14,6 +14,7 @@ import {
   rawPosition,
   readWheel,
   restingLanding,
+  routePoint,
   skyOpacity,
   spring,
   sunPose,
@@ -67,6 +68,7 @@ export function RideController() {
     const dots = [...document.querySelectorAll<HTMLElement>("[data-route-dot]")];
     const skies = [...document.querySelectorAll<HTMLElement>("[data-sky-layer]")];
     const boat = document.querySelector<HTMLElement>("[data-boat]");
+    const routeBoat = document.querySelector<HTMLElement>("[data-route-boat]");
     const pole = boat?.querySelector<SVGElement>("[data-pole]");
     const wake = boat?.querySelector<SVGElement>("[data-wake]");
     const clouds = [...document.querySelectorAll<HTMLElement>("[data-clouds]")];
@@ -163,6 +165,11 @@ export function RideController() {
       skies.forEach((sky, layer) => {
         sky.style.opacity = String(skyOpacity(layer, world, order));
       });
+
+      if (routeBoat) {
+        const { x, y } = routePoint(world);
+        routeBoat.style.transform = `translate3d(${x}px,${y}px,0)`;
+      }
 
       clouds.forEach((bank) => {
         bank.style.transform = `translate3d(${-world * CLOUD_DRIFT_VW}vw,0,0)`;

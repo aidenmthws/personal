@@ -17,6 +17,7 @@ import {
   readWheel,
   restingLanding,
   rideOptInScript,
+  routePoint,
   skyOpacity,
   skyStops,
   spring,
@@ -331,5 +332,13 @@ test("the boat is level and wakeless at rest, and leans within limits at speed",
 test("the pole is at rest on every dock", () => {
   for (let dock = 0; dock <= 8; dock += 1) {
     assert.ok(Math.abs(poleAngle(dock)) < 1e-9);
+  }
+});
+
+test("the route map's marker reaches every stop and stays on the river", () => {
+  assert.equal(routePoint(0).x, 32);
+  assert.equal(routePoint(8).x, 32 + 8 * 64);
+  for (let world = 0; world <= 8; world += 0.1) {
+    assert.ok(Math.abs(routePoint(world).y - 44) <= 4);
   }
 });

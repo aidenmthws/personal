@@ -277,6 +277,24 @@ export function poleAngle(world: number) {
   return 9 * Math.sin(world * 2 * Math.PI);
 }
 
+/** Space between stops on the route map, in pixels. */
+export const ROUTE_STEP = 64;
+export const ROUTE_HEIGHT = 58;
+const ROUTE_WAVE = [3, -3, 4, -2, 3, -4, 2, -3, 2];
+
+/** A point on the route map's river. Stops are `ROUTE_STEP` apart. */
+export function routePoint(world: number) {
+  const last = ROUTE_WAVE.length - 1;
+  const index = clamp(Math.floor(world), 0, last);
+  const next = Math.min(index + 1, last);
+  const t = clamp(world - index);
+  const eased = t * t * (3 - 2 * t);
+  return {
+    x: ROUTE_STEP / 2 + world * ROUTE_STEP,
+    y: 44 + ROUTE_WAVE[index] + (ROUTE_WAVE[next] - ROUTE_WAVE[index]) * eased,
+  };
+}
+
 export type LandingStage = {
   /** Which side of the screen holds the card, so the art can fill the other. */
   side: "left" | "right";
