@@ -5,10 +5,12 @@ import { useLayoutEffect } from "react";
 import type { LandingId } from "@/content/landings";
 import {
   RIDE_QUERY,
+  boatMotion,
   boatPose,
   boatX,
   cardPose,
   landingAfter,
+  poleAngle,
   rawPosition,
   readWheel,
   restingLanding,
@@ -61,6 +63,8 @@ export function RideController() {
     const dots = [...document.querySelectorAll<HTMLElement>("[data-route-dot]")];
     const skies = [...document.querySelectorAll<HTMLElement>("[data-sky-layer]")];
     const boat = document.querySelector<HTMLElement>("[data-boat]");
+    const pole = boat?.querySelector<SVGElement>("[data-pole]");
+    const wake = boat?.querySelector<SVGElement>("[data-wake]");
     const clouds = [...document.querySelectorAll<HTMLElement>("[data-clouds]")];
     const sun = document.querySelector<HTMLElement>("[data-sun]");
     const sunPale = document.querySelector<SVGElement>("[data-sun-pale]");
@@ -117,7 +121,7 @@ export function RideController() {
       if (!first) window.history.replaceState(null, "", `#${order[index]}`);
     }
 
-    function paintStage(world: number) {
+    function paintStage(world: number, velocity = 0) {
       scenes.forEach(({ scene, far, fore, frame }, index) => {
         if (!scene) return;
         const offset = index - world;
@@ -156,8 +160,14 @@ export function RideController() {
 
       if (boat) {
         const { x, y, angle } = boatPose(world);
+        const motion = boatMotion(velocity);
         const center = boatX(world, order, window.innerWidth);
-        boat.style.transform = `translate3d(${center + x}px,${y}px,0) rotate(${angle}deg)`;
+        boat.style.transform = `translate3d(${center + x}px,${y}px,0) rotate(${angle + motion.lean}deg)`;
+        if (pole) pole.style.transform = `rotate(${poleAngle(world)}deg)`;
+        if (wake) {
+          wake.style.opacity = String(motion.wake);
+          wake.style.transform = `scaleX(${motion.direction})`;
+        }
       }
     }
 
@@ -193,7 +203,7 @@ export function RideController() {
       gliding = drift.position !== goal || drift.velocity !== 0;
       /* The map and the URL follow what is on screen, not where the trip ends. */
       setCurrent(Math.round(drift.position));
-      paintStage(drift.position);
+      paintStage(drift.position, drift.velocity);
       if (gliding) frame = requestAnimationFrame(paint);
     }
 

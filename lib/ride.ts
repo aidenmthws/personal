@@ -258,6 +258,25 @@ export function cardPose(index: number, world: number) {
   };
 }
 
+/**
+ * How the boat answers its speed, in landings per second. It leans back as it
+ * pulls away, trails a wake, and settles as the spring brings it to the dock.
+ */
+export function boatMotion(velocity: number) {
+  const direction = velocity < 0 ? -1 : 1;
+  const speed = Math.abs(velocity);
+  return {
+    lean: -direction * clamp(speed * 2, 0, 4),
+    wake: clamp(speed / 1.6),
+    direction,
+  };
+}
+
+/** The pole swings through one stroke per landing and is upright at a dock. */
+export function poleAngle(world: number) {
+  return 9 * Math.sin(world * 2 * Math.PI);
+}
+
 export type LandingStage = {
   /** Which side of the screen holds the card, so the art can fill the other. */
   side: "left" | "right";

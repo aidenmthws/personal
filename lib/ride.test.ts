@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { landings } from "../content/landings.ts";
 import {
   boatDock,
+  boatMotion,
   boatPose,
   boatWidth,
   boatX,
@@ -11,6 +12,7 @@ import {
   easeDock,
   landingAfter,
   landingStage,
+  poleAngle,
   rawPosition,
   readWheel,
   restingLanding,
@@ -316,4 +318,18 @@ test("the boat moves smoothly between docks and stops on them", () => {
   const middle = boatX(3.5, order, 1440);
   const [low, high] = [boatDock("canal", 1440), boatDock("water", 1440)].sort((a, b) => a - b);
   assert.ok(middle > low && middle < high);
+});
+
+test("the boat is level and wakeless at rest, and leans within limits at speed", () => {
+  assert.equal(boatMotion(0).wake, 0);
+  assert.equal(Math.abs(boatMotion(0).lean), 0);
+  assert.equal(boatMotion(5).wake, 1);
+  assert.ok(Math.abs(boatMotion(5).lean) <= 4);
+  assert.ok(boatMotion(2).lean < 0 && boatMotion(-2).lean > 0);
+});
+
+test("the pole is at rest on every dock", () => {
+  for (let dock = 0; dock <= 8; dock += 1) {
+    assert.ok(Math.abs(poleAngle(dock)) < 1e-9);
+  }
 });
