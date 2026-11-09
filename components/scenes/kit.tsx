@@ -122,8 +122,8 @@ export function Forest({
 }) {
   const count = Math.round(width / (size * 1.25));
   const crowns = Array.from({ length: count }, (_, index) => {
-    const r = round(size * (0.7 + noise(index, seed) * 0.6));
-    const cx = round(x + (width * index) / count);
+    const r = Math.round(size * (0.7 + noise(index, seed) * 0.6));
+    const cx = Math.round(x + (width * index) / count);
     return `M${cx - r} ${base}a${r} ${r} 0 1 1 ${2 * r} 0Z`;
   });
   return (
@@ -210,20 +210,19 @@ export function GroveLine({
   fill: string;
   seed?: number;
 }) {
-  const count = Math.round(width / (height * 0.5));
+  const count = Math.round(width / (height * 0.72));
+  const whole = Math.round;
   const palms = Array.from({ length: count }, (_, index) => {
-    const cx = round(x + (width * (index + noise(index, seed) * 0.6)) / count);
-    const tall = round(height * (0.55 + noise(index, seed + 1) * 0.45));
-    const tip = round(base - tall);
-    const reach = round(tall * 0.34);
-    const lean = round((noise(index, seed + 2) - 0.5) * tall * 0.3);
-    const crown = cx + lean;
+    const cx = whole(x + (width * (index + noise(index, seed) * 0.6)) / count);
+    const tall = height * (0.55 + noise(index, seed + 1) * 0.45);
+    const tip = whole(base - tall);
+    const reach = whole(tall * 0.36);
+    const crown = cx + whole((noise(index, seed + 2) - 0.5) * tall * 0.3);
+    const droop = tip + whole(reach * 0.5);
     return (
-      `M${cx - 1.5} ${base}L${crown - 1} ${tip}L${crown + 1} ${tip}L${cx + 1.5} ${base}Z` +
-      `M${crown} ${tip}Q${crown - reach * 0.6} ${tip - reach * 0.4} ${crown - reach} ${round(tip + reach * 0.5)}Q${crown - reach * 0.5} ${tip} ${crown} ${tip}Z` +
-      `M${crown} ${tip}Q${crown + reach * 0.6} ${tip - reach * 0.4} ${crown + reach} ${round(tip + reach * 0.5)}Q${crown + reach * 0.5} ${tip} ${crown} ${tip}Z` +
-      `M${crown} ${tip}Q${crown - reach * 0.2} ${tip - reach * 0.7} ${crown - reach * 0.5} ${tip - reach * 0.5}Q${crown - reach * 0.2} ${tip - reach * 0.3} ${crown} ${tip}Z` +
-      `M${crown} ${tip}Q${crown + reach * 0.2} ${tip - reach * 0.7} ${crown + reach * 0.5} ${tip - reach * 0.5}Q${crown + reach * 0.2} ${tip - reach * 0.3} ${crown} ${tip}Z`
+      `M${cx - 1} ${base}L${crown} ${tip}L${cx + 1} ${base}Z` +
+      `M${crown} ${tip}Q${crown - whole(reach * 0.6)} ${tip - whole(reach * 0.4)} ${crown - reach} ${droop}Q${crown - whole(reach * 0.5)} ${tip} ${crown} ${tip}Z` +
+      `M${crown} ${tip}Q${crown + whole(reach * 0.6)} ${tip - whole(reach * 0.4)} ${crown + reach} ${droop}Q${crown + whole(reach * 0.5)} ${tip} ${crown} ${tip}Z`
     );
   });
   return (
