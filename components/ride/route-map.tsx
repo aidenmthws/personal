@@ -63,7 +63,23 @@ export function RouteMap() {
           </div>
         </div>
       </nav>
+      <button
+        type="button"
+        data-tour-toggle
+        data-play={site.ride.tour.play}
+        data-pause={site.ride.tour.pause}
+        data-again={site.ride.tour.again}
+        className="hidden min-h-11 rounded-sm bg-accent px-3 text-label font-medium whitespace-nowrap text-accent-foreground ride:inline-flex ride:items-center"
+      >
+        {site.ride.tour.play}
+      </button>
       <AmbientToggle pauseLabel={site.ride.pause} playLabel={site.ride.play} />
+      <p data-tour-status role="status" className="sr-only" />
+      <div
+        data-tour-progress
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 hidden h-0.5 origin-left bg-accent opacity-0 ride:block"
+      />
     </div>
   );
 }

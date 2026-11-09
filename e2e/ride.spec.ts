@@ -77,7 +77,141 @@ test.describe("the full Ride", () => {
     await openRide(page);
     await readyToRide(page);
 
-    await expect(page.getByText("Scroll or use the arrow keys to move.")).toBeVisible();
+    await expect(page.getByText("Cast off for a guided ride, or scroll or use the arrow keys.")).toBeVisible();
+  });
+});
+
+test.describe("the guided ride", () => {
+  const toggle = (page: Page) => page.locator("[data-tour-toggle]");
+
+  /** Ends the current stop's reading time, which is the progress bar's animation. */
+  async function finishReading(page: Page) {
+    await expect
+      .poll(() => page.locator("[data-tour-progress]").evaluate((el) => el.getAnimations().length))
+      .toBe(1);
+    await page.locator("[data-tour-progress]").evaluate((el) => el.getAnimations()[0].finish());
+  }
+
+  async function castOff(page: Page) {
+    await openRide(page);
+    await readyToRide(page);
+    await page.getByRole("link", { name: "Cast off" }).click();
+    await expectDocked(page, "boatman", 1);
+    await expect(toggle(page)).toHaveText("Pause ride");
+  }
+
+  test("moves on by itself once a card has had its reading time", async ({ page }) => {
+    await castOff(page);
+    await finishReading(page);
+    await expectDocked(page, "source", 2);
+    await finishReading(page);
+    await expectDocked(page, "canal", 3);
+  });
+
+  test("an arrow key takes over, and Cast off continues from there", async ({ page }) => {
+    await castOff(page);
+
+    await page.keyboard.press("ArrowDown");
+    await expectDocked(page, "source", 2);
+    await expect(toggle(page)).toHaveText("Cast off");
+    await expect
+      .poll(() => page.locator("[data-tour-progress]").evaluate((el) => el.getAnimations().length))
+      .toBe(0);
+
+    await toggle(page).click();
+    await expect(toggle(page)).toHaveText("Pause ride");
+    await expectDocked(page, "source", 2);
+    await finishReading(page);
+    await expectDocked(page, "canal", 3);
+  });
+
+  test("the scroll wheel and route map also take over", async ({ page }) => {
+    await castOff(page);
+    await page.mouse.wheel(0, 100);
+    await expectDocked(page, "source", 2);
+    await expect(toggle(page)).toHaveText("Cast off");
+
+    await toggle(page).click();
+    await page.locator('[data-route-dot="6"]').click();
+    await expectDocked(page, "channels", 6);
+    await expect(toggle(page)).toHaveText("Cast off");
+  });
+
+  test("pause holds the stop and play resumes it", async ({ page }) => {
+    await castOff(page);
+    await toggle(page).click();
+    await expect(toggle(page)).toHaveText("Cast off");
+
+    const state = () =>
+      page.locator("[data-tour-progress]").evaluate((el) => el.getAnimations()[0].playState);
+    await expect.poll(state).toBe("paused");
+
+    await toggle(page).click();
+    await expect.poll(state).toBe("running");
+    await finishReading(page);
+    await expectDocked(page, "source", 2);
+  });
+
+  test("using a control in a card pauses the ride", async ({ page }) => {
+    await page.goto("/#canal");
+    await readyToRide(page);
+    await toggle(page).click();
+    await page.locator('[data-route-dot="4"]').click();
+    await expectDocked(page, "water", 4);
+
+    await toggle(page).click();
+    await page.locator("#water").getByRole("button", { name: "Lower the net" }).click();
+    await expect(toggle(page)).toHaveText("Cast off");
+    await expectDocked(page, "water", 4);
+  });
+
+  test("a mouse left at rest never holds the ride, but pointing at a control does", async ({ page }) => {
+    await page.goto("/#water");
+    await readyToRide(page);
+    const net = page.locator("#water").getByRole("button", { name: "Lower the net" });
+    await expect.poll(() => net.evaluate((el) => getComputedStyle(el.closest("[data-card]")!).opacity)).toBe("1");
+    const box = (await net.boundingBox())!;
+    await page.locator('[data-route-dot="3"]').click();
+    await expectDocked(page, "canal", 3);
+    const state = () =>
+      page.locator("[data-tour-progress]").evaluate((el) => el.getAnimations()[0]?.playState);
+
+    /* The net's button will appear under this resting mouse. */
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await toggle(page).focus();
+    await page.keyboard.press("Enter");
+    await finishReading(page);
+    await expectDocked(page, "water", 4);
+    await expect.poll(() => net.evaluate((el) => getComputedStyle(el.closest("[data-card]")!).opacity)).toBe("1");
+    expect(await state()).toBe("running");
+
+    await page.mouse.move(box.x + box.width / 2 + 3, box.y + box.height / 2);
+    await expect.poll(state).toBe("paused");
+    await page.mouse.move(900, 300);
+    await expect.poll(state).toBe("running");
+  });
+
+  test("stops at the Harbor and offers to ride again", async ({ page }) => {
+    await page.goto("/#market");
+    await readyToRide(page);
+    await toggle(page).click();
+    await finishReading(page);
+    await expectDocked(page, "harbor", 8);
+    await expect(toggle(page)).toHaveText("Ride again");
+
+    await toggle(page).click();
+    await expectDocked(page, "shore", 0);
+    await finishReading(page);
+    await expectDocked(page, "boatman", 1);
+  });
+
+  test("Cast off stays a plain link with reduced motion", async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await page.goto("/");
+    await expect(page.locator("[data-tour-toggle]")).toBeHidden();
+    await expect(page.getByRole("link", { name: "Cast off" })).toHaveAttribute("href", "#boatman");
+    await context.close();
   });
 });
 
@@ -204,7 +338,7 @@ test.describe("the stacked page", () => {
     test("scrolls normally and hides the hint", async ({ page }) => {
       await openRide(page);
       await expect(page.locator("html")).not.toHaveAttribute("data-ride", "on");
-      await expect(page.getByText("Scroll or use the arrow keys to move.")).toBeHidden();
+      await expect(page.getByText("Cast off for a guided ride, or scroll or use the arrow keys.")).toBeHidden();
 
       await page.mouse.move(200, 400);
       await page.mouse.wheel(0, 300);

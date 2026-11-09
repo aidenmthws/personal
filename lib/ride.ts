@@ -310,6 +310,16 @@ export function routePoint(world: number) {
   };
 }
 
+const READ_BASE_MS = 2000;
+const READ_PER_WORD_MS = 260;
+const READ_MIN_MS = 5000;
+const READ_MAX_MS = 15000;
+
+/** How long the guided ride stays at a card, from how much there is to read. */
+export function readingTime(words: number) {
+  return clamp(READ_BASE_MS + words * READ_PER_WORD_MS, READ_MIN_MS, READ_MAX_MS);
+}
+
 export type LandingStage = {
   /** Which side of the screen holds the card, so the art can fill the other. */
   side: "left" | "right";

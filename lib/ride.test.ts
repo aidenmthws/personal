@@ -15,6 +15,7 @@ import {
   poleAngle,
   rawPosition,
   readWheel,
+  readingTime,
   restingLanding,
   rideOptInScript,
   routePoint,
@@ -341,6 +342,12 @@ test("the route map's marker reaches every stop and stays on the river", () => {
   for (let world = 0; world <= 8; world += 0.1) {
     assert.ok(Math.abs(routePoint(world).y - 44) <= 4);
   }
+});
+
+test("longer cards hold the guided ride longer, within limits", () => {
+  assert.ok(readingTime(40) > readingTime(20));
+  assert.equal(readingTime(1), 5000);
+  assert.equal(readingTime(500), 15000);
 });
 
 function steps(events: [number, number][]) {

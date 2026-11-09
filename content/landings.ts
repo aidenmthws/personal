@@ -104,10 +104,15 @@ export const site = {
     stack: "Stack",
   },
   ride: {
-    hint: "Scroll or use the arrow keys to move.",
+    hint: "Cast off for a guided ride, or scroll or use the arrow keys.",
     routeLabel: "Route map",
     pause: "Pause water",
     play: "Play water",
+    tour: {
+      play: "Cast off",
+      pause: "Pause ride",
+      again: "Ride again",
+    },
   },
   net: {
     lower: "Lower the net",

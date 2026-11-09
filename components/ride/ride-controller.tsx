@@ -13,6 +13,7 @@ import {
   poleAngle,
   rawPosition,
   readWheel,
+  readingTime,
   restingLanding,
   routePoint,
   skyOpacity,
@@ -38,6 +39,12 @@ const CLOUD_DRIFT_VW = 7;
 const ARRIVE_WITHIN = 0.08;
 /** The mooring comes loose before the first trip starts. */
 const CAST_OFF_MS = 520;
+/** A trip between landings, added to each card's reading time. */
+const TRIP_MS = 1000;
+/** The pause at the Shore when a finished ride starts over. */
+const SHORE_MS = 2000;
+/** Controls in a card. Using one means the visitor wants the ride to wait. */
+const CARD_CONTROL = '[data-card] :is(a, button, summary, [role="toolbar"])';
 /** How far a finger must travel to count as a swipe. */
 const SWIPE_PX = 40;
 
@@ -69,6 +76,9 @@ export function RideController() {
     const skies = [...document.querySelectorAll<HTMLElement>("[data-sky-layer]")];
     const boat = document.querySelector<HTMLElement>("[data-boat]");
     const routeBoat = document.querySelector<HTMLElement>("[data-route-boat]");
+    const tourToggle = document.querySelector<HTMLElement>("[data-tour-toggle]");
+    const tourStatus = document.querySelector<HTMLElement>("[data-tour-status]");
+    const tourProgress = document.querySelector<HTMLElement>("[data-tour-progress]");
     const pole = boat?.querySelector<SVGElement>("[data-pole]");
     const wake = boat?.querySelector<SVGElement>("[data-wake]");
     const clouds = [...document.querySelectorAll<HTMLElement>("[data-clouds]")];
@@ -94,6 +104,14 @@ export function RideController() {
     let current = -1;
     let arrived = -1;
     let castOffTimer = 0;
+    /* The guided ride. A paused ride keeps its clock, and a ride the visitor
+       has taken over from drops it. */
+    let riding = false;
+    let tourStop = -1;
+    let clock: Animation | null = null;
+    let held = false;
+    let pointerX = -1;
+    let pointerY = -1;
     let drift: Drift = { position: 0, velocity: 0 };
     let lastFrame = 0;
     let gliding = false;
@@ -128,6 +146,7 @@ export function RideController() {
         else dot.removeAttribute("aria-current");
       });
       if (!first) window.history.replaceState(null, "", `#${order[index]}`);
+      labelTourToggle();
     }
 
     /* A landing's small event plays once the boat is almost docked. */
@@ -255,24 +274,142 @@ export function RideController() {
       if (landing !== null) goTo(landing);
     }
 
-    /* On the full Ride, Cast off unties the boat first. The link still works
-       as a plain hash link everywhere else. */
-    function onClick(event: MouseEvent) {
-      if (!stage.matches || castOffTimer) return;
-      if (!(event.target as Element).closest?.("[data-cast-off]")) return;
-      event.preventDefault();
+    function labelTourToggle() {
+      if (!tourToggle) return;
+      const { pause, play, again } = tourToggle.dataset;
+      const label = riding ? pause : current === sections.length - 1 ? again : play;
+      if (label) tourToggle.textContent = label;
+    }
+
+    function syncClock() {
+      if (!clock || !riding) return;
+      if (held || document.hidden) clock.pause();
+      else clock.play();
+    }
+
+    /* The progress bar's animation is the timer, so pausing one pauses both. */
+    function waitAtStop(duration: number) {
+      clock = tourProgress?.animate(
+        [
+          { opacity: 1, transform: "scaleX(0)" },
+          { opacity: 1, transform: "scaleX(1)" },
+        ],
+        { duration },
+      ) ?? null;
+      if (!clock) return;
+      clock.onfinish = () => {
+        clock = null;
+        if (tourStop === 0) castOff();
+        else sail();
+      };
+      syncClock();
+    }
+
+    function readStop(index: number) {
+      const text = sections[index].querySelector("[data-card]")?.textContent ?? "";
+      waitAtStop(TRIP_MS + readingTime(text.trim().split(/\s+/).length));
+    }
+
+    /* The page jumps to the dock and the spring carries the world there. */
+    function sail() {
+      tourStop += 1;
+      held = false;
+      goTo(tourStop);
+      if (tourStatus) tourStatus.textContent = dots[tourStop]?.textContent ?? "";
+      if (tourStop === sections.length - 1) {
+        riding = false;
+        labelTourToggle();
+      } else {
+        readStop(tourStop);
+      }
+    }
+
+    function castOff() {
       root.dataset.castingOff = "on";
       castOffTimer = window.setTimeout(() => {
         castOffTimer = 0;
-        goTo(1);
-        sections[1].focus({ preventScroll: true });
+        sail();
       }, CAST_OFF_MS);
+    }
+
+    /* Starts from wherever the visitor is, and a finished ride starts over. */
+    function startRide() {
+      stopRide();
+      riding = true;
+      held = false;
+      tourStop = Math.round(rawPosition(window.scrollY, tops));
+      if (tourStop === sections.length - 1) {
+        tourStop = 0;
+        goTo(0);
+        waitAtStop(SHORE_MS);
+      } else if (tourStop === 0) {
+        castOff();
+      } else {
+        readStop(tourStop);
+      }
+      labelTourToggle();
+    }
+
+    function pauseRide() {
+      if (!riding || !clock) return;
+      riding = false;
+      clock.pause();
+      labelTourToggle();
+    }
+
+    /* The visitor has taken the pole. Cast off picks up from where they are. */
+    function stopRide() {
+      riding = false;
+      held = false;
+      clock?.cancel();
+      clock = null;
+      window.clearTimeout(castOffTimer);
+      castOffTimer = 0;
+      if (current === 0) delete root.dataset.castingOff;
+      labelTourToggle();
+    }
+
+    function onTourToggle() {
+      if (riding && castOffTimer) stopRide();
+      else if (riding) pauseRide();
+      else if (clock) {
+        riding = true;
+        syncClock();
+        labelTourToggle();
+      } else startRide();
+    }
+
+    /* Without the full Ride, Cast off is a plain hash link. */
+    function onClick(event: MouseEvent) {
+      if (!stage.matches) return;
+      const target = event.target as Element;
+      if (target.closest?.("[data-cast-off]")) {
+        event.preventDefault();
+        startRide();
+        /* The link is leaving with its card, so hand focus to the pause control. */
+        tourToggle?.focus({ preventScroll: true });
+      } else if (target.closest?.(CARD_CONTROL)) {
+        pauseRide();
+      }
+    }
+
+    /* Pointing at a control holds the ride, without stopping it. Only real
+       movement counts, because a card can appear under a mouse left at rest. */
+    function onPointerMove(event: PointerEvent) {
+      if (event.clientX === pointerX && event.clientY === pointerY) return;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      held = (event.target as Element).closest?.(CARD_CONTROL) != null;
+      syncClock();
     }
 
     function onScroll() {
       const y = window.scrollY;
       if (y !== lastY) direction = y > lastY ? 1 : -1;
       lastY = y;
+      /* Anything that moves the page off the ride's dock is the visitor's doing:
+         the scrollbar, the route map, a hash link, Home, or End. */
+      if ((riding || clock) && Math.abs(y - tops[tourStop]) > 2) stopRide();
       schedule();
       window.clearTimeout(settleTimer);
       settleTimer = window.setTimeout(settle, SETTLE_AFTER_MS);
@@ -283,6 +420,8 @@ export function RideController() {
       if (!stage.matches) clearStage();
       const wasPinned = root.dataset.ride === "on";
       measure();
+      if (!stage.matches) stopRide();
+      else if (riding || clock) window.scrollTo(0, tops[tourStop]);
       if (wasPinned) schedule();
       else snap();
     }
@@ -292,6 +431,7 @@ export function RideController() {
     }
 
     function move(step: number) {
+      stopRide();
       const raw = rawPosition(window.scrollY, tops);
       goTo(landingAfter(raw, step, sections.length - 1));
     }
@@ -300,11 +440,6 @@ export function RideController() {
     function leavesRide(direction: number) {
       const end = tops[tops.length - 1];
       return direction > 0 ? window.scrollY >= end - 1 : window.scrollY > end + 1;
-    }
-
-    /* The page behind an open dialog stays where it is. */
-    function dialogOpen() {
-      return ride!.querySelector("dialog[open]") !== null;
     }
 
     /* A tall card scrolls on its own before the river moves. */
@@ -317,7 +452,7 @@ export function RideController() {
     }
 
     function onWheel(event: WheelEvent) {
-      if (!stage.matches || event.ctrlKey || dialogOpen()) return;
+      if (!stage.matches || event.ctrlKey) return;
       if (scrollsInside(event.target, Math.sign(event.deltaY))) return;
       if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
 
@@ -337,7 +472,7 @@ export function RideController() {
     }
 
     function onTouchMove(event: TouchEvent) {
-      if (!stage.matches || touchY === null || event.touches.length > 1 || dialogOpen()) return;
+      if (!stage.matches || touchY === null || event.touches.length > 1) return;
       const swipe = touchY > event.touches[0].clientY ? 1 : -1;
       if (scrollsInside(event.target, swipe)) return;
       if (!leavesRide(swipe)) event.preventDefault();
@@ -348,12 +483,13 @@ export function RideController() {
       const travel = touchY - event.changedTouches[0].clientY;
       touchY = null;
       const step = travel > 0 ? 1 : -1;
-      if (dialogOpen() || scrollsInside(event.target, step)) return;
+      if (scrollsInside(event.target, step)) return;
       if (Math.abs(travel) >= SWIPE_PX && !leavesRide(step)) move(step);
     }
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.metaKey || event.ctrlKey || event.altKey || dialogOpen()) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key === "Tab") stopRide();
       /* A skill group's arrow keys move between its jars. */
       if ((event.target as Element).closest?.('[role="toolbar"]')) return;
       if (event.key === "]" || event.key === "[") {
@@ -385,7 +521,6 @@ export function RideController() {
       if (index !== -1 && index !== current) goTo(index);
     }
 
-    sections[1].tabIndex = -1;
     root.dataset.rideReady = "on";
     syncLayout();
     measure();
@@ -395,6 +530,9 @@ export function RideController() {
     resizes.observe(ride);
 
     ride.addEventListener("click", onClick);
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    tourToggle?.addEventListener("click", onTourToggle);
+    document.addEventListener("visibilitychange", syncClock);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -408,9 +546,12 @@ export function RideController() {
     return () => {
       if (frame) cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
-      window.clearTimeout(castOffTimer);
+      stopRide();
       resizes.disconnect();
       ride.removeEventListener("click", onClick);
+      window.removeEventListener("pointermove", onPointerMove);
+      tourToggle?.removeEventListener("click", onTourToggle);
+      document.removeEventListener("visibilitychange", syncClock);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
