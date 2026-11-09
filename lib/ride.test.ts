@@ -301,7 +301,7 @@ test("the sun crosses the sky in one direction", () => {
 test("the boat docks clear of the card at every window size", () => {
   for (const viewport of [1024, 1280, 1440, 1920, 2560]) {
     for (const id of order) {
-      const cardEdge = Math.max(32, viewport * 0.06) + 512;
+      const cardEdge = Math.max(32, viewport * 0.06) + (landingStage[id].card ? 672 : 512);
       const center = boatDock(id, viewport);
       const halfBoat = boatWidth(viewport) / 2;
       if (landingStage[id].side === "left") {

@@ -79,7 +79,7 @@ export function SkillJars({ groups, stops, landingTitles, labels }: SkillJarsPro
                 onFocus={() => setActive({ skill, group: groupIndex })}
                 onBlur={() => setActive(null)}
                 onClick={() => setActive({ skill, group: groupIndex })}
-                className={`min-h-11 min-w-11 cursor-default rounded-sm px-2 font-mono text-label ride:pointer-fine:min-h-8 ride:pointer-fine:min-w-0 ${
+                className={`min-h-11 min-w-11 cursor-default rounded-sm px-2 font-mono text-label ride:pointer-fine:min-h-7 ride:pointer-fine:min-w-0 ${
                   active?.skill === skill ? "bg-border text-foreground" : "text-muted-foreground"
                 }`}
               >
@@ -89,7 +89,7 @@ export function SkillJars({ groups, stops, landingTitles, labels }: SkillJarsPro
           </div>
         </div>
       ))}
-      <p role="status" className="min-h-[3em] text-label text-foreground">
+      <p role="status" className="min-h-[1.5em] text-label text-foreground">
         {status}
       </p>
     </div>

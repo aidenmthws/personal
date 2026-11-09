@@ -18,7 +18,7 @@ export function AmbientToggle({ pauseLabel, playLabel }: AmbientToggleProps) {
     <button
       type="button"
       onClick={toggle}
-      className="hidden min-h-11 rounded-sm px-2 text-label text-foreground underline ride:inline-flex ride:items-center"
+      className="hidden min-h-11 rounded-sm px-2 text-label whitespace-nowrap text-foreground underline ride:inline-flex ride:items-center"
     >
       {paused ? playLabel : pauseLabel}
     </button>

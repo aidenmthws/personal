@@ -24,7 +24,7 @@ function riverPath() {
 export function RouteMap() {
   const width = ROUTE_STEP * landings.length;
   return (
-    <div className="relative z-40 flex flex-wrap items-center justify-center gap-2 bg-background px-2 py-1 ride:fixed ride:bottom-4 ride:left-1/2 ride:flex-nowrap ride:-translate-x-1/2 ride:rounded-sm ride:border-keyline ride:border-border">
+    <div className="relative z-40 flex flex-wrap items-center justify-center gap-2 bg-background px-2 py-1 ride:fixed ride:bottom-4 ride:left-1/2 ride:w-max ride:flex-nowrap ride:-translate-x-1/2 ride:rounded-sm ride:border-keyline ride:border-border">
       <nav aria-label={site.ride.routeLabel}>
         <div className="relative">
           <svg

@@ -300,6 +300,8 @@ export type LandingStage = {
   side: "left" | "right";
   /** Where the boat docks, as the center of the boat in viewport widths. */
   boatVw: number;
+  /** Wide cards hold long lists, so they stay short enough for small windows. */
+  card?: "wide";
   /** The part of the art a narrow screen crops to, from 0 (left) to 1 (right). */
   focus: number;
 };
@@ -312,13 +314,14 @@ export const landingStage: Record<LandingId, LandingStage> = {
   water: { side: "left", boatVw: 52, focus: 0.8 },
   lake: { side: "right", boatVw: 42, focus: 0.22 },
   channels: { side: "left", boatVw: 53, focus: 0.7 },
-  market: { side: "right", boatVw: 34, focus: 0.3 },
+  market: { side: "right", boatVw: 34, focus: 0.3, card: "wide" },
   harbor: { side: "left", boatVw: 58, focus: 0.74 },
 };
 
 const CARD_INSET_VW = 6;
 const CARD_INSET_MIN_PX = 32;
 const CARD_WIDTH_PX = 512;
+const WIDE_CARD_WIDTH_PX = 672;
 const BOAT_CLEARANCE_PX = 24;
 
 /** The boat's width in pixels. It grows with the art on wide screens. */
@@ -328,9 +331,10 @@ export function boatWidth(viewport: number) {
 
 /** Where the boat docks at one landing, kept clear of that landing's card. */
 export function boatDock(id: LandingId, viewport: number) {
-  const { side, boatVw } = landingStage[id];
+  const { side, boatVw, card } = landingStage[id];
   const center = (boatVw / 100) * viewport;
-  const cardEdge = Math.max(CARD_INSET_MIN_PX, (CARD_INSET_VW / 100) * viewport) + CARD_WIDTH_PX;
+  const cardEdge = Math.max(CARD_INSET_MIN_PX, (CARD_INSET_VW / 100) * viewport) +
+    (card === "wide" ? WIDE_CARD_WIDTH_PX : CARD_WIDTH_PX);
   const clearance = cardEdge + BOAT_CLEARANCE_PX + boatWidth(viewport) / 2;
   return side === "left"
     ? Math.max(center, clearance)

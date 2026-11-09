@@ -56,7 +56,7 @@ export default function RidePage() {
                   <Scene />
                 </Landing.Scene>
                 <Landing.Card
-                  className={`mx-auto w-full max-w-xl ride:fixed ride:top-1/2 ${edge} ride:z-30 ride:mx-0 ride:max-w-lg ride:-translate-y-[calc(50%+0.5rem)] ${
+                  className={`mx-auto w-full max-w-xl ride:fixed ride:top-1/2 ${edge} ride:z-30 ride:mx-0 ${stage.card ? "ride:max-w-2xl" : "ride:max-w-lg"} ride:-translate-y-[calc(50%+0.5rem)] ${
                     isShore ? "" : "ride:opacity-0"
                   }`}
                 >
