@@ -42,10 +42,10 @@ export default function RidePage() {
               <Landing
                 key={landing.id}
                 id={landing.id}
-                className="relative isolate flex min-h-svh flex-col justify-center px-4 py-12 md:px-6 ride:static ride:isolation-auto ride:block ride:h-[110svh] ride:min-h-0 ride:p-0 ride:last:h-svh"
+                className={`sky-${landingSky[landing.id]} relative isolate flex flex-col px-4 pt-[44svh] pb-12 max-md:bg-(--water-bottom) md:min-h-svh md:justify-center md:px-6 md:py-12 ride:static ride:isolation-auto ride:block ride:h-[110svh] ride:min-h-0 ride:bg-transparent ride:p-0 ride:last:h-svh`}
               >
                 <Landing.Scene
-                  className={`sky sky-${landingSky[landing.id]}`}
+                  className={`sky sky-${landingSky[landing.id]} max-md:bottom-auto max-md:h-[56svh]`}
                   style={{ "--landing": index, "--focus": stage.focus } as CSSProperties}
                 >
                   <LandingSky
