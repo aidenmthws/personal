@@ -33,12 +33,6 @@ export type SkillGroup = { name: string; skills: string[] };
 /** One result in the Broad water net. Every fact comes from the resume bullets. */
 export type Catch = Metric & { story: string };
 
-/** The Lake's sorting demo. All of it is invented sample data. */
-export type CargoDemo = {
-  baskets: string[];
-  requests: { text: string; basket: string }[];
-};
-
 export type Landing = {
   id: LandingId;
   /** The landing name on the Ride. */
@@ -62,7 +56,6 @@ export type Landing = {
   projects?: Project[];
   skillGroups?: SkillGroup[];
   catch?: Catch[];
-  cargo?: CargoDemo;
 };
 
 const heroLine =
@@ -111,13 +104,19 @@ export const site = {
     stack: "Stack",
   },
   ride: {
-    hint: "Scroll or use the arrow keys to move.",
+    hint: "Cast off for a guided ride, or scroll or use the arrow keys.",
     routeLabel: "Route map",
     pause: "Pause water",
     play: "Play water",
+    tour: {
+      play: "Cast off",
+      pause: "Pause ride",
+      again: "Ride again",
+    },
   },
   net: {
     lower: "Lower the net",
+    hint: "See the other two results.",
     raise: "Empty the basket",
     label: "The catch",
   },
@@ -125,19 +124,6 @@ export const site = {
     hint: "Point at a skill, or tap it, to light its landings on the route map.",
     usedAt: "used at",
     offRoute: "on my resume, but not tied to one landing.",
-  },
-  cargo: {
-    action: "Sort the cargo",
-    title: "Sort the cargo",
-    intro: "Sort these customer requests into baskets. Drag each one, or use its basket buttons.",
-    note: "These requests are made up, and the sort is worked out ahead of time. No real tickets or live model are involved.",
-    unsorted: "On the jetty",
-    auto: "Sort them for me",
-    reset: "Start over",
-    close: "Close",
-    score: "{matched} of {total} match the sample sort.",
-    empty: "Nothing here yet.",
-    moveTo: "Move to",
   },
   copyEmail: {
     action: "Copy email",
@@ -351,20 +337,6 @@ export const landings: Landing[] = [
       { value: "25%", label: "fewer environment-related deployment failures" },
     ],
     skills: ["Node.js", "MCP", "Java", "Spring Boot", "MongoDB", "Angular"],
-    cargo: {
-      baskets: ["Exports", "Notifications", "Accessibility"],
-      requests: [
-        { text: "Export my monthly report as a spreadsheet", basket: "Exports" },
-        { text: "Email me when a request changes status", basket: "Notifications" },
-        { text: "Make the results table work with a screen reader", basket: "Accessibility" },
-        { text: "Let me schedule a PDF summary", basket: "Exports" },
-        { text: "Let me mute reminders on weekends", basket: "Notifications" },
-        { text: "Raise the contrast on status labels", basket: "Accessibility" },
-        { text: "Include the date range in downloaded files", basket: "Exports" },
-        { text: "Send one daily digest instead of many alerts", basket: "Notifications" },
-        { text: "Let me finish the form with only a keyboard", basket: "Accessibility" },
-      ],
-    },
     scene: "lake",
   },
   {
