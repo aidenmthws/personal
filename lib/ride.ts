@@ -120,7 +120,7 @@ const WHEEL_GAP_MS = 150;
 const WHEEL_THRESHOLD = 12;
 /** Smaller reversals are finger jitter. */
 const WHEEL_REVERSAL = 4;
-/** A second push cannot be read this soon after the gesture took its step. */
+/** No new gesture starts this soon after a step, even if the events stall. */
 const WHEEL_REARM_MS = 250;
 /** How much a decaying gesture must grow, at least, to be a second push. */
 const WHEEL_PUSH_RATIO = 3;
@@ -169,10 +169,12 @@ export function readWheel(gesture: WheelGesture | null, time: number, delta: num
     return { gesture: { ...gesture, at: time }, step: 0 };
   }
 
+  const justStepped =
+    gesture && gesture.stepped && time - gesture.steppedAt < WHEEL_REARM_MS;
   const isNew =
     !gesture ||
     reversed ||
-    time - gesture.at > WHEEL_GAP_MS ||
+    (time - gesture.at > WHEEL_GAP_MS && !justStepped) ||
     isSecondPush(gesture, time, size);
   const base: WheelGesture = isNew
     ? { at: time, direction, travelled: 0, stepped: false, steppedAt: 0, peak: size, floor: size }

@@ -106,6 +106,14 @@ test("a trackpad flick and all its momentum is one step", () => {
   assert.deepEqual(countSteps(flick(0, -1)), [-1]);
 });
 
+test("a stall in the event stream right after a step is still one step", () => {
+  const events = flick(0).map(([time, delta], index): [number, number] => [
+    index >= 2 ? time + 170 : time,
+    delta,
+  ]);
+  assert.deepEqual(countSteps(events), [1]);
+});
+
 test("two separate flicks are two steps", () => {
   assert.deepEqual(countSteps([...flick(0), ...flick(1600)]), [1, 1]);
 });
