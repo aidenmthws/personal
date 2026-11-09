@@ -47,7 +47,11 @@ const pinnedKeySteps: Record<string, number> = {
 export function RideController() {
   useLayoutEffect(() => {
     const root = document.documentElement;
-    const sections = [...document.querySelectorAll<HTMLElement>("[data-landing]")];
+    /* Next keeps the page you left in the DOM, hidden, and Dry Land has landings
+       too, so only look inside the Ride. */
+    const ride = document.getElementById("ride");
+    if (!ride) return;
+    const sections = [...ride.querySelectorAll<HTMLElement>("[data-landing]")];
     const order = sections.map((section) => section.id as LandingId);
     const dots = [...document.querySelectorAll<HTMLElement>("[data-route-dot]")];
     const skies = [...document.querySelectorAll<HTMLElement>("[data-sky-layer]")];
@@ -294,8 +298,7 @@ export function RideController() {
     snap();
 
     const resizes = new ResizeObserver(remeasure);
-    const ride = document.getElementById("ride");
-    if (ride) resizes.observe(ride);
+    resizes.observe(ride);
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: false });
