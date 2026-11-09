@@ -6,7 +6,7 @@ import { LandingCardBody, LandingMeta } from "@/components/landing-details";
 import { Boat } from "@/components/ride/boat";
 import { RideController } from "@/components/ride/ride-controller";
 import { RouteMap } from "@/components/ride/route-map";
-import { Sky } from "@/components/ride/sky";
+import { LandingSky, Sky } from "@/components/ride/sky";
 import { ReflectionDefs } from "@/components/scenes/kit";
 import { scenes } from "@/components/scenes/scenes";
 import { SiteHeader } from "@/components/site-header";
@@ -45,6 +45,11 @@ export default function RidePage() {
                   className={`sky sky-${landingSky[landing.id]}`}
                   style={{ "--landing": index } as CSSProperties}
                 >
+                  <LandingSky
+                    stop={landingSky[landing.id]}
+                    index={index}
+                    last={landings.length - 1}
+                  />
                   <Scene />
                 </Landing.Scene>
                 <Landing.Card

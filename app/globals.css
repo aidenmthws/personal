@@ -197,7 +197,34 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+@keyframes cloud-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-4vw, 0, 0);
+  }
+}
+
+@keyframes glitter {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .cloud-drift {
+    animation: cloud-drift 70s ease-in-out infinite alternate;
+  }
+
+  .glitter {
+    animation: glitter 5s ease-in-out infinite;
+  }
+
   .boat-bob {
     animation: boat-bob 4s ease-in-out infinite;
   }
@@ -209,6 +236,7 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+[data-ambient="paused"] .ambient,
 [data-ambient="paused"] .boat-bob,
 [data-ambient="paused"] .wake-ring {
   animation-play-state: paused;

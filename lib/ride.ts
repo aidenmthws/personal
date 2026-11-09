@@ -225,6 +225,30 @@ export function skyOpacity(layer: number, world: number, order: LandingId[]) {
   return clamp(position - layer + 1);
 }
 
+/** The sky's height above the waterline, as a share of the viewport height. */
+const HORIZON_VH = 70;
+const SUN_RADIUS_VH = 8;
+/** The share of the route the sun has crossed starts after the Shore, in the dark. */
+const SUNRISE = 0.06;
+const DAYLIGHT = 0.92;
+
+/**
+ * One day along the route. The sun is below the water at the Shore, climbs to
+ * its peak around Broad water, and has set by the Harbor.
+ */
+export function sunPose(world: number, last: number) {
+  const arc = clamp((clamp(world / last) - SUNRISE) / DAYLIGHT);
+  const height = Math.sin(Math.PI * arc) ** 1.4;
+  return {
+    xVw: 84 - 52 * arc,
+    yVh: HORIZON_VH + SUN_RADIUS_VH - height * 62,
+    /** How far the disc has paled from sunrise orange toward midday. */
+    pale: clamp((height - 0.35) / 0.4),
+    /** Light on the water, gone once the sun is down. */
+    glitter: Math.round(clamp(height * 3) * 1000) / 1000,
+  };
+}
+
 /** A card holds still at its dock and fades out as the world moves on. */
 export function cardPose(index: number, world: number) {
   const distance = Math.abs(index - world);

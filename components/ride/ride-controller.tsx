@@ -13,6 +13,7 @@ import {
   restingLanding,
   skyOpacity,
   spring,
+  sunPose,
   wheelPixels,
   worldPosition,
   type Drift,
@@ -26,6 +27,8 @@ const FAR_DRIFT_VW = 12;
 /** How long a dragged scrollbar must be still before it settles on a landing. */
 const SETTLE_AFTER_MS = 160;
 const FORE_DRIFT_VW = 20;
+/** Clouds sit far off, so they slide a little across the whole route. */
+const CLOUD_DRIFT_VW = 7;
 /** How far a finger must travel to count as a swipe. */
 const SWIPE_PX = 40;
 
@@ -56,6 +59,10 @@ export function RideController() {
     const dots = [...document.querySelectorAll<HTMLElement>("[data-route-dot]")];
     const skies = [...document.querySelectorAll<HTMLElement>("[data-sky-layer]")];
     const boat = document.querySelector<HTMLElement>("[data-boat]");
+    const clouds = [...document.querySelectorAll<HTMLElement>("[data-clouds]")];
+    const sun = document.querySelector<HTMLElement>("[data-sun]");
+    const sunPale = document.querySelector<SVGElement>("[data-sun-pale]");
+    const glitter = document.querySelector<HTMLElement>("[data-glitter]");
     const scenes = sections.map((section) => {
       const scene = section.querySelector<HTMLElement>("[data-scene]");
       return {
@@ -130,6 +137,18 @@ export function RideController() {
       skies.forEach((sky, layer) => {
         sky.style.opacity = String(skyOpacity(layer, world, order));
       });
+
+      clouds.forEach((bank) => {
+        bank.style.transform = `translate3d(${-world * CLOUD_DRIFT_VW}vw,0,0)`;
+      });
+
+      const light = sunPose(world, sections.length - 1);
+      if (sun) sun.style.transform = `translate3d(${light.xVw}vw,${light.yVh}vh,0)`;
+      if (sunPale) sunPale.style.opacity = String(light.pale);
+      if (glitter) {
+        glitter.style.transform = `translate3d(${light.xVw}vw,0,0)`;
+        glitter.style.opacity = String(light.glitter);
+      }
 
       if (boat) {
         const { x, y, angle } = boatPose(world);
