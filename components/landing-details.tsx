@@ -1,5 +1,6 @@
 import { ContactLinks } from "@/components/contact-links";
 import { CopyEmail } from "@/components/copy-email";
+import { NetCatch } from "@/components/net-catch";
 import { ResumeLink } from "@/components/resume-link";
 import { TagList } from "@/components/tag-list";
 import { site, type Landing as LandingContent } from "@/content/landings";
@@ -72,6 +73,15 @@ export function LandingDetails({ landing }: { landing: LandingContent }) {
   );
 }
 
+function Headline({ value, label }: { value: string; label: string }) {
+  return (
+    <p className="flex items-baseline gap-4">
+      <span className="font-display text-metric">{value}</span>
+      <span className="text-label text-muted-foreground">{label}</span>
+    </p>
+  );
+}
+
 /** A Ride card's content. Full bullets stay on Dry Land. */
 export function LandingCardBody({ landing }: { landing: LandingContent }) {
   const metric = landing.metrics[0];
@@ -80,11 +90,12 @@ export function LandingCardBody({ landing }: { landing: LandingContent }) {
     <>
       <p>{landing.summary}</p>
 
-      {metric && (
-        <p className="flex items-baseline gap-4">
-          <span className="font-display text-metric">{metric.value}</span>
-          <span className="text-label text-muted-foreground">{metric.label}</span>
-        </p>
+      {metric && landing.catch ? (
+        <NetCatch labels={site.net} results={landing.catch}>
+          <Headline value={metric.value} label={metric.label} />
+        </NetCatch>
+      ) : (
+        metric && <Headline value={metric.value} label={metric.label} />
       )}
 
       {landing.coursework && <TagList items={landing.coursework} />}

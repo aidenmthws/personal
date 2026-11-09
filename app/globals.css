@@ -382,6 +382,40 @@ html:has(#ride):not([data-ride]) {
   box-shadow: none;
 }
 
+/* The net dips to the water and comes back with the catch. */
+.catch-fish {
+  opacity: 0;
+}
+
+[data-net="down"] .catch-fish {
+  opacity: 1;
+}
+
+@keyframes net-haul {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  45%,
+  58% {
+    transform: rotate(-24deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .catch-fish {
+    transition: opacity 0.4s ease-out;
+  }
+
+  [data-net="down"] .catch-fish {
+    transition-delay: 1.3s;
+  }
+
+  [data-net="down"] .net-arm {
+    animation: net-haul 1.8s ease-in-out;
+  }
+}
+
 /* The name of the landing you are at, unless you are pointing at another. */
 [data-ride] .route-name {
   opacity: 0;

@@ -348,7 +348,7 @@ export function RideController() {
       if (!stage.matches) return;
 
       /* Space belongs to a focused link or button. */
-      const onControl = (event.target as Element).closest?.("a, button");
+      const onControl = (event.target as Element).closest?.("a, button, summary");
       const spaceStep = onControl ? 0 : event.shiftKey ? -1 : 1;
       const step = event.key === " " ? spaceStep : (pinnedKeySteps[event.key] ?? 0);
       if (step === 0 || leavesRide(step)) return;
