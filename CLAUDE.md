@@ -24,12 +24,14 @@ Next.js (App Router, static generation) with TypeScript, Tailwind with shadcn-st
 - `npm run build`: production build. Run `npm start` afterward to serve it.
 - `npm run lint`: run ESLint.
 - `npm test`: run the tests in `content/` and `lib/` with Node's built-in test runner.
+- `npm run test:e2e`: build the site and run the browser tests in `e2e/` with Playwright (Chromium, Firefox, WebKit). Browsers install with `npx playwright install`.
 
 This is Next.js 16. Check the bundled guides in `node_modules/next/dist/docs/` before using a Next.js API.
 
 ## Architecture
 
 - One typed file, `content/landings.ts`, is the single source of truth. Both the Ride (`/`) and Dry Land (`/dry-land`) render from it. Never duplicate copy in components.
+- Next keeps the page you left in the DOM, hidden (`cacheComponents`). Client code must search inside its own page, never the whole document, because Dry Land and the Ride share markup and ids.
 - Client components never import `content/landings.ts`, because that ships all copy as JS. Server components pass them strings as props. `content/error-copy.ts` is the one exception, for the error page.
 - The landing sections stay in normal flow, so hash links, focus, and find on page work. The stacked page is the default. An inline script in `<head>` sets `data-ride` before first paint at 1024 by 700 and up without reduced motion, and removes it if the Ride's script fails.
 - All text lives in the DOM as real HTML, never inside canvas or images. The Ride is progressive enhancement on top of that HTML.
