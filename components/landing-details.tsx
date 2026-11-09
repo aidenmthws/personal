@@ -2,8 +2,9 @@ import { ContactLinks } from "@/components/contact-links";
 import { CopyEmail } from "@/components/copy-email";
 import { NetCatch } from "@/components/net-catch";
 import { ResumeLink } from "@/components/resume-link";
+import { SkillJars } from "@/components/skill-jars";
 import { TagList } from "@/components/tag-list";
-import { site, type Landing as LandingContent } from "@/content/landings";
+import { landings, site, type Landing as LandingContent } from "@/content/landings";
 
 /** Role, place, and dates, in the order they appear on the resume. */
 export function LandingMeta({ landing }: { landing: LandingContent }) {
@@ -73,6 +74,16 @@ export function LandingDetails({ landing }: { landing: LandingContent }) {
   );
 }
 
+/** The route stops where each skill was used. */
+function skillStops(skills: string[]) {
+  return Object.fromEntries(
+    skills.map((skill) => [
+      skill,
+      landings.flatMap((item, index) => (item.skills.includes(skill) ? [index] : [])),
+    ]),
+  );
+}
+
 function Headline({ value, label }: { value: string; label: string }) {
   return (
     <p className="flex items-baseline gap-4">
@@ -110,12 +121,14 @@ export function LandingCardBody({ landing }: { landing: LandingContent }) {
         </div>
       ))}
 
-      {landing.skillGroups?.map((group) => (
-        <div key={group.name}>
-          <h3 className="font-medium">{group.name}</h3>
-          <TagList items={group.skills} />
-        </div>
-      ))}
+      {landing.skillGroups && (
+        <SkillJars
+          groups={landing.skillGroups}
+          stops={skillStops(landing.skillGroups.flatMap((group) => group.skills))}
+          landingTitles={landings.map((item) => item.title)}
+          labels={site.spices}
+        />
+      )}
 
       {landing.id === "harbor" && (
         <>

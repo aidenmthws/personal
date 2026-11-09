@@ -382,6 +382,18 @@ html:has(#ride):not([data-ride]) {
   box-shadow: none;
 }
 
+/* The stall selling the skill you are pointing at. */
+.stall-glow {
+  transition: opacity 0.2s ease-out;
+}
+
+[data-lit-stall="0"] [data-stall="0"] .stall-glow,
+[data-lit-stall="1"] [data-stall="1"] .stall-glow,
+[data-lit-stall="2"] [data-stall="2"] .stall-glow,
+[data-lit-stall="3"] [data-stall="3"] .stall-glow {
+  opacity: 0.55;
+}
+
 /* The net dips to the water and comes back with the catch. */
 .catch-fish {
   opacity: 0;

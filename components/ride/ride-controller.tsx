@@ -336,6 +336,8 @@ export function RideController() {
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      /* A skill group's arrow keys move between its jars. */
+      if ((event.target as Element).closest?.('[role="toolbar"]')) return;
       if (event.key === "]" || event.key === "[") {
         move(event.key === "]" ? 1 : -1);
         return;
