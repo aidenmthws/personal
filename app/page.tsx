@@ -73,7 +73,7 @@ export default function RidePage() {
                           <p className="text-lead">{landing.summary}</p>
                           <p className="text-label text-muted-foreground">{landing.location}</p>
                           <div className="flex flex-wrap gap-4">
-                            <a href={`#${landings[1].id}`} className={buttonStyles.accent}>
+                            <a href={`#${landings[1].id}`} data-cast-off className={buttonStyles.accent}>
                               {site.actions.castOff}
                             </a>
                             <Link href="/dry-land" className={buttonStyles.outline}>

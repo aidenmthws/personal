@@ -327,6 +327,59 @@ html:has(#ride):not([data-ride]) {
   animation-play-state: paused;
 }
 
+/* Arrivals. These states exist only on the running Ride, so without its script
+   the lamps stay lit and the birds stay in the sky. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-ride] .arrive-lamp {
+    transition: opacity 0.7s ease-out calc(0.15s + var(--i, 0) * 0.2s);
+  }
+
+  [data-ride] .arrive-lift {
+    transition:
+      opacity 0.7s ease-out,
+      transform 0.9s ease-out;
+  }
+
+  [data-ride] .cast-rope,
+  [data-ride] .cast-mist {
+    transition:
+      opacity 0.5s ease-out,
+      transform 0.5s ease-out;
+  }
+
+  [data-ride] .boat-nudge {
+    transition: transform 0.5s ease-in;
+  }
+}
+
+[data-ride-ready][data-ride] [data-landing]:not([data-arrived]) .arrive-lamp {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+[data-ride-ready][data-ride] [data-landing]:not([data-arrived]) .arrive-lift {
+  opacity: 0;
+  transform: translate3d(-24px, 56px, 0);
+}
+
+[data-casting-off] .cast-rope {
+  opacity: 0;
+}
+
+[data-casting-off] .cast-mist {
+  opacity: 0;
+  transform: translate3d(0, -42px, 0);
+}
+
+[data-casting-off] .boat-nudge {
+  transform: translate3d(22px, 0, 0);
+}
+
+[data-landing]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 @utility border-keyline {
   border-width: 1.5px;
 }

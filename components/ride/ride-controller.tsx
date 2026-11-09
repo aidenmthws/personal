@@ -33,6 +33,10 @@ const FORE_DRIFT_VW = 20;
 const FRAME_DRIFT_VW = 34;
 /** Clouds sit far off, so they slide a little across the whole route. */
 const CLOUD_DRIFT_VW = 7;
+/** How close to a dock the boat must be for that landing's arrival to play. */
+const ARRIVE_WITHIN = 0.08;
+/** The mooring comes loose before the first trip starts. */
+const CAST_OFF_MS = 520;
 /** How far a finger must travel to count as a swipe. */
 const SWIPE_PX = 40;
 
@@ -86,6 +90,8 @@ export function RideController() {
     let tops: number[] = [];
     let frame = 0;
     let current = -1;
+    let arrived = -1;
+    let castOffTimer = 0;
     let drift: Drift = { position: 0, velocity: 0 };
     let lastFrame = 0;
     let gliding = false;
@@ -114,6 +120,7 @@ export function RideController() {
       if (index === current) return;
       const first = current === -1;
       current = index;
+      if (index === 0 && !castOffTimer) delete root.dataset.castingOff;
       dots.forEach((dot, position) => {
         if (position === index) dot.setAttribute("aria-current", "location");
         else dot.removeAttribute("aria-current");
@@ -121,7 +128,18 @@ export function RideController() {
       if (!first) window.history.replaceState(null, "", `#${order[index]}`);
     }
 
+    /* A landing's small event plays once the boat is almost docked. */
+    function markArrival(world: number) {
+      const nearest = Math.round(world);
+      const landing = Math.abs(world - nearest) < ARRIVE_WITHIN ? nearest : -1;
+      if (landing === arrived) return;
+      sections[arrived]?.removeAttribute("data-arrived");
+      arrived = landing;
+      sections[arrived]?.setAttribute("data-arrived", "on");
+    }
+
     function paintStage(world: number, velocity = 0) {
+      markArrival(world);
       scenes.forEach(({ scene, far, fore, frame }, index) => {
         if (!scene) return;
         const offset = index - world;
@@ -230,6 +248,20 @@ export function RideController() {
       if (landing !== null) goTo(landing);
     }
 
+    /* On the full Ride, Cast off unties the boat first. The link still works
+       as a plain hash link everywhere else. */
+    function onClick(event: MouseEvent) {
+      if (!stage.matches || castOffTimer) return;
+      if (!(event.target as Element).closest?.("[data-cast-off]")) return;
+      event.preventDefault();
+      root.dataset.castingOff = "on";
+      castOffTimer = window.setTimeout(() => {
+        castOffTimer = 0;
+        goTo(1);
+        sections[1].focus({ preventScroll: true });
+      }, CAST_OFF_MS);
+    }
+
     function onScroll() {
       const y = window.scrollY;
       if (y !== lastY) direction = y > lastY ? 1 : -1;
@@ -326,6 +358,7 @@ export function RideController() {
       if (index !== -1 && index !== current) goTo(index);
     }
 
+    sections[1].tabIndex = -1;
     root.dataset.rideReady = "on";
     syncLayout();
     measure();
@@ -334,6 +367,7 @@ export function RideController() {
     const resizes = new ResizeObserver(remeasure);
     resizes.observe(ride);
 
+    ride.addEventListener("click", onClick);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -347,7 +381,9 @@ export function RideController() {
     return () => {
       if (frame) cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
+      window.clearTimeout(castOffTimer);
       resizes.disconnect();
+      ride.removeEventListener("click", onClick);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
@@ -358,6 +394,7 @@ export function RideController() {
       document.removeEventListener("focusin", onFocusIn);
       stage.removeEventListener("change", remeasure);
       delete root.dataset.ambient;
+      delete root.dataset.castingOff;
       delete root.dataset.ride;
       delete root.dataset.rideReady;
     };
