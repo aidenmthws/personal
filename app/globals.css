@@ -61,6 +61,8 @@
   --text-heading--line-height: 1.25;
   --text-title: 2rem;
   --text-title--line-height: 1.2;
+  --text-metric: clamp(3rem, 2.5rem + 2vw, 4.25rem);
+  --text-metric--line-height: 1;
   --text-display: clamp(2.75rem, 2rem + 4vw, 4.5rem);
   --text-display--line-height: 1.05;
 }

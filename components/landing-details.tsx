@@ -81,8 +81,8 @@ export function LandingCardBody({ landing }: { landing: LandingContent }) {
       <p>{landing.summary}</p>
 
       {metric && (
-        <p>
-          <span className="block font-display text-title">{metric.value}</span>
+        <p className="flex items-baseline gap-4">
+          <span className="font-display text-metric">{metric.value}</span>
           <span className="text-label text-muted-foreground">{metric.label}</span>
         </p>
       )}
