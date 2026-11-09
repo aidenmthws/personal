@@ -200,9 +200,9 @@ export const landings: Landing[] = [
     dryTitle: "Virginia Tech",
     org: "Virginia Tech",
     role: "B.S. in Computer Science",
-    dates: "Expected May 2027",
+    dates: "Expected May 2028",
     summary:
-      "I study computer science at Virginia Tech, with a 3.72 GPA and an expected graduation of May 2027.",
+      "I study computer science at Virginia Tech, with a 3.72 GPA and an expected graduation of May 2028.",
     bullets: ["GPA 3.72"],
     metrics: [{ value: "3.72", label: "GPA" }],
     skills: [],
