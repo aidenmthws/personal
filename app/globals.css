@@ -289,6 +289,13 @@ html:has(#ride):not([data-ride]) {
   height: calc(var(--art-w) * 0.16875);
 }
 
+/* Fronds hang from just under the sticky header at any window shape. */
+[data-layer="frame"] {
+  top: 4.75rem;
+  height: calc(var(--art-w) * 0.39375);
+  overflow: visible;
+}
+
 /* Reeds and posts run past the bottom of the box, so they reach the screen edge. */
 [data-layer="fore"] {
   overflow: visible;

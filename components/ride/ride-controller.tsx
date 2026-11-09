@@ -28,6 +28,7 @@ const FAR_DRIFT_VW = 12;
 /** How long a dragged scrollbar must be still before it settles on a landing. */
 const SETTLE_AFTER_MS = 160;
 const FORE_DRIFT_VW = 20;
+const FRAME_DRIFT_VW = 34;
 /** Clouds sit far off, so they slide a little across the whole route. */
 const CLOUD_DRIFT_VW = 7;
 /** How far a finger must travel to count as a swipe. */
@@ -70,6 +71,7 @@ export function RideController() {
         scene,
         far: scene?.querySelector<SVGElement>('[data-layer="far"]'),
         fore: scene?.querySelector<SVGElement>('[data-layer="fore"]'),
+        frame: scene?.querySelector<SVGElement>('[data-layer="frame"]'),
       };
     });
     const cards = sections.map((section) =>
@@ -116,7 +118,7 @@ export function RideController() {
     }
 
     function paintStage(world: number) {
-      scenes.forEach(({ scene, far, fore }, index) => {
+      scenes.forEach(({ scene, far, fore, frame }, index) => {
         if (!scene) return;
         const offset = index - world;
         const nearby = Math.abs(offset) < 1.6;
@@ -125,6 +127,7 @@ export function RideController() {
         scene.style.transform = `translate3d(${offset * 100}vw,0,0)`;
         if (far) far.style.transform = `translate3d(${-offset * FAR_DRIFT_VW}vw,0,0)`;
         if (fore) fore.style.transform = `translate3d(${offset * FORE_DRIFT_VW}vw,0,0)`;
+        if (frame) frame.style.transform = `translate3d(${offset * FRAME_DRIFT_VW}vw,0,0)`;
       });
 
       cards.forEach((card, index) => {
@@ -160,7 +163,7 @@ export function RideController() {
 
     function clearStage() {
       const moved = [
-        ...scenes.flatMap(({ scene, far, fore }) => [scene, far, fore]),
+        ...scenes.flatMap(({ scene, far, fore, frame }) => [scene, far, fore, frame]),
         ...cards,
         boat,
       ];
