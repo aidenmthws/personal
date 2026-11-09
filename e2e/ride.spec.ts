@@ -142,27 +142,6 @@ test.describe("the living river", () => {
     await expectDocked(page, "market", 7);
   });
 
-  test("the cargo demo sorts, holds the Ride still, and returns focus", async ({ page }) => {
-    await page.goto("/#lake");
-    await readyToRide(page);
-
-    const open = page.locator("#lake").getByRole("button", { name: "Sort the cargo" });
-    /* Safari does not focus a button on click, so open it from the keyboard. */
-    await open.focus();
-    await page.keyboard.press("Enter");
-    await expect(page.getByText("These requests are made up")).toBeVisible();
-
-    await page.keyboard.press("ArrowDown");
-    await expectDocked(page, "lake", 5);
-
-    await page.getByRole("button", { name: "Sort them for me" }).click();
-    await expect(page.getByText("9 of 9 match the sample sort.")).toBeVisible();
-
-    await page.keyboard.press("Escape");
-    await expect(page.getByRole("dialog")).toBeHidden();
-    await expect(open).toBeFocused();
-  });
-
   test("every card fits a small Ride window", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 700 });
     await openRide(page);

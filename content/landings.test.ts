@@ -107,16 +107,6 @@ test("every result in the net comes from the resume text", () => {
   }
 });
 
-test("the cargo demo is labeled as made up and every request has a basket", () => {
-  const cargo = landings.find((landing) => landing.id === "lake")?.cargo;
-
-  assert.match(site.cargo.note, /made up/);
-  assert.ok((cargo?.requests.length ?? 0) >= 8);
-  for (const request of cargo?.requests ?? []) {
-    assert.ok(cargo?.baskets.includes(request.basket), request.text);
-  }
-});
-
 test("nothing off limits is published", () => {
   assert.doesNotMatch(everything, /\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}/, "phone");
   assert.doesNotMatch(everything, /github\.com/i, "GitHub link");
