@@ -4,9 +4,9 @@ A personal portfolio site themed as a boat ride down a Kerala backwater. The res
 
 ## Scope
 
-The MVP and the living-river pass have shipped: all nine landings with resume content, the Ride, Dry Land (`/dry-land`), Harbor contact, the stacked page, and on top of those a per-landing scene kit with people and reflections, a sun that crosses the sky, arrival events, an illustrated route map, and three interactions (the Broad water net, Spice market skill lighting, and Sort the cargo).
+The MVP and the living-river pass have shipped: all nine landings with resume content, the Ride, Dry Land (`/dry-land`), Harbor contact, the stacked page, and on top of those a per-landing scene kit with people and reflections, a sun that crosses the sky, arrival events, an illustrated route map, a guided ride started by Cast off, and two interactions (the Broad water net and Spice market skill lighting).
 
-Do not build these yet (add-ons, in priority order): left-rail boat and top-left route map on phones, Before/After toggle, lamp and "currently" line, project links, easter eggs, custom domain, Malayalam text. Sound and WebGL water were considered and rejected: the first adds little for a recruiter, and the second breaks the flat style and the Lighthouse target.
+Do not build these yet (add-ons, in priority order): left-rail boat and top-left route map on phones, Before/After toggle, lamp and "currently" line, project links, easter eggs, custom domain, Malayalam text. Sound, WebGL water, and the Sort the cargo demo were considered and rejected: sound adds little for a recruiter, WebGL breaks the flat style and the Lighthouse target, and the demo did not make its link to the Freddie Mac work clear.
 
 ## Stack
 

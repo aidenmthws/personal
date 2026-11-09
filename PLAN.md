@@ -86,7 +86,6 @@ All figures come from the resume as written. For the MVP, only the scene and con
 
 - Scene: open lake at noon with houseboats at anchor and a floating jetty stacked with baskets.
 - Content: Software Engineering Intern, McLean. AI-assisted workflows, agent skills, and a Node.js MCP server that groups customer enhancement requests with LLM categorization (40% less manual triage across hundreds of tickets). Java Spring Boot and MongoDB backend for a portal used by 50+ internal stakeholders. Angular chatbot UI (30% less review time per request). Bruno and Jenkins checks (25% fewer environment-related deployment failures).
-- Add-on interaction: "Sort the cargo", a demo with about eight invented sample requests that the visitor drags into baskets or lets a pre-computed grouping sort. All sample data is fictional.
 
 ### 7. Side channels (projects)
 
@@ -159,6 +158,7 @@ Kasavu card: Mist fill, 1.5 px gold border with a thin inner rule, and a woven-s
 - Route map: a winding river with one glyph per landing and a small boat that follows the ride, fixed at bottom center on the full Ride. On the stacked page it is a strip in normal flow, with 44 by 44 px targets, so it never covers content. The current landing is highlighted and named. Stops are real links, so it doubles as navigation.
 - Sky: six static layers, one per stop, crossfaded with opacity only. Each paints the sky, the water, and its own clouds. A sun crosses the route, rising after the Shore and setting by the Harbor, with a moon and stars at the Harbor.
 - Arrivals: each landing plays one small event as the boat docks, such as birds lifting or the Harbor lamps coming on in turn. Cast off drops the mooring and lifts the mist before the first trip. Without the Ride's script everything simply stays lit.
+- Guided ride: Cast off, or the button by the route map, sails the route by itself and stays at each card for its reading time, measured from the card's word count. Pause holds the stop and resumes it. Any scroll, swipe, key, route map click, or Tab hands control back to the visitor, and Cast off then continues from that landing. Using a control in a card pauses the ride, and pointing at one holds it. The ride stops at the Harbor and offers to ride again. On the stacked page, Cast off is a plain link.
 - Ambient loops: palms, mist, ripples, ducks, steam, and water run only at the docked landing and stop with the pause control.
 - Deep links: each landing has a hash URL such as `#lake`, updated with `replaceState` as the visitor scrolls.
 - Keyboard: arrow keys, Page Up, Page Down, Space, `[`, and `]` move one landing, Home and End go to the Shore and Harbor, and every interactive object is reachable by Tab.
@@ -259,7 +259,7 @@ Add-ons after the MVP, in priority order (each can ship on its own):
 5. Easter eggs (kingfisher dive, snake-boat race) and Malayalam words (reviewed by a speaker first).
 6. A custom domain.
 
-Shipped after the MVP: the fishing-net catch, Sort the cargo, Spice market skill lighting, and unique art per landing. Sound and WebGL water were dropped: sound adds little for a recruiter, and WebGL breaks the flat style and risks the Lighthouse target.
+Shipped after the MVP: the fishing-net catch, Spice market skill lighting, unique art per landing, and the guided ride. Sound, WebGL water, and Sort the cargo were dropped: sound adds little for a recruiter, WebGL breaks the flat style and risks the Lighthouse target, and the demo did not make its link to the Freddie Mac work clear.
 
 ## 10. Risks
 
