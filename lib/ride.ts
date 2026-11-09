@@ -5,7 +5,9 @@ import type { LandingId } from "../content/landings.ts";
  * (`raw`), docking turns that into the world position, and everything visible
  * is derived from the world position.
  *
- * Each landing docks at its section's top, so hash links land docked.
+ * Each landing docks at its section's top, so hash links land docked. A scroll
+ * gesture or key press moves the page straight to the next dock, and the world
+ * then travels there on a spring.
  */
 
 /** The full Ride needs this much room and permission to move. */
@@ -50,9 +52,10 @@ export const landingSky: Record<LandingId, SkyStop> = {
 /** How strongly the world slows at a dock. At 1 it would stop dead. */
 const DOCK_HOLD = 0.92;
 
-/** The world closes on the scroll position with this time constant. */
-const GLIDE_MS = 90;
-const SETTLED = 0.0005;
+/** How quickly the world closes on its target, per second. */
+const SPRING_RATE = 8;
+const SETTLED_POSITION = 0.0005;
+const SETTLED_VELOCITY = 0.005;
 
 const clamp = (value: number, min = 0, max = 1) =>
   Math.min(max, Math.max(min, value));
@@ -70,7 +73,7 @@ export function easeDock(t: number) {
 const DOCK_ZONE = 0.2;
 
 /**
- * Scrolling is native, so it can stop between two landings, where no card is
+ * Dragging the scrollbar can stop between two landings, where no card is
  * readable. Once it stops there, this picks the landing to settle on: the next
  * one in the direction of travel. It returns null when already docked.
  */
@@ -81,10 +84,116 @@ export function restingLanding(raw: number, direction: number, last: number) {
   return Math.min(last, direction < 0 ? index : index + 1);
 }
 
-/** Moves the world toward the scroll position, at any frame rate. */
-export function glide(shown: number, target: number, elapsedMs: number) {
-  const next = target + (shown - target) * Math.exp(-elapsedMs / GLIDE_MS);
-  return Math.abs(target - next) < SETTLED ? target : next;
+/** The landing one step from here. Between landings, the nearest in that direction. */
+export function landingAfter(raw: number, step: number, last: number) {
+  const nearest = Math.round(raw);
+  const from = Math.abs(raw - nearest) < 0.02 ? nearest : raw;
+  return clamp(step > 0 ? Math.floor(from) + 1 : Math.ceil(from) - 1, 0, last);
+}
+
+export type Drift = { position: number; velocity: number };
+
+/**
+ * Moves the world toward its target on a critically damped spring, at any frame
+ * rate. It eases in and out without overshoot, and velocity carries through a
+ * change of target, so a second scroll mid-trip never makes it stutter.
+ */
+export function spring({ position, velocity }: Drift, target: number, elapsedMs: number): Drift {
+  const time = elapsedMs / 1000;
+  const offset = position - target;
+  const push = velocity + SPRING_RATE * offset;
+  const decay = Math.exp(-SPRING_RATE * time);
+  const next = {
+    position: target + (offset + push * time) * decay,
+    velocity: (push - SPRING_RATE * (offset + push * time)) * decay,
+  };
+
+  const settled =
+    Math.abs(next.position - target) < SETTLED_POSITION &&
+    Math.abs(next.velocity) < SETTLED_VELOCITY;
+  return settled ? { position: target, velocity: 0 } : next;
+}
+
+/** Input this far apart in time belongs to two separate gestures. */
+const WHEEL_GAP_MS = 150;
+/** A gesture must travel this far to count, so a brushed trackpad stays put. */
+const WHEEL_THRESHOLD = 12;
+/** Smaller reversals are finger jitter. */
+const WHEEL_REVERSAL = 4;
+/** No new gesture starts this soon after a step, even if the events stall. */
+const WHEEL_REARM_MS = 250;
+/** How much a decaying gesture must grow, at least, to be a second push. */
+const WHEEL_PUSH_RATIO = 3;
+const WHEEL_PUSH_SIZE = 16;
+const WHEEL_LINE_PX = 16;
+
+/** Browsers report wheel deltas in pixels, lines, or pages. */
+export function wheelPixels(delta: number, deltaMode: number, pageHeight: number) {
+  if (deltaMode === 1) return delta * WHEEL_LINE_PX;
+  if (deltaMode === 2) return delta * pageHeight;
+  return delta;
+}
+
+export type WheelGesture = {
+  at: number;
+  direction: number;
+  travelled: number;
+  stepped: boolean;
+  steppedAt: number;
+  peak: number;
+  floor: number;
+};
+
+/** A new push during momentum: the deltas had faded, and now they jump back up. */
+function isSecondPush(gesture: WheelGesture, time: number, size: number) {
+  return (
+    gesture.stepped &&
+    time - gesture.steppedAt >= WHEEL_REARM_MS &&
+    gesture.floor <= gesture.peak * 0.6 &&
+    size >= Math.max(gesture.floor * WHEEL_PUSH_RATIO, gesture.floor + WHEEL_PUSH_SIZE)
+  );
+}
+
+/**
+ * Turns the stream of wheel events into one step per gesture. A trackpad keeps
+ * sending momentum for a second or more after the finger lifts, and all of that
+ * belongs to the step already taken.
+ */
+export function readWheel(gesture: WheelGesture | null, time: number, delta: number) {
+  const size = Math.abs(delta);
+  if (size === 0) return { gesture, step: 0 };
+
+  const direction = delta > 0 ? 1 : -1;
+  const reversed = gesture && direction !== gesture.direction;
+  if (gesture && reversed && size < WHEEL_REVERSAL && time - gesture.at <= WHEEL_GAP_MS) {
+    return { gesture: { ...gesture, at: time }, step: 0 };
+  }
+
+  const justStepped =
+    gesture && gesture.stepped && time - gesture.steppedAt < WHEEL_REARM_MS;
+  const isNew =
+    !gesture ||
+    reversed ||
+    (time - gesture.at > WHEEL_GAP_MS && !justStepped) ||
+    isSecondPush(gesture, time, size);
+  const base: WheelGesture = isNew
+    ? { at: time, direction, travelled: 0, stepped: false, steppedAt: 0, peak: size, floor: size }
+    : gesture;
+
+  const travelled = base.travelled + size;
+  const steps = !base.stepped && travelled >= WHEEL_THRESHOLD;
+  return {
+    gesture: {
+      ...base,
+      at: time,
+      travelled,
+      stepped: base.stepped || steps,
+      steppedAt: steps ? time : base.steppedAt,
+      peak: Math.max(base.peak, size),
+      floor: size >= base.peak ? size : Math.min(base.floor, size),
+    },
+    step: steps ? direction : 0,
+  };
 }
 
 /** Converts a scroll offset to a landing index, given each landing's top. */

@@ -6,13 +6,17 @@ import {
   boatPose,
   cardPose,
   easeDock,
-  glide,
+  landingAfter,
   rawPosition,
+  readWheel,
   restingLanding,
   rideOptInScript,
   skyOpacity,
   skyStops,
+  spring,
+  wheelPixels,
   worldPosition,
+  type WheelGesture,
 } from "./ride.ts";
 
 const order = landings.map((landing) => landing.id);
@@ -35,28 +39,124 @@ test("the world's speed never jumps, so it cannot stutter at a dock", () => {
   assert.ok(Math.abs(speed(0) - speed(0.998)) < 0.05, "across a landing");
 });
 
-test("the world glides to the scroll position within 300 ms", () => {
-  let shown = 0;
-  let previousStep = Infinity;
-  for (let elapsed = 0; elapsed < 300; elapsed += 16) {
-    const next = glide(shown, 1, 16);
-    assert.ok(next - shown < previousStep);
-    previousStep = next - shown;
-    shown = next;
+const still = { position: 0, velocity: 0 };
+
+function runSpring(frames: number, frameMs: number, start = still, target = 1) {
+  let drift = start;
+  for (let frame = 0; frame < frames; frame += 1) drift = spring(drift, target, frameMs);
+  return drift;
+}
+
+test("a trip eases in, never overshoots, and arrives in under a second", () => {
+  let drift = still;
+  let fastest = 0;
+  for (let elapsed = 0; elapsed < 960; elapsed += 16) {
+    drift = spring(drift, 1, 16);
+    assert.ok(drift.position <= 1);
+    fastest = Math.max(fastest, drift.velocity);
   }
-  assert.ok(shown > 0.95);
+  assert.ok(drift.position > 0.99);
+  assert.ok(runSpring(1, 16).velocity < fastest);
 });
 
-test("the glide is the same at any frame rate", () => {
-  let at60 = 0;
-  let at120 = 0;
-  for (let frame = 0; frame < 6; frame += 1) at60 = glide(at60, 1, 16);
-  for (let frame = 0; frame < 12; frame += 1) at120 = glide(at120, 1, 8);
-  assert.ok(Math.abs(at60 - at120) < 0.001);
+test("the spring is the same at any frame rate", () => {
+  const at60 = runSpring(30, 16);
+  const at120 = runSpring(60, 8);
+  assert.ok(Math.abs(at60.position - at120.position) < 1e-9);
+  assert.ok(Math.abs(at60.velocity - at120.velocity) < 1e-9);
 });
 
-test("the glide lands exactly on the target", () => {
-  assert.equal(glide(0.9999, 1, 16), 1);
+test("the spring lands exactly on the target and stops", () => {
+  assert.deepEqual(spring({ position: 0.9999, velocity: 0 }, 1, 16), {
+    position: 1,
+    velocity: 0,
+  });
+});
+
+test("a second scroll mid-trip keeps the world's speed", () => {
+  const midway = runSpring(10, 16);
+  const retargeted = spring(midway, 2, 0);
+  assert.ok(Math.abs(retargeted.position - midway.position) < 1e-9);
+  assert.ok(Math.abs(retargeted.velocity - midway.velocity) < 1e-9);
+});
+
+function countSteps(events: [time: number, delta: number][]) {
+  let gesture: WheelGesture | null = null;
+  const steps: number[] = [];
+  for (const [time, delta] of events) {
+    const read = readWheel(gesture, time, delta);
+    gesture = read.gesture;
+    if (read.step) steps.push(read.step);
+  }
+  return steps;
+}
+
+/** A trackpad flick: a quick rise, then momentum fading over about 1.4 seconds. */
+function flick(start: number, sign = 1, frames = 85) {
+  const events: [number, number][] = [];
+  for (let frame = 0; frame < frames; frame += 1) {
+    const size = frame < 4 ? 10 + frame * 25 : 85 * Math.exp(-(frame - 4) / 16);
+    events.push([start + frame * 16, sign * Math.max(1, Math.round(size))]);
+  }
+  return events;
+}
+
+test("a trackpad flick and all its momentum is one step", () => {
+  assert.deepEqual(countSteps(flick(0)), [1]);
+  assert.deepEqual(countSteps(flick(0, -1)), [-1]);
+});
+
+test("a stall in the event stream right after a step is still one step", () => {
+  const events = flick(0).map(([time, delta], index): [number, number] => [
+    index >= 2 ? time + 170 : time,
+    delta,
+  ]);
+  assert.deepEqual(countSteps(events), [1]);
+});
+
+test("two separate flicks are two steps", () => {
+  assert.deepEqual(countSteps([...flick(0), ...flick(1600)]), [1, 1]);
+});
+
+test("a new flick during the last one's momentum is a second step", () => {
+  const first = flick(0).slice(0, 45);
+  assert.deepEqual(countSteps([...first, ...flick(45 * 16)]), [1, 1]);
+});
+
+test("a reversal mid-momentum steps the other way", () => {
+  const first = flick(0).slice(0, 30);
+  assert.deepEqual(countSteps([...first, ...flick(30 * 16, -1)]), [1, -1]);
+});
+
+test("finger jitter during momentum does not step", () => {
+  const events = flick(0);
+  events.splice(40, 0, [events[39][0] + 1, -2]);
+  assert.deepEqual(countSteps(events), [1]);
+});
+
+test("mouse wheel notches step once each, and a fast spin counts once", () => {
+  assert.deepEqual(countSteps([[0, 100], [300, 100], [600, 100]]), [1, 1, 1]);
+  assert.deepEqual(countSteps([[0, 100], [40, 100], [80, 100]]), [1]);
+});
+
+test("a brushed trackpad does not step", () => {
+  assert.deepEqual(countSteps([[0, 2], [16, 3], [32, 2]]), []);
+});
+
+test("wheel deltas convert to pixels", () => {
+  assert.equal(wheelPixels(100, 0, 800), 100);
+  assert.equal(wheelPixels(3, 1, 800), 48);
+  assert.equal(wheelPixels(1, 2, 800), 800);
+});
+
+test("a step goes to the neighboring landing and stops at both ends", () => {
+  assert.equal(landingAfter(3, 1, 8), 4);
+  assert.equal(landingAfter(3, -1, 8), 2);
+  assert.equal(landingAfter(3.3, 1, 8), 4);
+  assert.equal(landingAfter(3.3, -1, 8), 3);
+  assert.equal(landingAfter(3.001, -1, 8), 2);
+  assert.equal(landingAfter(8, 1, 8), 8);
+  assert.equal(landingAfter(0, -1, 8), 0);
 });
 
 test("the docking curve never runs backward", () => {
@@ -77,7 +177,7 @@ test("scroll offsets map to landings and clamp at both ends", () => {
   assert.equal(rawPosition(900, tops), 2);
 });
 
-test("scrolling that stops between landings settles in its direction", () => {
+test("a scrollbar that stops between landings settles in its direction", () => {
   assert.equal(restingLanding(3, 1, 8), null);
   assert.equal(restingLanding(3.1, 1, 8), null);
   assert.equal(restingLanding(3.9, -1, 8), null);

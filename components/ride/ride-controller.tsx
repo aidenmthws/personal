@@ -7,29 +7,51 @@ import {
   RIDE_QUERY,
   boatPose,
   cardPose,
-  glide,
+  landingAfter,
   rawPosition,
+  readWheel,
   restingLanding,
   skyOpacity,
+  spring,
+  wheelPixels,
   worldPosition,
+  type Drift,
+  type WheelGesture,
 } from "@/lib/ride";
 
 /* The far layer is inset by 12.5% of the width, so a 12vw drift never lets a
    neighboring scene's hills show at a dock. */
 const FAR_DRIFT_VW = 12;
 
-/** How long scrolling must be still, momentum included, before it settles. */
+/** How long a dragged scrollbar must be still before it settles on a landing. */
 const SETTLE_AFTER_MS = 160;
 const FORE_DRIFT_VW = 20;
+/** How far a finger must travel to count as a swipe. */
+const SWIPE_PX = 40;
+
+const pinnedKeySteps: Record<string, number> = {
+  ArrowDown: 1,
+  ArrowRight: 1,
+  PageDown: 1,
+  ArrowUp: -1,
+  ArrowLeft: -1,
+  PageUp: -1,
+};
 
 /**
  * The one scroll loop for the Ride. The page is complete HTML without it: this
- * only moves what is already there, and scrolling stays native throughout.
+ * only moves what is already there. On the pinned Ride, one gesture or key press
+ * is one landing: the page jumps to that dock, invisibly because everything is
+ * pinned, and the world travels there on a spring.
  */
 export function RideController() {
   useLayoutEffect(() => {
     const root = document.documentElement;
-    const sections = [...document.querySelectorAll<HTMLElement>("[data-landing]")];
+    /* Next keeps the page you left in the DOM, hidden, and Dry Land has landings
+       too, so only look inside the Ride. */
+    const ride = document.getElementById("ride");
+    if (!ride) return;
+    const sections = [...ride.querySelectorAll<HTMLElement>("[data-landing]")];
     const order = sections.map((section) => section.id as LandingId);
     const dots = [...document.querySelectorAll<HTMLElement>("[data-route-dot]")];
     const skies = [...document.querySelectorAll<HTMLElement>("[data-sky-layer]")];
@@ -50,12 +72,15 @@ export function RideController() {
     let tops: number[] = [];
     let frame = 0;
     let current = -1;
-    let shown = 0;
+    let drift: Drift = { position: 0, velocity: 0 };
     let lastFrame = 0;
     let gliding = false;
     let lastY = window.scrollY;
     let direction = 1;
     let settleTimer = 0;
+    let wheel: WheelGesture | null = null;
+    let wheelIsNative = false;
+    let touchY: number | null = null;
 
     function syncLayout() {
       if (stage.matches) root.dataset.ride = "on";
@@ -130,7 +155,7 @@ export function RideController() {
       return worldPosition(rawPosition(window.scrollY, tops));
     }
 
-    /* The world follows native scroll, smoothing wheel steps along the way. */
+    /* The world follows the page's position on a spring. */
     function paint(now: number) {
       frame = 0;
       const goal = target();
@@ -139,27 +164,27 @@ export function RideController() {
         return;
       }
 
-      shown = glide(shown, goal, gliding ? Math.min(now - lastFrame, 50) : 16);
+      drift = spring(drift, goal, gliding ? Math.min(now - lastFrame, 50) : 16);
       lastFrame = now;
-      gliding = shown !== goal;
-      /* The map and the URL follow what is on screen, not where scroll is headed. */
-      setCurrent(Math.round(shown));
-      paintStage(shown);
+      gliding = drift.position !== goal || drift.velocity !== 0;
+      /* The map and the URL follow what is on screen, not where the trip ends. */
+      setCurrent(Math.round(drift.position));
+      paintStage(drift.position);
       if (gliding) frame = requestAnimationFrame(paint);
     }
 
     function snap() {
-      shown = target();
+      drift = { position: target(), velocity: 0 };
       gliding = false;
-      setCurrent(Math.round(shown));
-      if (stage.matches) paintStage(shown);
+      setCurrent(Math.round(drift.position));
+      if (stage.matches) paintStage(drift.position);
     }
 
     function schedule() {
       if (!frame) frame = requestAnimationFrame(paint);
     }
 
-    /* If scrolling stops between landings, finish the trip to the next one. */
+    /* If the scrollbar stops between landings, finish the trip to the next one. */
     function settle() {
       settleTimer = 0;
       if (!stage.matches) return;
@@ -168,7 +193,7 @@ export function RideController() {
         direction,
         sections.length - 1,
       );
-      if (landing !== null) window.scrollTo({ top: tops[landing], behavior: "smooth" });
+      if (landing !== null) goTo(landing);
     }
 
     function onScroll() {
@@ -190,18 +215,73 @@ export function RideController() {
     }
 
     function goTo(index: number) {
-      const target = Math.min(sections.length - 1, Math.max(0, index));
-      window.scrollTo({ top: tops[target] });
+      window.scrollTo(0, tops[index]);
+    }
+
+    function move(step: number) {
+      const raw = rawPosition(window.scrollY, tops);
+      goTo(landingAfter(raw, step, sections.length - 1));
+    }
+
+    /* The footer sits past the last landing and scrolls like a normal page. */
+    function leavesRide(direction: number) {
+      const end = tops[tops.length - 1];
+      return direction > 0 ? window.scrollY >= end - 1 : window.scrollY > end + 1;
+    }
+
+    function onWheel(event: WheelEvent) {
+      if (!stage.matches || event.ctrlKey) return;
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
+      const delta = wheelPixels(event.deltaY, event.deltaMode, window.innerHeight);
+      const read = readWheel(wheel, event.timeStamp, delta);
+      wheel = read.gesture;
+      const direction = Math.sign(delta);
+      if (!wheel?.stepped || read.step) wheelIsNative = leavesRide(direction);
+      if (wheelIsNative && leavesRide(direction)) return;
+
+      event.preventDefault();
+      if (read.step) move(read.step);
+    }
+
+    function onTouchStart(event: TouchEvent) {
+      touchY = event.touches.length === 1 ? event.touches[0].clientY : null;
+    }
+
+    function onTouchMove(event: TouchEvent) {
+      if (!stage.matches || touchY === null || event.touches.length > 1) return;
+      if (!leavesRide(touchY > event.touches[0].clientY ? 1 : -1)) event.preventDefault();
+    }
+
+    function onTouchEnd(event: TouchEvent) {
+      if (!stage.matches || touchY === null) return;
+      const travel = touchY - event.changedTouches[0].clientY;
+      touchY = null;
+      const step = travel > 0 ? 1 : -1;
+      if (Math.abs(travel) >= SWIPE_PX && !leavesRide(step)) move(step);
     }
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
-      if (event.key === "]") goTo(current + 1);
-      else if (event.key === "[") goTo(current - 1);
-      else if (event.key === "End") {
+      if (event.key === "]" || event.key === "[") {
+        move(event.key === "]" ? 1 : -1);
+        return;
+      }
+      if (event.key === "End" || (event.key === "Home" && stage.matches)) {
         event.preventDefault();
-        goTo(sections.length - 1);
-      } else return;
+        goTo(event.key === "End" ? sections.length - 1 : 0);
+        return;
+      }
+      if (!stage.matches) return;
+
+      /* Space belongs to a focused link or button. */
+      const onControl = (event.target as Element).closest?.("a, button");
+      const spaceStep = onControl ? 0 : event.shiftKey ? -1 : 1;
+      const step = event.key === " " ? spaceStep : (pinnedKeySteps[event.key] ?? 0);
+      if (step === 0 || leavesRide(step)) return;
+
+      event.preventDefault();
+      if (!event.repeat) move(step);
     }
 
     /* Cards are pinned, so the browser will not scroll to a focused link. */
@@ -209,9 +289,7 @@ export function RideController() {
       if (!stage.matches) return;
       const target = event.target as HTMLElement;
       const index = sections.findIndex((section) => section.contains(target));
-      if (index !== -1 && index !== current) {
-        window.scrollTo({ top: tops[index], behavior: "instant" });
-      }
+      if (index !== -1 && index !== current) goTo(index);
     }
 
     root.dataset.rideReady = "on";
@@ -220,10 +298,13 @@ export function RideController() {
     snap();
 
     const resizes = new ResizeObserver(remeasure);
-    const ride = document.getElementById("ride");
-    if (ride) resizes.observe(ride);
+    resizes.observe(ride);
 
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
     window.addEventListener("resize", remeasure);
     window.addEventListener("keydown", onKeyDown);
     document.addEventListener("focusin", onFocusIn);
@@ -234,6 +315,10 @@ export function RideController() {
       window.clearTimeout(settleTimer);
       resizes.disconnect();
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("resize", remeasure);
       window.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("focusin", onFocusIn);

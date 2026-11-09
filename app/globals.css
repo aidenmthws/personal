@@ -113,10 +113,6 @@
   }
 }
 
-html[data-ride] {
-  scroll-behavior: smooth;
-}
-
 /* The stacked page keeps a sticky header, so anchors and focus stop below it. */
 html:has(#ride):not([data-ride]) {
   scroll-padding-top: 4.75rem;

@@ -100,6 +100,7 @@ export const site = {
     stack: "Stack",
   },
   ride: {
+    hint: "Scroll or use the arrow keys to move.",
     routeLabel: "Route map",
     pause: "Pause water",
     play: "Play water",
@@ -187,8 +188,8 @@ export const landings: Landing[] = [
     id: "boatman",
     title: "The boatman",
     dryTitle: "About",
-    // PLACEHOLDER: replace with Aiden's 80 to 120 word note (PLAN.md section 3).
-    summary: "Placeholder: Aiden's about note goes here.",
+    summary:
+      "I am a computer science student at Virginia Tech who loves software development, ethical cybersecurity, and AI. I look for challenging projects that push my limits, even when they mean late-night coding. If you want to build something great together, let's connect.",
     bullets: [],
     metrics: [],
     skills: [],
@@ -200,9 +201,8 @@ export const landings: Landing[] = [
     dryTitle: "Virginia Tech",
     org: "Virginia Tech",
     role: "B.S. in Computer Science",
-    dates: "Expected May 2027",
     summary:
-      "I study computer science at Virginia Tech, with a 3.72 GPA and an expected graduation of May 2027.",
+      "I study computer science at Virginia Tech, with a 3.72 GPA.",
     bullets: ["GPA 3.72"],
     metrics: [{ value: "3.72", label: "GPA" }],
     skills: [],
