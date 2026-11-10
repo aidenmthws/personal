@@ -32,6 +32,7 @@ export const skyStops = [
   "gold",
   "bright",
   "amber",
+  "sunset",
   "dusk",
 ] as const;
 
@@ -45,7 +46,7 @@ export const landingSky: Record<LandingId, SkyStop> = {
   water: "bright",
   lake: "bright",
   channels: "amber",
-  market: "amber",
+  market: "sunset",
   harbor: "dusk",
 };
 

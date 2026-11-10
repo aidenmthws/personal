@@ -168,6 +168,15 @@ html:has(#ride):not([data-ride]) {
     --water-bottom: #1f5f58;
   }
 
+  /* The evening between amber and night: the sky deepens to rose overhead and
+     the water darkens, so the Harbor's night arrives by degrees. */
+  .sky-sunset {
+    --sky-top: #8f4f55;
+    --sky-bottom: #f0a060;
+    --water-top: #a8695a;
+    --water-bottom: #24504f;
+  }
+
   .sky-dusk {
     --sky-top: #0f3b3a;
     --sky-bottom: #2f6a63;

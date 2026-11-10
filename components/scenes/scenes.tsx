@@ -83,6 +83,18 @@ const golden: Tint = {
   glow: "#c8a24a",
 };
 
+const sunset: Tint = {
+  far: "#b9735d",
+  bank: "#556233",
+  lip: "#454f29",
+  leaf: "#43522a",
+  shade: "#333f20",
+  trunk: "#4c3524",
+  roof: "#933a22",
+  wall: "#ebc79c",
+  glow: "#c8a24a",
+};
+
 const nightfall: Tint = {
   far: "#1f5450",
   bank: "#123f3b",
@@ -389,7 +401,7 @@ function ChannelsScene() {
 }
 
 function MarketScene() {
-  const tint = golden;
+  const tint = sunset;
   const spice = ["#b4492b", "#c8a24a", "#4b7b3c", "#6f5237"];
   const reversed = [...spice].reverse();
   const flags = ["#b4492b", "#c8a24a", "#f3ede0", "#4b7b3c"];
@@ -399,7 +411,7 @@ function MarketScene() {
       far={
         <>
           <Hill x={200} width={1400} height={80} fill={tint.far} />
-          <GroveLine x={0} width={1600} base={base} height={90} fill="#b7904f" seed={8} />
+          <GroveLine x={0} width={1600} base={base} height={90} fill="#a5704a" seed={8} />
         </>
       }
       mid={

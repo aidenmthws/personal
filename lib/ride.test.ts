@@ -209,6 +209,7 @@ test("the sky reaches each stop at its landing and ends at dusk", () => {
   assert.equal(skyStops[visibleTop(1)], "dawn");
   assert.equal(skyStops[visibleTop(2)], "sunrise");
   assert.equal(skyStops[visibleTop(4)], "bright");
+  assert.equal(skyStops[visibleTop(7)], "sunset");
   assert.equal(skyStops[visibleTop(8)], "dusk");
 });
 
