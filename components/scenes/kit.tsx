@@ -134,7 +134,26 @@ export function Forest({
   );
 }
 
-/** A coconut palm. Pass `sway` for the slow ambient movement of its crown. */
+/** A point on the quadratic curve from `a` through control `c` to `b`. */
+function quad(a: number, c: number, b: number, t: number) {
+  return (1 - t) * (1 - t) * a + 2 * (1 - t) * t * c + t * t * b;
+}
+
+/** A hex color made darker, as solid paint, so detail costs no blending. */
+function darken(hex: string, amount = 0.25) {
+  const value = parseInt(hex.slice(1), 16);
+  const channel = (shift: number) => Math.round(((value >> shift) & 255) * (1 - amount));
+  return `rgb(${channel(16)} ${channel(8)} ${channel(0)})`;
+}
+
+/* Where leaflets hang along a frond, from the crown (0) to the tip (1). */
+const LEAFLETS = [0.8, 0.6, 0.4];
+
+/**
+ * A coconut palm: a ringed trunk and fronds with a notched underside, where the
+ * leaflets hang. Each frond is one filled shape, so the detail stays cheap to
+ * paint as scenes slide past. Pass `sway` for the slow movement of its crown.
+ */
 export function Palm({
   x,
   base,
@@ -159,12 +178,23 @@ export function Palm({
   const bendY = base - height * 0.6;
   const fronds = [-1.04, 0.98, -0.8, 0.74, -0.5, 0.44, -0.2, 0.16];
 
+  /* Rings get closer together toward the crown, as on a real trunk. */
+  const ringCount = Math.round(height / 22);
+  const rings = Array.from({ length: ringCount }, (_, index) => {
+    const t = ((index + 1) / (ringCount + 1)) ** 0.85;
+    const cx = round(quad(x, bendX, topX, t));
+    const cy = round(quad(base, bendY, topY, t));
+    const half = round(low + (high - low) * t);
+    return `M${round(cx - half)} ${cy}q${half} 1.6 ${round(half * 2)} 0`;
+  }).join("");
+
   return (
     <g>
       <path
         d={`M${x - low} ${base}Q${bendX - low} ${bendY} ${topX - high} ${topY}L${topX + high} ${topY}Q${bendX + low} ${bendY} ${x + low} ${base}Z`}
         fill={tint.trunk}
       />
+      <path d={rings} fill="none" stroke={darken(tint.trunk)} strokeWidth={Math.max(1, height * 0.005)} />
       <g
         className={sway ? "sway ambient" : undefined}
         style={sway ? { transformOrigin: `${topX}px ${topY}px` } : undefined}
@@ -175,11 +205,29 @@ export function Palm({
           const endY = round(topY + reach * (0.72 * spread ** 1.6 - 0.1));
           const midX = round(topX + side * reach * 0.55);
           const midY = round(topY - reach * (0.34 - spread * 0.14));
+          const underY = midY + reach * 0.3;
+          /* Back along the underside from the tip, a leaflet at each step. */
+          /* Only the front fronds are notched: the back ones sit in shadow. */
+          const front = index >= 4;
+          const teeth = !front ? "" : LEAFLETS.map((t) => {
+            const px = quad(topX, midX, endX, t);
+            const py = quad(topY, underY, endY, t);
+            const size = reach * 0.14 * Math.sin(Math.PI * t);
+            const tipX = round(px + side * size * 0.5);
+            const tipY = round(py + size);
+            const backX = round(quad(topX, midX, endX, t - 0.1));
+            const backY = round(quad(topY, underY, endY, t - 0.1));
+            return `L${tipX} ${tipY}L${backX} ${backY}`;
+          }).join("");
           return (
             <path
               key={side}
-              d={`M${topX} ${topY}Q${midX} ${midY} ${endX} ${endY}Q${midX} ${round(midY + reach * 0.3)} ${topX} ${topY}Z`}
-              fill={index < 4 ? tint.shade : tint.leaf}
+              d={
+                front
+                  ? `M${topX} ${topY}Q${midX} ${midY} ${endX} ${endY}${teeth}L${topX} ${topY}Z`
+                  : `M${topX} ${topY}Q${midX} ${midY} ${endX} ${endY}Q${midX} ${round(underY)} ${topX} ${topY}Z`
+              }
+              fill={front ? tint.leaf : tint.shade}
             />
           );
         })}
@@ -188,6 +236,7 @@ export function Palm({
         <g fill={tint.trunk}>
           <circle cx={topX - 7} cy={topY + 8} r={height * 0.018} />
           <circle cx={topX + 6} cy={topY + 10} r={height * 0.018} />
+          <circle cx={topX - 1} cy={topY + 14} r={height * 0.016} />
         </g>
       )}
     </g>
