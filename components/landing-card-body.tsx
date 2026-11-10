@@ -60,7 +60,7 @@ export function LandingCardBody({ landing }: { landing: LandingContent }) {
         <SkillJars
           groups={landing.skillGroups}
           stops={skillStops(landing.skillGroups.flatMap((group) => group.skills))}
-          landingTitles={landings.map((item) => item.title)}
+          landingTitles={landings.map((item) => item.org ?? item.dryTitle)}
           labels={site.spices}
         />
       )}
