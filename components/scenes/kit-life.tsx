@@ -128,3 +128,108 @@ export function WashingLine({ x, y, width, colors }: { x: number; y: number; wid
     </g>
   );
 }
+
+/* Animals of the Kerala backwaters. Each is small and sits clear of the cards
+   and the boat, so the scenes stay quiet. */
+
+/** A white-throated kingfisher perched and facing left. `base` is its feet. */
+export function Kingfisher({ x, base, scale = 1 }: { x: number; base: number; scale?: number }) {
+  return (
+    <g transform={`translate(${x} ${base}) scale(${scale})`} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round">
+      <path d="M-2 0v-4M3 0v-4" stroke="#c0392b" />
+      <path d="M2 -20Q11 -14 11 -4L16 5L6 -2Q2 -10 2 -20Z" fill="#2a86b5" />
+      <path d="M-6 -3Q-10 -13 -5 -20Q-1 -25 3 -20Q7 -11 5 -3Z" fill="#8a3b1f" />
+      <path d="M-8 -12Q-4 -7 0 -11Q-3 -16 -8 -12Z" fill="#fbf7ec" strokeWidth="1" />
+      <path d="M-7 -21L-20 -17L-7 -16Z" fill="#c0392b" />
+    </g>
+  );
+}
+
+/** An Asian elephant at the water's edge, its trunk down to drink. */
+export function Elephant({ x, base, scale = 1 }: { x: number; base: number; scale?: number }) {
+  const hide = "#7a7772";
+  return (
+    <g transform={`translate(${x} ${base}) scale(${scale})`} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round">
+      <g fill={hide}>
+        <rect x="-20" y="-18" width="9" height="18" />
+        <rect x="-6" y="-18" width="9" height="18" />
+        <rect x="20" y="-18" width="9" height="18" />
+        <rect x="32" y="-18" width="9" height="18" />
+        <ellipse cx="10" cy="-32" rx="33" ry="20" />
+        <circle cx="-22" cy="-38" r="14" />
+      </g>
+      <path d="M42 -38q7 6 5 17" fill="none" />
+      <path d="M-32 -34Q-40 -18 -36 0" fill="none" strokeWidth="8" strokeLinecap="round" />
+      <path d="M-32 -34Q-40 -18 -36 0" fill="none" stroke={hide} strokeWidth="5" strokeLinecap="round" />
+      <path d="M-18 -48Q-4 -48 -6 -32Q-8 -22 -18 -26Z" fill="#67645f" />
+      <path d="M-30 -28q-3 5 -9 4" fill="none" stroke="#fbf7ec" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="-27" cy="-41" r="1.5" fill={OUTLINE} stroke="none" />
+    </g>
+  );
+}
+
+/** A water buffalo wading, only its back and head above the water. For the fore layer. */
+export function Buffalo({ x, y, scale = 1, ripple }: { x: number; y: number; scale?: number; ripple: string }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`}>
+      <g stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round">
+        <path d="M-44 0Q-42 -17 -20 -19Q2 -21 18 -12L24 0Z" fill="#3d3836" />
+        <path d="M18 0Q18 -20 32 -25Q44 -28 50 -18L57 -6Q58 0 50 0Z" fill="#3d3836" />
+        <path d="M26 -16l-11 -3l8 8Z" fill="#3d3836" />
+        <path d="M32 -25Q20 -44 -4 -38Q16 -36 27 -21Z" fill="#cbb99a" />
+        <path d="M54 -5q3 1 3 -1" fill="none" strokeWidth="1" />
+      </g>
+      <circle cx="41" cy="-17" r="1.5" fill="#f3ede0" />
+      <path d="M-52 2q26 5 52 0t52 0" fill="none" stroke={ripple} strokeWidth="2.5" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** A karimeen, the pearl spot, leaping from the water. For the fore layer. */
+export function Karimeen({ x, y, ripple }: { x: number; y: number; ripple: string }) {
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      <ellipse cx="2" cy="10" rx="20" ry="4" fill="none" stroke={ripple} strokeWidth="2" className="splash ambient" />
+      <g className="leap ambient">
+        <g transform="rotate(-24)" stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round">
+          <path d="M-14 0Q-12 -9 0 -9Q12 -9 16 -2L24 -8V6L16 0Q12 7 0 7Q-12 7 -14 0Z" fill="#7d9a7a" />
+          <path d="M-4 -8v14M4 -8v14" stroke="#4f6a52" />
+          <circle cx="-8" cy="-2" r="1.3" fill={OUTLINE} stroke="none" />
+        </g>
+      </g>
+    </g>
+  );
+}
+
+/** A cormorant on a stake, holding its wings out to dry. */
+export function Cormorant({ x, base, height = 50 }: { x: number; base: number; height?: number }) {
+  const top = base - height;
+  return (
+    <g>
+      <rect x={x - 3} y={top} width="6" height={height} fill="#6f5237" />
+      <g transform={`translate(${x} ${top})`} fill="#1d2522" stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round">
+        <path d="M-3 -20Q-16 -32 -26 -16Q-15 -20 -4 -11Z" />
+        <path d="M3 -20Q16 -32 26 -16Q15 -20 4 -11Z" />
+        <path d="M-4 0Q-7 -14 -3 -26Q0 -31 3 -26Q7 -14 4 0Z" />
+        <circle cy="-31" r="4" />
+        <path d="M-3 -32l-9 2l9 1Z" fill="#c8a24a" />
+      </g>
+    </g>
+  );
+}
+
+/** A great hornbill, the state bird of Kerala, in flight to the left. */
+export function Hornbill({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round">
+      <path d="M28 -1L46 -5V8L28 4Z" fill="#fbf7ec" />
+      <path d="M38 -3v9" stroke="#1d2522" strokeWidth="3" />
+      <path d="M-20 0Q-6 -8 14 -4Q22 -2 30 1Q20 6 14 4Q-4 8 -20 0Z" fill="#1d2522" />
+      <path d="M-10 -4Q-4 -30 26 -38Q24 -16 16 -3Z" fill="#1d2522" />
+      <path d="M2 -18Q12 -30 23 -34" stroke="#fbf7ec" strokeWidth="3" strokeLinecap="round" />
+      <path d="M-20 -1Q-26 -5 -31 -3Q-29 4 -20 4Z" fill="#f2e2a0" />
+      <path d="M-30 -2Q-44 2 -52 10Q-40 6 -30 4Z" fill="#e8b830" />
+      <path d="M-31 -4Q-40 -11 -48 -3Q-40 -5 -31 -1Z" fill="#e8b830" />
+    </g>
+  );
+}

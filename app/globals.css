@@ -286,6 +286,44 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+/* The karimeen spends most of the loop under water, then leaps and is gone,
+   and its splash spreads as it lands. */
+@keyframes leap {
+  0%,
+  62% {
+    opacity: 0;
+    transform: translate3d(-14px, 12px, 0);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(-4px, -10px, 0);
+  }
+  80% {
+    opacity: 1;
+    transform: translate3d(8px, -6px, 0);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: translate3d(16px, 10px, 0);
+  }
+}
+
+@keyframes splash {
+  0%,
+  84% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
 /* Scene loops run only on the full Ride, whose off-screen scenes are hidden. */
 @media (prefers-reduced-motion: no-preference) {
   [data-ride] .sway {
@@ -310,6 +348,16 @@ html:has(#ride):not([data-ride]) {
 
   [data-ride] .fall {
     animation: falling 2.8s linear infinite;
+  }
+
+  [data-ride] .leap {
+    animation: leap 7s ease-out infinite;
+  }
+
+  [data-ride] .splash {
+    animation: splash 7s ease-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
   }
 
   .cloud-drift {

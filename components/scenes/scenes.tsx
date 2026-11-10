@@ -30,7 +30,20 @@ import {
   Veranda,
   Waterfall,
 } from "./kit-craft";
-import { BirdFlock, Ducks, Egret, Figure, Smoke, WashingLine } from "./kit-life";
+import {
+  BirdFlock,
+  Buffalo,
+  Cormorant,
+  Ducks,
+  Egret,
+  Elephant,
+  Figure,
+  Hornbill,
+  Karimeen,
+  Kingfisher,
+  Smoke,
+  WashingLine,
+} from "./kit-life";
 
 const base = WATERLINE;
 const top = (height: number) => WATERLINE - height + 2;
@@ -127,6 +140,7 @@ function ShoreScene() {
           <Palm x={1530} base={top(64)} height={220} lean={-22} tint={tint} />
           <Palm x={190} base={top(38)} height={160} tint={tint} />
           <Jetty x={1204} width={280} />
+          <Kingfisher x={1490} base={592} scale={1.2} />
           <path className="cast-rope" d="M1206 598Q1176 632 1150 612" fill="none" stroke="#3f3226" strokeWidth="3" strokeLinecap="round" />
           <Egret x={930} base={base + 2} height={84} />
           <Canoe x={730} base={base - 2} width={120} />
@@ -209,6 +223,7 @@ function SourceScene() {
           <Waterfall x={1178} top={288} bottom={612} width={58} />
           <Bank x={620} width={980} height={26} fill="#5a7c40" lip="#4b6a36" seed={6} />
           <Palm x={1420} base={top(26)} height={190} tint={morning} sway="sway" />
+          <Elephant x={1530} base={top(26) + 4} scale={1.05} />
           <Palm x={1040} base={top(26)} height={150} lean={-16} tint={morning} />
           <BirdFlock birds={[[900, 150], [960, 112], [1010, 164]]} color="#6f5237" />
         </>
@@ -270,6 +285,7 @@ function CanalScene() {
         <>
           <Ripples color="#fbf2d4" lines={[[180, 70, 110], [760, 120, 140], [1260, 56, 120]]} />
           <Canoe x={60} base={60} width={170} />
+          <Buffalo x={400} y={46} scale={0.9} ripple="#fbf2d4" />
           <Reeds x={30} color={tint.leaf} />
           <Reeds x={930} color={tint.shade} />
         </>
@@ -315,6 +331,7 @@ function WaterScene() {
         <>
           <Ripples color="#d6efe2" lines={[[120, 60, 150], [640, 120, 130], [1100, 50, 170], [1340, 170, 120]]} />
           <Canoe x={1040} base={150} width={150} />
+          <Karimeen x={1290} y={84} ripple="#d6efe2" />
         </>
       }
       frame={<FrameFronds side="right" fill={tint.shade} />}
@@ -341,6 +358,7 @@ function LakeScene() {
           <Houseboat x={50} base={base + 4} width={480} />
           <Figure x={500} base={base - 44} scale={0.9} cloth="#f3ede0" wrap="#b4492b" />
           <Egret x={620} base={base + 2} height={70} />
+          <Cormorant x={1560} base={base + 2} height={46} />
           <BirdFlock birds={[[640, 180], [700, 140], [760, 192]]} color="#14221f" />
         </>
       }
@@ -384,7 +402,7 @@ function ChannelsScene() {
           <Palm x={1090} base={top(92)} height={290} lean={20} tint={tint} sway="sway" />
           <Palm x={1210} base={top(92)} height={250} lean={-26} tint={tint} />
           <Figure x={1420} base={top(64) - 88} scale={0.9} cloth="#f0d8a8" wrap="#a03f24" />
-          <BirdFlock birds={[[820, 180], [880, 140]]} color="#5a4029" />
+          <Hornbill x={800} y={170} scale={1.4} />
         </>
       }
       fore={
