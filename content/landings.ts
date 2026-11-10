@@ -73,9 +73,8 @@ export const site = {
   dryLandPageTitle: "Dry Land | Aiden Mathews",
   location: "Northern Virginia",
   email: "2023amathews@gmail.com",
-  emailLabel: "Email 2023amathews@gmail.com",
   linkedin: {
-    label: "LinkedIn: linkedin.com/in/aiden-mathews",
+    label: "LinkedIn",
     href: "https://www.linkedin.com/in/aiden-mathews",
   },
   resume: {

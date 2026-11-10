@@ -1,7 +1,5 @@
 import { ContactLinks } from "@/components/contact-links";
-import { CopyEmail } from "@/components/copy-email";
 import { NetCatch } from "@/components/net-catch";
-import { ResumeLink } from "@/components/resume-link";
 import { SkillJars } from "@/components/skill-jars";
 import { TagList } from "@/components/tag-list";
 import { landings, site, type Landing as LandingContent } from "@/content/landings";
@@ -65,13 +63,7 @@ export function LandingCardBody({ landing }: { landing: LandingContent }) {
         />
       )}
 
-      {landing.id === "harbor" && (
-        <>
-          <ContactLinks />
-          <CopyEmail email={site.email} labels={site.copyEmail} />
-          <ResumeLink variant="outline" />
-        </>
-      )}
+      {landing.id === "harbor" && <ContactLinks />}
     </>
   );
 }
