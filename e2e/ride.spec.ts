@@ -268,7 +268,7 @@ test.describe("the living river", () => {
     await expect(page.locator('[data-route-dot="3"]')).toHaveAttribute("data-lit", "on");
     await expect(page.locator('[data-route-dot="6"]')).toHaveAttribute("data-lit", "on");
     await expect(page.locator('[data-route-dot][data-lit]')).toHaveCount(2);
-    await expect(page.locator("#market [role=status]")).toContainText("First canal, Side channels");
+    await expect(page.locator("#market [role=status]")).toContainText("Bunchful Enterprise, Projects");
 
     await react.focus();
     await page.keyboard.press("ArrowRight");
