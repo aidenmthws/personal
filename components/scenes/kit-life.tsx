@@ -1,8 +1,11 @@
 import { OUTLINE } from "./kit";
 
-const SKIN = "#5a3a28";
+export const SKIN = "#5a3a28";
 
-/** A flat standing figure. `reach` raises the arms, as when hauling a rope. */
+/**
+ * A flat standing figure. `reach` raises the arms, as when hauling a rope.
+ * `hold` draws no arms, so whatever the figure holds can draw them on itself.
+ */
 export function Figure({
   x,
   base,
@@ -18,7 +21,7 @@ export function Figure({
   cloth?: string;
   shirt?: string;
   wrap?: string;
-  pose?: "stand" | "reach";
+  pose?: "stand" | "reach" | "hold";
 }) {
   return (
     <g transform={`translate(${x} ${base}) scale(${scale})`}>
@@ -26,13 +29,15 @@ export function Figure({
       <rect x="2" y="-6" width="4.5" height="6" fill={SKIN} />
       <path d="M-8 -32L8 -32L10 -4L-10 -4Z" fill={cloth} />
       <path d="M-8.5 -32L-10 -50Q0 -57 10 -50L8.5 -32Z" fill={shirt} />
-      <path
-        d={pose === "reach" ? "M-8 -47L-23 -60M8 -47L-16 -66" : "M-9 -48L-13 -28M9 -48L13 -28"}
-        stroke={SKIN}
-        strokeWidth="4.5"
-        strokeLinecap="round"
-        fill="none"
-      />
+      {pose !== "hold" && (
+        <path
+          d={pose === "reach" ? "M-8 -47L-23 -60M8 -47L-16 -66" : "M-9 -48L-13 -28M9 -48L13 -28"}
+          stroke={SKIN}
+          strokeWidth="4.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+      )}
       <circle cy="-62" r="7.5" fill={SKIN} />
       <path d="M-8 -64Q0 -74 8 -64Q0 -67 -8 -64Z" fill={wrap} />
     </g>

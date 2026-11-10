@@ -1,4 +1,4 @@
-import { Figure } from "@/components/scenes/kit-life";
+import { Figure, SKIN } from "@/components/scenes/kit-life";
 
 const rings = [0, 1, 2];
 const OUTLINE = "#14221f";
@@ -38,10 +38,30 @@ export function Boat() {
                 strokeLinecap="round"
               />
             </g>
+            <Figure x={56} base={48} scale={0.86} pose="hold" cloth="#f3ede0" shirt="#c8a24a" wrap="#b4492b" />
+            {/* The oar swings about the boatman's shoulders, and his arms swing
+                with it, so his hands never leave the shaft. */}
             <g data-pole style={{ transformOrigin: "60px 8px" }}>
-              <path d="M78 -74L36 112" stroke="#5a4029" strokeWidth="4" strokeLinecap="round" />
+              <g transform="translate(60 8) rotate(12.7)">
+                <path d="M0 -84V76" stroke="#5a4029" strokeWidth="4" strokeLinecap="round" />
+                <path d="M-5 -84H5" stroke="#5a4029" strokeWidth="4" strokeLinecap="round" />
+                <path
+                  d="M0 70C8 78 8 100 0 110C-8 100 -8 78 0 70Z"
+                  fill="#6f5237"
+                  stroke={OUTLINE}
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+              </g>
+              <path
+                d="M62.9 7.6L69 1L63.1 -5.7M49.1 7.6L47 17L56.9 21.7"
+                fill="none"
+                stroke={SKIN}
+                strokeWidth="3.9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </g>
-            <Figure x={56} base={48} scale={0.86} pose="reach" cloth="#f3ede0" wrap="#b4492b" />
             <path
               d="M104 62C104 26 122 18 150 18C178 18 196 26 196 62Z"
               fill="#c8a24a"
