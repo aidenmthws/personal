@@ -377,8 +377,6 @@ function ChannelsScene() {
       }
       fore={
         <>
-          <path d="M1000 -2H1312L1166 186Q1146 208 1126 186Z" fill={tint.bank} />
-          <path d="M1000 -2L1126 186Q1146 208 1166 186L1312 -2" fill="none" stroke={tint.lip} strokeWidth="8" strokeLinejoin="round" />
           <Stone x={1146} y={214} width={30} fill="#8c7a5e" />
           <Stone x={1098} y={190} width={18} fill="#a08d70" />
           <Ripples color="#f6d79a" lines={[[260, 90, 120], [760, 60, 110], [1350, 120, 130]]} />
