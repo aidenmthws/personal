@@ -379,6 +379,55 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+/* Dry Land's strip of backwater. Its loops run without the Ride, since the
+   strip is the only art on the page. */
+@keyframes canoe-drift {
+  from {
+    transform: translate3d(-60px, 0, 0);
+  }
+  to {
+    transform: translate3d(60px, 0, 0);
+  }
+}
+
+@keyframes birds-cross {
+  from {
+    transform: translate3d(-120px, 0, 0);
+  }
+  to {
+    transform: translate3d(1700px, -40px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .horizon .sway {
+    animation: sway 8s ease-in-out infinite alternate;
+  }
+
+  .horizon .ripples {
+    animation: ripple-drift 7s ease-in-out infinite alternate;
+  }
+
+  .horizon .h-drift {
+    animation: canoe-drift 36s ease-in-out infinite alternate;
+  }
+
+  .horizon .h-bob {
+    animation: boat-bob 4s ease-in-out infinite;
+  }
+
+  .horizon .h-birds {
+    animation: birds-cross 60s linear infinite;
+  }
+}
+
+/* Under reduced motion nothing moves, so the pause button has nothing to do. */
+@media (prefers-reduced-motion: reduce) {
+  .horizon button {
+    display: none;
+  }
+}
+
 /* A scene's loops hold still until the boat is docked there, so nothing in the
    art repaints during a trip. */
 [data-ride] [data-landing]:not([data-arrived]) .ambient,
@@ -510,6 +559,13 @@ html:has(#ride):not([data-ride]) {
     var(--kasavu-gold) 0 4px,
     transparent 4px 8px
   );
+}
+
+/* Dry Land's route: a narrow river that winds down the page past each stop. */
+@utility river-line {
+  width: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='96' viewBox='0 0 12 96'%3E%3Cpath d='M6 0C12 24 0 24 6 48S0 72 6 96' fill='none' stroke='%231f7a74' stroke-width='2.5'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
 }
 
 /* Scene art. The width is 1600 units, so every layer shares one scale and the
