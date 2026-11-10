@@ -53,6 +53,13 @@ test("card summaries carry at most one percentage", () => {
   }
 });
 
+test("a card summary does not repeat its headline number", () => {
+  for (const landing of landings) {
+    const headline = landing.metrics[0];
+    if (headline) assert.ok(!landing.summary.includes(headline.value), landing.id);
+  }
+});
+
 test("every metric appears in the resume text it came from", () => {
   for (const landing of landings) {
     const source = landing.bullets.join(" ");
