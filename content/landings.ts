@@ -105,8 +105,8 @@ export const site = {
   ride: {
     hint: "Cast off for a guided ride, or scroll or use the arrow keys.",
     routeLabel: "Route map",
-    pause: "Pause water",
-    play: "Play water",
+    pause: "Pause motion",
+    play: "Play motion",
     tour: {
       play: "Cast off",
       pause: "Pause ride",

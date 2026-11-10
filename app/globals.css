@@ -547,6 +547,44 @@ html:has(#ride):not([data-ride]) {
   opacity: 0;
 }
 
+/* The ride button shows play, pause, or start again. */
+.tour-toggle svg {
+  display: none;
+}
+
+.tour-toggle[data-state="play"] .tour-play,
+.tour-toggle[data-state="pause"] .tour-pause,
+.tour-toggle[data-state="again"] .tour-again {
+  display: block;
+}
+
+/* Icon-only controls name themselves on hover and focus. */
+.bar-tip {
+  opacity: 0;
+}
+
+button:hover > .bar-tip,
+button:focus-visible > .bar-tip {
+  opacity: 1;
+}
+
+/* After a few seconds without input the bar fades to its river and stops.
+   Pointing at it or tabbing into it brings it straight back. */
+[data-route-bar] .bar-fade,
+[data-route-bar] nav,
+[data-route-bar] .route-name {
+  transition: opacity 0.5s ease;
+}
+
+[data-ride] [data-route-bar][data-idle]:not(:hover, :focus-within) .bar-fade,
+[data-ride] [data-route-bar][data-idle]:not(:hover, :focus-within) .route-name {
+  opacity: 0;
+}
+
+[data-ride] [data-route-bar][data-idle]:not(:hover, :focus-within) nav {
+  opacity: 0.6;
+}
+
 @utility border-keyline {
   border-width: 1.5px;
 }

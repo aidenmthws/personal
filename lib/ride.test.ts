@@ -342,7 +342,7 @@ test("the route map's marker reaches every stop and stays on the river", () => {
   assert.equal(routePoint(0).x, 32);
   assert.equal(routePoint(8).x, 32 + 8 * 64);
   for (let world = 0; world <= 8; world += 0.1) {
-    assert.ok(Math.abs(routePoint(world).y - 44) <= 4);
+    assert.ok(Math.abs(routePoint(world).y - 22) <= 3);
   }
 });
 

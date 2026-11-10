@@ -298,8 +298,8 @@ export function poleAngle(world: number) {
 
 /** Space between stops on the route map, in pixels. */
 export const ROUTE_STEP = 64;
-export const ROUTE_HEIGHT = 58;
-const ROUTE_WAVE = [3, -3, 4, -2, 3, -4, 2, -3, 2];
+export const ROUTE_HEIGHT = 44;
+const ROUTE_WAVE = [2, -2, 3, -1, 2, -3, 1, -2, 1];
 
 /** A point on the route map's river. Stops are `ROUTE_STEP` apart. */
 export function routePoint(world: number) {
@@ -310,7 +310,7 @@ export function routePoint(world: number) {
   const eased = t * t * (3 - 2 * t);
   return {
     x: ROUTE_STEP / 2 + world * ROUTE_STEP,
-    y: 44 + ROUTE_WAVE[index] + (ROUTE_WAVE[next] - ROUTE_WAVE[index]) * eased,
+    y: 22 + ROUTE_WAVE[index] + (ROUTE_WAVE[next] - ROUTE_WAVE[index]) * eased,
   };
 }
 

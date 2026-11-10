@@ -45,6 +45,10 @@ const TRIP_MS = 500;
 const SHORE_MS = 1000;
 /** Controls in a card. Using one means the visitor wants the ride to wait. */
 const CARD_CONTROL = '[data-card] :is(a, button, summary, [role="toolbar"])';
+/** How long the route bar waits without input before it fades. */
+const BAR_IDLE_MS = 3000;
+/** The visitor's own input, which wakes the route bar. */
+const WAKE_EVENTS = ["pointermove", "pointerdown", "wheel", "keydown", "touchstart", "focusin"] as const;
 /** How far a finger must travel to count as a swipe. */
 const SWIPE_PX = 40;
 
@@ -77,6 +81,7 @@ export function RideController() {
     const boat = document.querySelector<HTMLElement>("[data-boat]");
     const routeBoat = document.querySelector<HTMLElement>("[data-route-boat]");
     const tourToggle = document.querySelector<HTMLElement>("[data-tour-toggle]");
+    const routeBar = document.querySelector<HTMLElement>("[data-route-bar]");
     const tourStatus = document.querySelector<HTMLElement>("[data-tour-status]");
     const tourProgress = document.querySelector<HTMLElement>("[data-tour-progress]");
     const pole = boat?.querySelector<SVGElement>("[data-pole]");
@@ -121,6 +126,27 @@ export function RideController() {
     let wheel: WheelGesture | null = null;
     let wheelIsNative = false;
     let touchY: number | null = null;
+
+    /* The route bar fades after a spell without input. Only the visitor's own
+       input wakes it, not the guided ride's scrolling. */
+    let idleTimer = 0;
+    let wakeX = -1;
+    let wakeY = -1;
+    function wakeBar(event?: Event) {
+      /* Browsers send a pointermove after scrolling even when the mouse is still. */
+      if (event instanceof PointerEvent && event.type === "pointermove") {
+        if (event.clientX === wakeX && event.clientY === wakeY) return;
+        wakeX = event.clientX;
+        wakeY = event.clientY;
+      }
+      /* The flag lives on the bar, not the root, so waking restyles only the
+         bar. A whole-page restyle mid-flick stalls WebKit. */
+      if (routeBar?.dataset.idle) delete routeBar.dataset.idle;
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        if (routeBar) routeBar.dataset.idle = "on";
+      }, BAR_IDLE_MS);
+    }
 
     function syncLayout() {
       if (stage.matches) root.dataset.ride = "on";
@@ -277,8 +303,13 @@ export function RideController() {
     function labelTourToggle() {
       if (!tourToggle) return;
       const { pause, play, again } = tourToggle.dataset;
-      const label = riding ? pause : current === sections.length - 1 ? again : play;
-      if (label) tourToggle.textContent = label;
+      const state = riding ? "pause" : current === sections.length - 1 ? "again" : "play";
+      const label = { pause, again, play }[state];
+      tourToggle.dataset.state = state;
+      if (!label) return;
+      tourToggle.setAttribute("aria-label", label);
+      const tip = tourToggle.querySelector(".bar-tip");
+      if (tip) tip.textContent = label;
     }
 
     function syncClock() {
@@ -531,6 +562,8 @@ export function RideController() {
 
     ride.addEventListener("click", onClick);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
+    for (const type of WAKE_EVENTS) window.addEventListener(type, wakeBar, { passive: true });
+    wakeBar();
     tourToggle?.addEventListener("click", onTourToggle);
     document.addEventListener("visibilitychange", syncClock);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -550,6 +583,9 @@ export function RideController() {
       resizes.disconnect();
       ride.removeEventListener("click", onClick);
       window.removeEventListener("pointermove", onPointerMove);
+      for (const type of WAKE_EVENTS) window.removeEventListener(type, wakeBar);
+      window.clearTimeout(idleTimer);
+      if (routeBar) delete routeBar.dataset.idle;
       tourToggle?.removeEventListener("click", onTourToggle);
       document.removeEventListener("visibilitychange", syncClock);
       window.removeEventListener("scroll", onScroll);

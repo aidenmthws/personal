@@ -97,7 +97,7 @@ test.describe("the guided ride", () => {
     await readyToRide(page);
     await page.getByRole("link", { name: "Cast off" }).click();
     await expectDocked(page, "boatman", 1);
-    await expect(toggle(page)).toHaveText("Pause ride");
+    await expect(toggle(page)).toHaveAccessibleName("Pause ride");
   }
 
   test("moves on by itself once a card has had its reading time", async ({ page }) => {
@@ -113,13 +113,13 @@ test.describe("the guided ride", () => {
 
     await page.keyboard.press("ArrowDown");
     await expectDocked(page, "source", 2);
-    await expect(toggle(page)).toHaveText("Cast off");
+    await expect(toggle(page)).toHaveAccessibleName("Cast off");
     await expect
       .poll(() => page.locator("[data-tour-progress]").evaluate((el) => el.getAnimations().length))
       .toBe(0);
 
     await toggle(page).click();
-    await expect(toggle(page)).toHaveText("Pause ride");
+    await expect(toggle(page)).toHaveAccessibleName("Pause ride");
     await expectDocked(page, "source", 2);
     await finishReading(page);
     await expectDocked(page, "canal", 3);
@@ -129,18 +129,18 @@ test.describe("the guided ride", () => {
     await castOff(page);
     await page.mouse.wheel(0, 100);
     await expectDocked(page, "source", 2);
-    await expect(toggle(page)).toHaveText("Cast off");
+    await expect(toggle(page)).toHaveAccessibleName("Cast off");
 
     await toggle(page).click();
     await page.locator('[data-route-dot="6"]').click();
     await expectDocked(page, "channels", 6);
-    await expect(toggle(page)).toHaveText("Cast off");
+    await expect(toggle(page)).toHaveAccessibleName("Cast off");
   });
 
   test("pause holds the stop and play resumes it", async ({ page }) => {
     await castOff(page);
     await toggle(page).click();
-    await expect(toggle(page)).toHaveText("Cast off");
+    await expect(toggle(page)).toHaveAccessibleName("Cast off");
 
     const state = () =>
       page.locator("[data-tour-progress]").evaluate((el) => el.getAnimations()[0].playState);
@@ -161,7 +161,7 @@ test.describe("the guided ride", () => {
 
     await toggle(page).click();
     await page.locator("#water").getByRole("button", { name: "Lower the net" }).click();
-    await expect(toggle(page)).toHaveText("Cast off");
+    await expect(toggle(page)).toHaveAccessibleName("Cast off");
     await expectDocked(page, "water", 4);
   });
 
@@ -197,7 +197,7 @@ test.describe("the guided ride", () => {
     await toggle(page).click();
     await finishReading(page);
     await expectDocked(page, "harbor", 8);
-    await expect(toggle(page)).toHaveText("Ride again");
+    await expect(toggle(page)).toHaveAccessibleName("Ride again");
 
     await toggle(page).click();
     await expectDocked(page, "shore", 0);
@@ -240,7 +240,7 @@ test.describe("the living river", () => {
   test("the pause control stops the scene's loops", async ({ page }) => {
     await openRide(page);
     await readyToRide(page);
-    await page.getByRole("button", { name: "Pause water" }).click();
+    await page.getByRole("button", { name: "Pause motion" }).click();
 
     const state = await page.locator("#shore .sway").first().evaluate((el) => getComputedStyle(el).animationPlayState);
     expect(state).toBe("paused");
