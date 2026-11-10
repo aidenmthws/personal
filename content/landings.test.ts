@@ -102,6 +102,15 @@ test("landing skills all come from the Spice market lists", () => {
   }
 });
 
+test("every Spice market skill is used at a landing", () => {
+  const market = landings.find((landing) => landing.id === "market");
+  const used = new Set(landings.flatMap((landing) => landing.skills));
+
+  for (const skill of market?.skillGroups?.flatMap((group) => group.skills) ?? []) {
+    assert.ok(used.has(skill), skill);
+  }
+});
+
 test("every result in the net comes from the resume text", () => {
   const water = landings.find((landing) => landing.id === "water");
   const source = water?.bullets.join(" ") ?? "";

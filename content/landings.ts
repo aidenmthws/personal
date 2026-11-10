@@ -123,7 +123,6 @@ export const site = {
   spices: {
     hint: "Point at a skill, or tap it, to light its landings on the route map.",
     usedAt: "used at",
-    offRoute: "on my resume, but not tied to one landing.",
   },
   copyEmail: {
     action: "Copy email",
@@ -259,7 +258,7 @@ export const landings: Landing[] = [
       { value: "22 points", label: "mobile page speed up" },
       { value: "85%", label: "coverage" },
     ],
-    skills: ["React", "Firebase", "HTML/CSS"],
+    skills: ["React", "Firebase", "HTML/CSS", "Tailwind", "JavaScript"],
     scene: "canal",
   },
   {
@@ -311,6 +310,11 @@ export const landings: Landing[] = [
       "GCP",
       "Langfuse",
       "Terraform",
+      "SQL",
+      "ClickHouse",
+      "Docker",
+      "Git",
+      "Agile/Scrum",
     ],
     scene: "water",
   },
@@ -336,7 +340,18 @@ export const landings: Landing[] = [
       { value: "30%", label: "less review time per request" },
       { value: "25%", label: "fewer environment-related deployment failures" },
     ],
-    skills: ["Node.js", "MCP", "Java", "Spring Boot", "MongoDB", "Angular"],
+    skills: [
+      "Node.js",
+      "MCP",
+      "Java",
+      "Spring Boot",
+      "MongoDB",
+      "Angular",
+      "C++",
+      "C#",
+      "Redis",
+      "CI/CD",
+    ],
     scene: "lake",
   },
   {
@@ -347,7 +362,15 @@ export const landings: Landing[] = [
       "Two side projects: an MCP-based harness comparing Jev against Claude, still in progress, and a legal document analyzer.",
     bullets: [],
     metrics: [],
-    skills: ["React", "FastAPI", "OpenAI API", "Python", "MCP"],
+    skills: [
+      "React",
+      "FastAPI",
+      "OpenAI API",
+      "Python",
+      "MCP",
+      "Vercel",
+      "AWS",
+    ],
     scene: "channels",
     projects: [
       {
