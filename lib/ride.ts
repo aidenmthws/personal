@@ -127,6 +127,8 @@ const WHEEL_REARM_MS = 250;
 const WHEEL_PUSH_RATIO = 3;
 const WHEEL_PUSH_SIZE = 16;
 const WHEEL_LINE_PX = 16;
+/** Momentum has started to fade once it drops below this share of its peak. */
+const MOMENTUM_FADED = 0.9;
 /** A busy frame can hold up momentum for this long and still be one gesture. */
 const WHEEL_STALL_MS = 700;
 
@@ -159,12 +161,14 @@ function isSecondPush(gesture: WheelGesture, time: number, size: number) {
 
 /**
  * Events stopped mid-momentum, then came back at the level they had faded to.
- * The fade tells this apart from a mouse wheel, whose notches are all one size.
+ * The fade tells this apart from a mouse wheel, whose notches are all one size,
+ * so any fade counts, even one just past the peak: a busy frame can land there.
  */
 function isStalledMomentum(gesture: WheelGesture, time: number, size: number) {
   return (
     gesture.stepped &&
-    gesture.floor <= gesture.peak * 0.6 &&
+    gesture.floor < gesture.peak * MOMENTUM_FADED &&
+    size <= gesture.peak &&
     time - gesture.at <= WHEEL_STALL_MS &&
     size <= gesture.floor * 2 + 8
   );

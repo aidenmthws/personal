@@ -375,6 +375,32 @@ test("a stall in the middle of a flick's momentum is still one gesture", () => {
   assert.equal(steps([...rise, ...fade, ...afterStall]), 1);
 });
 
+test("a stall just after a flick's peak is still one gesture", () => {
+  const rise: [number, number][] = [[0, 10], [16, 35], [32, 60], [48, 85]];
+  const early: [number, number][] = Array.from({ length: 8 }, (_, frame) => [
+    64 + frame * 16,
+    Math.round(85 * Math.exp(-frame / 16)),
+  ]);
+  const last = early[early.length - 1];
+  const resumed: [number, number][] = Array.from({ length: 30 }, (_, frame) => [
+    last[0] + 200 + frame * 16,
+    Math.max(1, Math.round(last[1] * Math.exp(-frame / 16))),
+  ]);
+
+  assert.equal(steps([...rise, ...early, ...resumed]), 1);
+});
+
+test("two flicks with a pause between them are two steps", () => {
+  const flick = (start: number): [number, number][] => [
+    [start, 10], [start + 16, 35], [start + 32, 60], [start + 48, 85],
+    ...Array.from({ length: 60 }, (_, frame): [number, number] => [
+      start + 64 + frame * 16,
+      Math.max(1, Math.round(85 * Math.exp(-frame / 16))),
+    ]),
+  ];
+  assert.equal(steps([...flick(0), ...flick(2200)]), 2);
+});
+
 test("mouse wheel notches stay separate steps however far apart", () => {
   assert.equal(steps([[0, 100], [300, 100], [600, 100]]), 3);
 });
