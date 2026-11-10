@@ -346,8 +346,8 @@ test("the route map's marker reaches every stop and stays on the river", () => {
 
 test("longer cards hold the guided ride longer, within limits", () => {
   assert.ok(readingTime(40) > readingTime(20));
-  assert.equal(readingTime(1), 5000);
-  assert.equal(readingTime(500), 15000);
+  assert.equal(readingTime(1), 2500);
+  assert.equal(readingTime(500), 7500);
 });
 
 function steps(events: [number, number][]) {

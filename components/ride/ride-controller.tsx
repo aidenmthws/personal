@@ -40,9 +40,9 @@ const ARRIVE_WITHIN = 0.08;
 /** The mooring comes loose before the first trip starts. */
 const CAST_OFF_MS = 520;
 /** A trip between landings, added to each card's reading time. */
-const TRIP_MS = 1000;
+const TRIP_MS = 500;
 /** The pause at the Shore when a finished ride starts over. */
-const SHORE_MS = 2000;
+const SHORE_MS = 1000;
 /** Controls in a card. Using one means the visitor wants the ride to wait. */
 const CARD_CONTROL = '[data-card] :is(a, button, summary, [role="toolbar"])';
 /** How far a finger must travel to count as a swipe. */
