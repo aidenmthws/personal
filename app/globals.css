@@ -133,11 +133,11 @@ html:has(#ride):not([data-ride]) {
     );
   }
 
-  .sky-predawn {
-    --sky-top: #a9bcc4;
-    --sky-bottom: #e9e4d8;
-    --water-top: #9fb5b3;
-    --water-bottom: #6f9290;
+  .sky-dawn {
+    --sky-top: #e9967c;
+    --sky-bottom: #fcd8ab;
+    --water-top: #eab79f;
+    --water-bottom: #6f9690;
   }
 
   .sky-sunrise {

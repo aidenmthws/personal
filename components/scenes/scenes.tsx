@@ -36,14 +36,14 @@ const base = WATERLINE;
 const top = (height: number) => WATERLINE - height + 2;
 
 const dawn: Tint = {
-  far: "#b5c4c4",
-  bank: "#7d9a86",
-  lip: "#688677",
-  leaf: "#5f8270",
-  shade: "#4f7262",
-  trunk: "#5f5a50",
-  roof: "#a06a55",
-  wall: "#e4dccb",
+  far: "#dfa98f",
+  bank: "#7f8f58",
+  lip: "#69793f",
+  leaf: "#5d7f42",
+  shade: "#4a6a36",
+  trunk: "#6a4d36",
+  roof: "#b0573a",
+  wall: "#f2dcc4",
   glow: "#c8a24a",
 };
 
@@ -132,7 +132,7 @@ function ShoreScene() {
         <>
           <FrameFronds side="right" fill={tint.shade} />
           <g className="cast-mist">
-            <Mist x={420} y={606} width={1180} color="#f3ede0" />
+            <Mist x={420} y={606} width={1180} color="#fbe3cc" />
           </g>
         </>
       }
@@ -148,7 +148,7 @@ function BoatmanScene() {
       far={
         <>
           <Ridge points={[[0, 40], [300, 130], [620, 80], [980, 140], [1600, 40]]} fill={tint.far} />
-          <Mist y={560} color="#f3ede0" />
+          <Mist y={560} color="#fbe3cc" />
         </>
       }
       mid={
@@ -161,7 +161,7 @@ function BoatmanScene() {
           <Palm x={590} base={top(74)} height={300} lean={-24} tint={tint} sway="sway" />
           <WashingLine x={620} y={top(74) - 62} width={170} colors={["#b4492b", "#f3ede0", "#c8a24a", "#f3ede0"]} />
           <Palm x={840} base={top(74)} height={240} tint={tint} />
-          <BirdFlock birds={[[720, 200], [770, 170], [680, 150]]} color="#4f5a55" />
+          <BirdFlock birds={[[720, 200], [770, 170], [680, 150]]} color="#6a4a3c" />
         </>
       }
       fore={

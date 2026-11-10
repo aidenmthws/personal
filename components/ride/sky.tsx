@@ -1,7 +1,7 @@
 import { skyStops, sunPose, type SkyStop } from "@/lib/ride";
 
 const cloudColor: Record<SkyStop, string> = {
-  predawn: "#d3dbd8",
+  dawn: "#fbd0b4",
   sunrise: "#fdeedb",
   gold: "#fff8e2",
   bright: "#f2fbf4",
@@ -11,7 +11,7 @@ const cloudColor: Record<SkyStop, string> = {
 
 /* Each row is one cloud: x, y, width. */
 const cloudBanks: Record<SkyStop, [number, number, number][]> = {
-  predawn: [[1020, 120, 420], [1660, 80, 360], [420, 190, 300], [2100, 200, 340]],
+  dawn: [[1020, 120, 420], [1660, 80, 360], [420, 190, 300], [2100, 200, 340]],
   sunrise: [[930, 150, 340], [1500, 70, 460], [260, 90, 300], [2050, 170, 320]],
   gold: [[820, 70, 380], [1380, 170, 300], [120, 150, 340], [1900, 90, 420]],
   bright: [[700, 110, 460], [1240, 60, 320], [1640, 180, 380], [80, 60, 300], [2120, 110, 300]],

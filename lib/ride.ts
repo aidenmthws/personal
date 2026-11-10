@@ -27,7 +27,7 @@ const HARD_LIMIT_MS = 8000;
 export const rideOptInScript = `(function(){var r=document.documentElement;if(location.pathname!=="/"||!matchMedia(${JSON.stringify(RIDE_QUERY)}).matches)return;r.dataset.ride="on";function o(){if(!("rideReady"in r.dataset))delete r.dataset.ride}addEventListener("error",function(e){if(e.target&&e.target.tagName==="SCRIPT")o()},true);addEventListener("load",function(){setTimeout(o,${AFTER_LOAD_MS})});setTimeout(o,${HARD_LIMIT_MS})})()`;
 
 export const skyStops = [
-  "predawn",
+  "dawn",
   "sunrise",
   "gold",
   "bright",
@@ -38,8 +38,8 @@ export const skyStops = [
 export type SkyStop = (typeof skyStops)[number];
 
 export const landingSky: Record<LandingId, SkyStop> = {
-  shore: "predawn",
-  boatman: "predawn",
+  shore: "dawn",
+  boatman: "dawn",
   source: "sunrise",
   canal: "gold",
   water: "bright",
@@ -243,22 +243,25 @@ export function skyOpacity(layer: number, world: number, order: LandingId[]) {
 /** The sky's height above the waterline, as a share of the viewport height. */
 const HORIZON_VH = 70;
 const SUN_RADIUS_VH = 8;
-/** The share of the route the sun has crossed starts after the Shore, in the dark. */
-const SUNRISE = 0.06;
-const DAYLIGHT = 0.92;
+/* The day starts before the Shore, so the sun is just up there, low over the
+   far palms, and is back under the water exactly at the Harbor. */
+const SUNRISE = -0.1416;
+const DAYLIGHT = 1 - SUNRISE;
 
 /**
- * One day along the route. The sun is below the water at the Shore, climbs to
- * its peak around Broad water, and has set by the Harbor.
+ * One day along the route. The sun is rising out of the water at the Shore, climbs to
+ * its peak around First canal, and has set by the Harbor.
  */
 export function sunPose(world: number, last: number) {
   const arc = clamp((clamp(world / last) - SUNRISE) / DAYLIGHT);
   const height = Math.sin(Math.PI * arc) ** 1.4;
   return {
-    xVw: 84 - 52 * arc,
+    /* Cards sit to either side, so the sun keeps to the open middle of the sky,
+       starting between the Shore card and the boat. */
+    xVw: 56 - 14 * arc,
     yVh: HORIZON_VH + SUN_RADIUS_VH - height * 62,
     /** How far the disc has paled from sunrise orange toward midday. */
-    pale: clamp((height - 0.35) / 0.4),
+    pale: clamp((height - 0.6) / 0.3),
     /** Light on the water, gone once the sun is down. */
     glitter: Math.round(clamp(height * 3) * 1000) / 1000,
   };

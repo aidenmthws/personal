@@ -205,8 +205,8 @@ test("the sky reaches each stop at its landing and ends at dusk", () => {
       (_, layer) => skyOpacity(layer, world, order) === 1,
     );
 
-  assert.equal(skyStops[visibleTop(0)], "predawn");
-  assert.equal(skyStops[visibleTop(1)], "predawn");
+  assert.equal(skyStops[visibleTop(0)], "dawn");
+  assert.equal(skyStops[visibleTop(1)], "dawn");
   assert.equal(skyStops[visibleTop(2)], "sunrise");
   assert.equal(skyStops[visibleTop(4)], "bright");
   assert.equal(skyStops[visibleTop(8)], "dusk");
@@ -282,15 +282,16 @@ test("a running Ride is never switched off by the fallback", () => {
   assert.equal(dataset.ride, "on");
 });
 
-test("the sun is under the water at both ends of the day and highest midway", () => {
+test("the sun rises at the Shore, sets by the Harbor, and is highest midway", () => {
   const horizon = 70;
-  assert.ok(sunPose(0, 8).yVh - 8 >= horizon, "dark at the Shore");
+  const shore = sunPose(0, 8).yVh;
+  assert.ok(shore < horizon && shore > horizon - 16, "low over the water at the Shore");
   assert.ok(sunPose(8, 8).yVh - 8 >= horizon, "set at the Harbor");
-  assert.equal(sunPose(0, 8).glitter, 0);
+  assert.ok(sunPose(0, 8).glitter > 0);
   assert.equal(sunPose(8, 8).glitter, 0);
 
   const heights = order.map((_, world) => sunPose(world, 8).yVh);
-  assert.equal(heights.indexOf(Math.min(...heights)), 4);
+  assert.equal(heights.indexOf(Math.min(...heights)), 3);
 });
 
 test("the sun crosses the sky in one direction", () => {
