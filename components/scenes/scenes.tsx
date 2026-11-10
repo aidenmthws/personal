@@ -102,7 +102,7 @@ function ShoreScene() {
       name="shore"
       far={
         <>
-          <Ridge points={[[260, 20], [520, 100], [760, 60], [1040, 150], [1280, 90], [1600, 130]]} fill="#c3cfce" />
+          <Ridge points={[[220, 0], [520, 100], [760, 60], [1040, 150], [1280, 90], [1480, 60], [1600, 0]]} fill="#ecbea2" />
           <GroveLine x={200} width={1400} base={base} height={92} fill={tint.far} />
         </>
       }
@@ -147,7 +147,7 @@ function BoatmanScene() {
       name="boatman"
       far={
         <>
-          <Ridge points={[[0, 40], [300, 130], [620, 80], [980, 140], [1600, 40]]} fill={tint.far} />
+          <Ridge points={[[0, 0], [300, 130], [620, 80], [980, 140], [1400, 60], [1600, 0]]} fill={tint.far} />
           <Mist y={560} color="#fbe3cc" />
         </>
       }
