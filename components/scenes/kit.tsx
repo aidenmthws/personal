@@ -391,12 +391,40 @@ export function Reeds({ x, base = 270, color }: { x: number; base?: number; colo
   );
 }
 
+/* The faint currents every scene's water carries: x, y, length in the fore layer. */
+const CURRENTS: [number, number, number][] = [
+  [60, 26, 360],
+  [760, 92, 440],
+  [1160, 148, 340],
+  [320, 206, 480],
+];
+
 export function Ripples({ color, lines }: { color: string; lines: [number, number, number][] }) {
   return (
-    <g className="ripples ambient" stroke={color} strokeWidth="3" strokeLinecap="round" opacity="0.5">
-      {lines.map(([x, y, length]) => (
-        <path key={`${x}-${y}`} d={`M${x} ${y}h${length}`} />
-      ))}
+    <g stroke={color} strokeLinecap="round">
+      {/* Long, faint currents under the ripples, spread down the water. */}
+      <g strokeWidth="2" opacity="0.3">
+        {CURRENTS.map(([x, y, length], index) => (
+          <path
+            key={`${x}-${y}`}
+            className="current ambient"
+            style={{ animationDelay: `${-index * 3.7}s` }}
+            d={`M${x} ${y}h${length}`}
+          />
+        ))}
+      </g>
+      {/* Each ripple drifts downstream on its own beat, brightening and
+          fading as it goes, so the water never moves as one block. */}
+      <g strokeWidth="3" opacity="0.55">
+        {lines.map(([x, y, length], index) => (
+          <path
+            key={`${x}-${y}`}
+            className="ripple ambient"
+            style={{ animationDelay: `${-index * 2.3}s`, animationDuration: `${7 + (index % 3) * 1.6}s` }}
+            d={`M${x} ${y}h${length}`}
+          />
+        ))}
+      </g>
     </g>
   );
 }
@@ -536,7 +564,7 @@ export function SceneLayers({
           {mid}
         </g>
       </svg>
-      <svg data-layer="reflect" viewBox="0 0 1600 270">
+      <svg data-layer="reflect" viewBox="0 0 1600 270" className="waver ambient">
         <g mask="url(#reflection-mask)" opacity="0.55">
           <use href={`#${art}`} transform="matrix(1 0 0 -0.6 0 378)" />
         </g>
