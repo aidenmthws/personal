@@ -6,6 +6,7 @@ import {
   Forest,
   GroveLine,
   Hill,
+  Lilies,
   Mist,
   Palm,
   Reeds,
@@ -31,8 +32,10 @@ import {
   Waterfall,
 } from "./kit-craft";
 import {
+  Angler,
   BirdFlock,
   Buffalo,
+  Climber,
   Cormorant,
   Ducks,
   Egret,
@@ -400,8 +403,9 @@ function ChannelsScene() {
           <Footbridge x={1240} width={330} base={top(64)} />
           <Bank x={990} width={330} height={92} fill={tint.bank} seed={7} />
           <Palm x={1090} base={top(92)} height={290} lean={20} tint={tint} sway="sway" />
+          <Climber x={1093} y={366} scale={0.9} />
           <Palm x={1210} base={top(92)} height={250} lean={-26} tint={tint} />
-          <Figure x={1420} base={top(64) - 88} scale={0.9} cloth="#f0d8a8" wrap="#a03f24" />
+          <Angler x={1445} base={480} water={base} scale={0.9} cloth="#f0d8a8" wrap="#a03f24" />
           <Hornbill x={800} y={170} scale={1.4} />
         </>
       }
@@ -410,6 +414,8 @@ function ChannelsScene() {
           <Stone x={1146} y={214} width={30} fill="#8c7a5e" />
           <Stone x={1098} y={190} width={18} fill="#a08d70" />
           <Ripples color="#f6d79a" lines={[[260, 90, 120], [760, 60, 110], [1350, 120, 130]]} />
+          <Lilies pads={[[250, 150, 22], [296, 172, 16], [334, 142, 18], [212, 186, 14]]} leaf={tint.bank} flower="#ee9fae" />
+          <Lilies pads={[[1384, 204, 20], [1430, 226, 15], [1466, 194, 17]]} leaf={tint.bank} flower="#ee9fae" />
           <Reeds x={70} color={tint.leaf} />
         </>
       }

@@ -309,6 +309,22 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+/* A float that sits still, then dips twice when something nibbles. */
+@keyframes nibble {
+  0%,
+  70%,
+  84%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  74% {
+    transform: translate3d(0, 3px, 0);
+  }
+  80% {
+    transform: translate3d(0, 2px, 0);
+  }
+}
+
 @keyframes splash {
   0%,
   84% {
@@ -352,6 +368,10 @@ html:has(#ride):not([data-ride]) {
 
   [data-ride] .leap {
     animation: leap 7s ease-out infinite;
+  }
+
+  [data-ride] .bobber {
+    animation: nibble 6s ease-in-out infinite;
   }
 
   [data-ride] .splash {

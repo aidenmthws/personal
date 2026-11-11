@@ -44,6 +44,69 @@ export function Figure({
   );
 }
 
+/**
+ * A figure fishing with a rod, facing left. The line drops from the rod's tip
+ * to `water`, where a float dips now and then.
+ */
+export function Angler({
+  x,
+  base,
+  water,
+  scale = 1,
+  cloth,
+  wrap,
+}: {
+  x: number;
+  base: number;
+  water: number;
+  scale?: number;
+  cloth?: string;
+  wrap?: string;
+}) {
+  const tipX = Math.round(x - 86 * scale);
+  const tipY = Math.round(base - 96 * scale);
+  return (
+    <g>
+      <Figure x={x} base={base} scale={scale} pose="hold" cloth={cloth} wrap={wrap} />
+      <g transform={`translate(${x} ${base}) scale(${scale})`} fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M-4 -34L-86 -96" stroke="#5a4029" strokeWidth="2.5" />
+        <path d="M-8 -47L-22 -47M8 -47L0 -38L-12 -40" stroke={SKIN} strokeWidth="4.5" />
+      </g>
+      <path d={`M${tipX} ${tipY}L${tipX + 3} ${water - 5}`} stroke="#3f3226" strokeWidth="1" />
+      <g className="bobber ambient">
+        <circle cx={tipX + 3} cy={water - 5} r="3.5" fill="#c0392b" stroke={OUTLINE} strokeWidth="1" />
+      </g>
+      <ellipse cx={tipX + 3} cy={water - 1} rx="12" ry="2.5" fill="none" stroke="#f6d79a" strokeWidth="1.5" opacity="0.7" />
+    </g>
+  );
+}
+
+/**
+ * A toddy tapper partway up a palm, a clay pot at the hip and a loop of rope
+ * around the trunk at the feet. (x, y) is the trunk's left edge at the hands.
+ */
+export function Climber({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`} strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="6" cy="40" rx="9" ry="3" fill="none" stroke="#e4cfa0" strokeWidth="2" />
+      {/* Skin and trunk are close in color, so the body is outlined: a wider dark stroke under the skin one. */}
+      <g fill="none" stroke={OUTLINE} strokeWidth="7.5">
+        <path d="M-10 22L-15 32L0 39M-4 22L-6 31L4 36" />
+        <path d="M-5 -4L2 -12M-8 4L2 2" strokeWidth="7" />
+      </g>
+      <path d="M-10 22L-15 32L0 39M-4 22L-6 31L4 36" stroke={SKIN} strokeWidth="4.5" fill="none" />
+      <g stroke={OUTLINE} strokeWidth="1.5">
+        <path d="M-14 -6Q-6 -11 0 -6L-1 12H-13Z" fill={SKIN} />
+        <path d="M-13 12H-1L0 24H-12Z" fill="#f3ede0" />
+        <circle cx="-8" cy="-14" r="6.5" fill={SKIN} />
+      </g>
+      <path d="M-5 -4L2 -12M-8 4L2 2" stroke={SKIN} strokeWidth="4" fill="none" />
+      <path d="M-15 -16Q-8 -24 -1 -16Q-8 -19 -15 -16Z" fill="#b4492b" />
+      <path d="M-20 10q-9 0 -9 9q0 8 8 8q7 0 7 -8q0 -9 -6 -9Z" fill="#a0502c" stroke={OUTLINE} strokeWidth="1.5" />
+    </g>
+  );
+}
+
 export function Bird({ x, y, color }: { x: number; y: number; color: string }) {
   return (
     <path

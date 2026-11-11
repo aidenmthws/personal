@@ -84,6 +84,25 @@ export function Hill({
   );
 }
 
+/** Water lilies for the fore layer: notched pads, every other one in flower. */
+export function Lilies({ pads, leaf, flower }: { pads: [number, number, number][]; leaf: string; flower: string }) {
+  return (
+    <g stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round">
+      {pads.map(([x, y, r], index) => {
+        const ry = r * 0.36;
+        return (
+          <g key={`${x}-${y}`}>
+            <path d={`M${x} ${y}L${x + r * 0.9} ${round(y - ry * 0.45)}A${r} ${round(ry)} 0 1 0 ${x + r * 0.9} ${round(y + ry * 0.45)}Z`} fill={leaf} />
+            {index % 2 === 0 && (
+              <path d={`M${x - 9} ${y - 2}L${x - 6} ${y - 14}L${x - 2} ${y - 6}L${x + 2} ${y - 16}L${x + 5} ${y - 6}L${x + 8} ${y - 14}L${x + 9} ${y - 2}Z`} fill={flower} />
+            )}
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
 /** A long ridge through [x, height] points, for the Ghats. */
 export function Ridge({ points, fill }: { points: [number, number][]; fill: string }) {
   const at = ([x, height]: [number, number]) => `${x} ${WATERLINE - height}`;
