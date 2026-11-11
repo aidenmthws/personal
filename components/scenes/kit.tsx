@@ -176,7 +176,15 @@ export function Ridge({ points, fill }: { points: [number, number][]; fill: stri
   );
 }
 
-/** A band of rounded tree crowns, drawn as one path. */
+/* How much of a band's width, at each end, it takes to shrink to nothing. */
+const EDGE = 0.12;
+
+/** 1 through a band's middle, falling to 0 at each end, for `t` from 0 to 1. */
+function taper(t: number) {
+  return Math.max(0, Math.min(1, t / EDGE, (1 - t) / EDGE));
+}
+
+/** A band of rounded tree crowns, drawn as one path, tapering at both ends. */
 export function Forest({
   x,
   width,
@@ -194,16 +202,13 @@ export function Forest({
 }) {
   const count = Math.round(width / (size * 1.25));
   const crowns = Array.from({ length: count }, (_, index) => {
-    const r = Math.round(size * (0.7 + noise(index, seed) * 0.6));
     const cx = Math.round(x + (width * index) / count);
-    return `M${cx - r} ${base}a${r} ${r} 0 1 1 ${2 * r} 0Z`;
+    const r = Math.round(size * (0.7 + noise(index, seed) * 0.6) * taper((cx - x) / width));
+    return r < 2 ? "" : `M${cx - r} ${base}a${r} ${r} 0 1 1 ${2 * r} 0Z`;
   });
-  return (
-    <path
-      d={`${crowns.join("")}M${x} ${base}h${width}v${size}h${-width}Z`}
-      fill={fill}
-    />
-  );
+  /* The band under the crowns narrows to a point at each end. */
+  const band = `M${x} ${base + size}L${x + width * EDGE} ${base}H${x + width * (1 - EDGE)}L${x + width} ${base + size}Z`;
+  return <path d={`${crowns.join("")}${band}`} fill={fill} />;
 }
 
 /** A point on the quadratic curve from `a` through control `c` to `b`. */
@@ -335,7 +340,10 @@ export function GroveLine({
   const whole = Math.round;
   const palms = Array.from({ length: count }, (_, index) => {
     const cx = whole(x + (width * (index + noise(index, seed) * 0.6)) / count);
-    const tall = height * (0.55 + noise(index, seed + 1) * 0.45);
+    /* The grove shrinks to nothing at both ends, so it never stops in a wall. */
+    const fade = taper((cx - x) / width);
+    if (fade < 0.2) return "";
+    const tall = height * (0.55 + noise(index, seed + 1) * 0.45) * fade;
     const tip = whole(base - tall);
     const reach = whole(tall * 0.36);
     const crown = cx + whole((noise(index, seed + 2) - 0.5) * tall * 0.3);
@@ -463,6 +471,27 @@ export function ReflectionDefs() {
   );
 }
 
+/* The far shore: low crowns over a solid band, a palm now and then. Every
+   scene draws the same outline, and no crown crosses either edge, so where one
+   scene's mid layer meets the next the shore runs straight on. */
+const FAR_SHORE = (() => {
+  const band = WATERLINE - 16;
+  const crowns = Array.from({ length: 64 }, (_, index) => {
+    const cx = index * 25 + 12;
+    const r = Math.min(Math.round(7 + noise(index, 11) * 8), cx, 1600 - cx);
+    return `M${cx - r} ${band}a${r} ${r} 0 1 1 ${2 * r} 0Z`;
+  });
+  const palms = Array.from({ length: 15 }, (_, index) => {
+    const cx = Math.round(index * 104 + 60 + noise(index, 12) * 40);
+    const tip = Math.round(band - 18 - noise(index, 13) * 14);
+    return `M${cx - 1} ${band}L${cx} ${tip}L${cx + 1} ${band}ZM${cx} ${tip}q-9 -5 -15 5q9 -3 15 -5ZM${cx} ${tip}q9 -5 15 5q-9 -3 -15 -5Z`;
+  });
+  return `${crowns.join("")}${palms.join("")}M0 ${band}H1600V${WATERLINE}H0Z`;
+})();
+
+/** The colors of a scene's far shore: where it meets the scene before, its own, and where it meets the next. */
+export type ShoreTint = [string, string, string];
+
 /**
  * The scene's layers. The Ride moves far and fore at their own speeds for
  * parallax. The reflection repeats the mid layer, flipped at the waterline and
@@ -474,21 +503,38 @@ export function SceneLayers({
   mid,
   fore,
   frame,
+  shore,
 }: {
   name: string;
   far: ReactNode;
   mid: ReactNode;
   fore: ReactNode;
   frame?: ReactNode;
+  shore: ShoreTint;
 }) {
   const art = `art-${name}`;
+  const [left, own, right] = shore;
   return (
     <>
       <svg data-layer="far" viewBox="0 0 1600 630">
         {far}
       </svg>
+      {/* Mid layers sit edge to edge on the Ride, so the far shore drawn here
+          runs on unbroken from scene to scene. Its color blends toward each
+          neighbor and matches it exactly at the seam. */}
       <svg data-layer="mid" viewBox="0 0 1600 630">
-        <g id={art}>{mid}</g>
+        <defs>
+          <linearGradient id={`shore-${name}`} gradientUnits="userSpaceOnUse" x1="0" x2="1600" y1="0" y2="0">
+            <stop offset="0" stopColor={left} />
+            <stop offset="0.3" stopColor={own} />
+            <stop offset="0.7" stopColor={own} />
+            <stop offset="1" stopColor={right} />
+          </linearGradient>
+        </defs>
+        <g id={art}>
+          <path d={FAR_SHORE} fill={`url(#shore-${name})`} />
+          {mid}
+        </g>
       </svg>
       <svg data-layer="reflect" viewBox="0 0 1600 270">
         <g mask="url(#reflection-mask)" opacity="0.55">

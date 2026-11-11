@@ -17,6 +17,7 @@ import {
   Stone,
   TeaHill,
   WATERLINE,
+  type ShoreTint,
   type Tint,
 } from "./kit";
 import {
@@ -127,11 +128,43 @@ const nightfall: Tint = {
   glow: "#f3d98b",
 };
 
+/* Each scene's far shore, in ride order, a little paler than its own far
+   land so it reads as further off. */
+const ORDER = ["shore", "boatman", "source", "canal", "water", "lake", "channels", "market", "harbor"];
+const SHORE_COLOR: Record<string, string> = {
+  shore: "#e3b39a",
+  boatman: "#e3b39a",
+  source: "#dfc0a6",
+  canal: "#cfcc9a",
+  water: "#a3cdba",
+  lake: "#a3cdba",
+  channels: "#d9b27a",
+  market: "#c48468",
+  harbor: "#22524d",
+};
+
+/** The halfway color between two hex colors. */
+function mix(a: string, b: string) {
+  const channel = (hex: string, shift: number) => (parseInt(hex.slice(1), 16) >> shift) & 255;
+  const value = [16, 8, 0].map((shift) => Math.round((channel(a, shift) + channel(b, shift)) / 2));
+  return `#${value.map((part) => part.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** A scene's far shore blends halfway to each neighbor's, so the seams match. */
+function shoreFor(name: string): ShoreTint {
+  const index = ORDER.indexOf(name);
+  const own = SHORE_COLOR[name];
+  const before = SHORE_COLOR[ORDER[index - 1]] ?? own;
+  const after = SHORE_COLOR[ORDER[index + 1]] ?? own;
+  return [mix(before, own), own, mix(own, after)];
+}
+
 function ShoreScene() {
   const tint = dawn;
   return (
     <SceneLayers
       name="shore"
+      shore={shoreFor("shore")}
       far={
         <>
           <Ridge points={[[220, 0], [520, 100], [760, 60], [1040, 150], [1280, 90], [1480, 60], [1600, 0]]} fill="#ecbea2" />
@@ -144,7 +177,7 @@ function ShoreScene() {
           <Bank x={1160} width={440} height={64} fill={tint.bank} lip={tint.lip} seed={2} />
           <Palm x={1300} base={top(64)} height={250} lean={-34} tint={tint} sway="sway" />
           <Palm x={1420} base={top(64)} height={300} tint={tint} sway="sway" />
-          <Palm x={1530} base={top(64)} height={220} lean={-22} tint={tint} />
+          <Palm x={1530} base={top(64)} height={220} lean={-34} tint={tint} />
           <Palm x={190} base={top(38)} height={160} tint={tint} />
           <Jetty x={1204} width={280} />
           <Kingfisher x={1490} base={592} scale={1.2} />
@@ -157,8 +190,8 @@ function ShoreScene() {
       fore={
         <>
           <Ripples color="#f3ede0" lines={[[140, 60, 120], [620, 110, 90], [1040, 44, 150], [1320, 150, 110]]} />
-          <Reeds x={1500} color={tint.leaf} />
-          <Reeds x={1570} color={tint.shade} />
+          <Reeds x={1470} color={tint.leaf} />
+          <Reeds x={1540} color={tint.shade} />
         </>
       }
       frame={
@@ -178,6 +211,7 @@ function BoatmanScene() {
   return (
     <SceneLayers
       name="boatman"
+      shore={shoreFor("boatman")}
       far={
         <>
           <Ridge points={[[0, 0], [300, 130], [620, 80], [980, 140], [1400, 60], [1600, 0]]} fill={tint.far} />
@@ -189,7 +223,7 @@ function BoatmanScene() {
           <GroveLine x={880} width={720} base={top(30)} height={110} fill={tint.far} seed={5} />
           <Bank x={960} width={640} height={32} fill={tint.bank} lip={tint.lip} seed={7} />
           <Bank x={0} width={930} height={74} fill={tint.bank} lip={tint.lip} seed={4} />
-          <Palm x={84} base={top(74)} height={320} lean={36} tint={tint} sway="sway" />
+          <Palm x={160} base={top(74)} height={300} lean={14} tint={tint} sway="sway" />
           <Veranda x={150} base={top(74)} tint={tint} />
           <Palm x={590} base={top(74)} height={300} lean={-24} tint={tint} sway="sway" />
           <WashingLine x={620} y={top(74) - 62} width={170} colors={["#b4492b", "#f3ede0", "#c8a24a", "#f3ede0"]} />
@@ -221,21 +255,22 @@ function SourceScene() {
   return (
     <SceneLayers
       name="source"
+      shore={shoreFor("source")}
       far={
         <>
-          <Ridge points={[[0, 180], [240, 310], [520, 240], [800, 400], [1040, 300], [1300, 380], [1600, 220]]} fill="#dcbba5" />
-          <Ridge points={[[0, 90], [300, 200], [620, 150], [940, 260], [1260, 190], [1600, 120]]} fill="#cfa98f" />
+          <Ridge points={[[0, 0], [200, 250], [520, 240], [800, 400], [1040, 300], [1300, 380], [1460, 220], [1600, 0]]} fill="#dcbba5" />
+          <Ridge points={[[0, 0], [260, 180], [620, 150], [940, 260], [1260, 190], [1480, 110], [1600, 0]]} fill="#cfa98f" />
           <Mist x={100} y={420} width={1400} color="#fbe6c8" />
         </>
       }
       mid={
         <>
           {/* A tall peak and a tea estate carry the Ghats out to the left edge. */}
-          <Ridge points={[[0, 400], [180, 440], [420, 320], [700, 150], [900, 30], [1000, 0]]} fill="#d3ad95" />
-          <TeaHill x={-160} width={940} height={250} fill="#9aa872" row="#6f8650" />
-          <Ridge points={[[560, 20], [760, 140], [940, 230], [1080, 330], [1200, 400], [1330, 340], [1470, 270], [1600, 200]]} fill="#8fa070" />
-          <Forest x={760} width={840} base={500} size={30} fill="#7b9462" seed={2} />
-          <Forest x={700} width={900} base={566} size={36} fill="#67864f" seed={4} />
+          <Ridge points={[[0, 0], [260, 300], [460, 440], [660, 300], [860, 140], [1020, 0]]} fill="#d3ad95" />
+          <TeaHill x={60} width={800} height={230} fill="#9aa872" row="#6f8650" />
+          <Ridge points={[[560, 20], [760, 140], [940, 230], [1080, 330], [1200, 400], [1330, 340], [1470, 230], [1600, 0]]} fill="#8fa070" />
+          <Forest x={760} width={760} base={500} size={30} fill="#7b9462" seed={2} />
+          <Forest x={700} width={860} base={566} size={36} fill="#67864f" seed={4} />
           <path d="M1136 330Q1140 268 1206 268Q1272 268 1276 330L1300 612H1112Z" fill="#6d7f58" />
           <Waterfall x={1178} top={288} bottom={612} width={58} />
           <Bank x={620} width={980} height={26} fill="#5a7c40" lip="#4b6a36" seed={6} />
@@ -274,6 +309,7 @@ function CanalScene() {
   return (
     <SceneLayers
       name="canal"
+      shore={shoreFor("canal")}
       far={
         <>
           <Palm x={260} base={base} height={320} tint={pale} />
@@ -288,7 +324,7 @@ function CanalScene() {
           <House x={1180} base={top(112)} width={150} tint={tint} />
           <Palm x={1120} base={top(112)} height={320} lean={-20} tint={tint} />
           <Bank x={0} width={1010} height={100} fill={tint.bank} lip={tint.lip} seed={9} />
-          <Palm x={70} base={top(100)} height={340} lean={26} tint={tint} sway="sway" />
+          <Palm x={150} base={top(100)} height={340} lean={20} tint={tint} sway="sway" />
           <House x={130} base={top(100)} width={170} tint={tint} />
           <Smoke x={200} y={top(100) - 170} />
           <Palm x={340} base={top(100)} height={300} lean={-22} tint={tint} sway="sway" />
@@ -309,7 +345,7 @@ function CanalScene() {
           <Ripples color="#fbf2d4" lines={[[180, 70, 110], [760, 120, 140], [1260, 56, 120]]} />
           <Canoe x={60} base={60} width={170} />
           <Buffalo x={400} y={46} scale={0.9} ripple="#fbf2d4" />
-          <Reeds x={30} color={tint.leaf} />
+          <Reeds x={44} color={tint.leaf} />
           <Reeds x={930} color={tint.shade} />
         </>
       }
@@ -323,6 +359,7 @@ function WaterScene() {
   return (
     <SceneLayers
       name="water"
+      shore={shoreFor("water")}
       far={
         <>
           {/* The wide lake, its far shore low and hazy. */}
@@ -342,7 +379,7 @@ function WaterScene() {
           <g stroke="#14221f" strokeWidth="2" strokeLinejoin="round">
             <Church x={1470} base={top(44)} wall={tint.wall} shade={tint.roof} />
           </g>
-          <Palm x={1566} base={top(44)} height={250} lean={-30} tint={tint} sway="sway" />
+          <Palm x={1530} base={top(44)} height={230} lean={-44} tint={tint} sway="sway" />
           <BirdFlock birds={[[720, 200], [770, 150], [830, 214], [660, 142]]} color="#14221f" />
         </>
       }
@@ -364,6 +401,7 @@ function LakeScene() {
   return (
     <SceneLayers
       name="lake"
+      shore={shoreFor("lake")}
       far={
         <>
           <Hill x={0} width={1600} height={44} fill={tint.far} />
@@ -405,6 +443,7 @@ function ChannelsScene() {
   return (
     <SceneLayers
       name="channels"
+      shore={shoreFor("channels")}
       far={
         <>
           <Hill x={300} width={1300} height={110} fill={tint.far} />
@@ -416,7 +455,7 @@ function ChannelsScene() {
           <Bank x={0} width={660} height={56} fill={tint.bank} lip={tint.lip} seed={4} />
           <Palm x={210} base={top(56)} height={210} tint={tint} />
           <Bank x={1490} width={110} height={84} fill={tint.bank} lip={tint.lip} seed={2} />
-          <Palm x={1560} base={top(84)} height={300} lean={-34} tint={tint} sway="sway" />
+          <Palm x={1530} base={top(84)} height={280} lean={-62} tint={tint} sway="sway" />
           <Footbridge x={1240} width={330} base={top(64)} />
           <Bank x={990} width={330} height={92} fill={tint.bank} seed={7} />
           <Palm x={1090} base={top(92)} height={290} lean={20} tint={tint} sway="sway" />
@@ -449,6 +488,7 @@ function MarketScene() {
   return (
     <SceneLayers
       name="market"
+      shore={shoreFor("market")}
       far={
         <>
           <Hill x={200} width={1400} height={80} fill={tint.far} />
@@ -460,9 +500,9 @@ function MarketScene() {
           <Bank x={960} width={640} height={32} fill={tint.bank} lip={tint.lip} seed={5} />
           <Palm x={1460} base={top(32)} height={200} tint={tint} />
           <Bank x={0} width={950} height={70} fill={tint.bank} lip={tint.lip} seed={6} />
-          <Palm x={40} base={top(70)} height={350} lean={30} tint={tint} sway="sway" />
+          <Palm x={36} base={top(70)} height={350} lean={140} tint={tint} sway="sway" />
           <Palm x={900} base={top(70)} height={330} lean={-30} tint={tint} sway="sway" />
-          <Bunting from={[52, top(70) - 262]} to={[892, top(70) - 262]} colors={flags} />
+          <Bunting from={[150, top(70) - 262]} to={[892, top(70) - 262]} colors={flags} />
           <Stall index={0} x={72} base={top(70)} awning="#b4492b" jars={spice} />
           <Stall index={1} x={280} base={top(70)} awning="#f0d8a8" jars={reversed} />
           <Stall index={2} x={488} base={top(70)} awning="#4b7b3c" jars={spice} />
@@ -476,7 +516,7 @@ function MarketScene() {
         <>
           <Ripples color="#f6d79a" lines={[[160, 80, 130], [720, 50, 140], [1220, 110, 150]]} />
           <Canoe x={760} base={96} width={150} />
-          <Reeds x={30} color={tint.leaf} />
+          <Reeds x={44} color={tint.leaf} />
         </>
       }
       frame={<FrameFronds side="left" fill={tint.shade} />}
@@ -491,6 +531,7 @@ function HarborScene() {
   return (
     <SceneLayers
       name="harbor"
+      shore={shoreFor("harbor")}
       far={
         <>
           <Hill x={0} width={800} height={70} fill={tint.far} />
@@ -506,7 +547,7 @@ function HarborScene() {
           <House x={800} base={top(70)} width={150} tint={tint} lit="lit" />
           <House x={1030} base={top(70)} width={130} tint={tint} lit="lit" />
           <House x={1240} base={top(70)} width={170} tint={tint} lit="lit" />
-          <Palm x={1500} base={top(70)} height={290} lean={-30} tint={tint} sway="sway" />
+          <Palm x={1500} base={top(70)} height={290} lean={-38} tint={tint} sway="sway" />
           <Bunting from={[760, top(70) - 136]} to={[1000, top(70) - 136]} sag={16} colors={lights} />
           <Bunting from={[1200, top(70) - 136]} to={[1460, top(70) - 136]} sag={16} colors={lights} />
           {lamps.map((x, order) => (
