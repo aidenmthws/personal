@@ -281,6 +281,27 @@ export function Cormorant({ x, base, height = 50 }: { x: number; base: number; h
   );
 }
 
+/**
+ * A Malabar giant squirrel clinging to a trunk, head up and facing right, its
+ * long tail hanging. (x, y) is where its belly meets the trunk.
+ */
+export function GiantSquirrel({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
+  const coat = "#8a3420";
+  const cream = "#ecd2a0";
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round">
+      <path d="M-5 8Q-24 8 -27 26Q-29 42 -17 50Q-22 37 -15 27Q-9 19 -1 13Z" fill="#4a1e14" />
+      <ellipse cx="-2" cy="1" rx="7.5" ry="12" fill={coat} />
+      <path d="M2 -7Q6 1 3 9Q0 2 -1 -5Z" fill={cream} stroke="none" />
+      <path d="M2 -6h5M1 10h6" stroke={cream} strokeWidth="3" strokeLinecap="round" />
+      <path d="M-3 -19q-1 -6 3 -6q2 3 0 6Z" fill={coat} />
+      <path d="M-5 -14Q-5 -21 1 -21Q8 -21 10 -15Q10 -11 5 -10Q-4 -9 -5 -14Z" fill={coat} />
+      <path d="M4 -12Q8 -12 9 -14" fill="none" stroke={cream} strokeWidth="2" />
+      <circle cx="3" cy="-16.5" r="1.2" fill={OUTLINE} stroke="none" />
+    </g>
+  );
+}
+
 /** A great hornbill, the state bird of Kerala, in flight to the left. */
 export function Hornbill({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
   return (

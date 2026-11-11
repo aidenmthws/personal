@@ -14,6 +14,7 @@ import {
   Ripples,
   SceneLayers,
   Stone,
+  TeaHill,
   WATERLINE,
   type Tint,
 } from "./kit";
@@ -41,6 +42,7 @@ import {
   Egret,
   Elephant,
   Figure,
+  GiantSquirrel,
   Hornbill,
   Karimeen,
   Kingfisher,
@@ -206,6 +208,13 @@ function BoatmanScene() {
   );
 }
 
+/* Wildflowers along the Source's bank, kept clear of the waterfall's pool. */
+const sourceFlowers: [number, string][] = [
+  [690, "#e8b830"], [712, "#fbf7ec"], [760, "#c0392b"], [842, "#e8b830"], [864, "#fbf7ec"],
+  [982, "#c0392b"], [1008, "#e8b830"], [1330, "#fbf7ec"], [1352, "#e8b830"], [1374, "#c0392b"],
+  [1478, "#fbf7ec"], [1500, "#e8b830"],
+];
+
 function SourceScene() {
   return (
     <SceneLayers
@@ -219,13 +228,22 @@ function SourceScene() {
       }
       mid={
         <>
+          {/* A tall peak and a tea estate carry the Ghats out to the left edge. */}
+          <Ridge points={[[0, 400], [180, 440], [420, 320], [700, 150], [900, 30], [1000, 0]]} fill="#d3ad95" />
+          <TeaHill x={-160} width={940} height={250} fill="#9aa872" row="#6f8650" />
           <Ridge points={[[560, 20], [760, 140], [940, 230], [1080, 330], [1200, 400], [1330, 340], [1470, 270], [1600, 200]]} fill="#8fa070" />
           <Forest x={760} width={840} base={500} size={30} fill="#7b9462" seed={2} />
           <Forest x={700} width={900} base={566} size={36} fill="#67864f" seed={4} />
           <path d="M1136 330Q1140 268 1206 268Q1272 268 1276 330L1300 612H1112Z" fill="#6d7f58" />
           <Waterfall x={1178} top={288} bottom={612} width={58} />
           <Bank x={620} width={980} height={26} fill="#5a7c40" lip="#4b6a36" seed={6} />
+          <g>
+            {sourceFlowers.map(([x, color]) => (
+              <circle key={x} cx={x} cy={top(26) + 3} r="3.5" fill={color} />
+            ))}
+          </g>
           <Palm x={1420} base={top(26)} height={190} tint={morning} sway="sway" />
+          <GiantSquirrel x={1421} y={511} scale={0.9} />
           <Elephant x={1530} base={top(26) + 4} scale={1.05} />
           <Palm x={1040} base={top(26)} height={150} lean={-16} tint={morning} />
           <BirdFlock birds={[[900, 150], [960, 112], [1010, 164]]} color="#6f5237" />

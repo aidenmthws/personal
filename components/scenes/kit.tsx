@@ -84,6 +84,37 @@ export function Hill({
   );
 }
 
+/** A hill planted with tea, its bushes in rows that follow the slope, as on the Ghats estates. */
+export function TeaHill({
+  x,
+  width,
+  height,
+  fill,
+  row,
+}: {
+  x: number;
+  width: number;
+  height: number;
+  fill: string;
+  row: string;
+}) {
+  const curve = (rise: number) =>
+    `M${x} ${WATERLINE}C${x + width * 0.3} ${WATERLINE - rise * 1.3} ${x + width * 0.6} ${WATERLINE - rise * 1.3} ${x + width} ${WATERLINE}`;
+  return (
+    <>
+      <path d={`${curve(height)}Z`} fill={fill} />
+      <path
+        d={[0.86, 0.7, 0.54, 0.38, 0.22].map((ratio) => curve(height * ratio)).join("")}
+        fill="none"
+        stroke={row}
+        strokeWidth="8"
+        strokeLinecap="round"
+        strokeDasharray="1 12"
+      />
+    </>
+  );
+}
+
 /** Water lilies for the fore layer: notched pads, every other one in flower. */
 export function Lilies({ pads, leaf, flower }: { pads: [number, number, number][]; leaf: string; flower: string }) {
   return (
