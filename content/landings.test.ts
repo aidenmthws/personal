@@ -53,6 +53,13 @@ test("card summaries carry at most one percentage", () => {
   }
 });
 
+test("a card summary does not repeat its headline number", () => {
+  for (const landing of landings) {
+    const headline = landing.metrics[0];
+    if (headline) assert.ok(!landing.summary.includes(headline.value), landing.id);
+  }
+});
+
 test("every metric appears in the resume text it came from", () => {
   for (const landing of landings) {
     const source = landing.bullets.join(" ");
@@ -95,6 +102,15 @@ test("landing skills all come from the Spice market lists", () => {
   }
 });
 
+test("every Spice market skill is used at a landing", () => {
+  const market = landings.find((landing) => landing.id === "market");
+  const used = new Set(landings.flatMap((landing) => landing.skills));
+
+  for (const skill of market?.skillGroups?.flatMap((group) => group.skills) ?? []) {
+    assert.ok(used.has(skill), skill);
+  }
+});
+
 test("every result in the net comes from the resume text", () => {
   const water = landings.find((landing) => landing.id === "water");
   const source = water?.bullets.join(" ") ?? "";
@@ -110,7 +126,10 @@ test("every result in the net comes from the resume text", () => {
 test("nothing off limits is published", () => {
   assert.doesNotMatch(everything, /\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}/, "phone");
   assert.doesNotMatch(everything, /github\.com/i, "GitHub link");
-  assert.doesNotMatch(everything, /[ഀ-ൿ]/, "Malayalam text");
+  /* Malayalam appears only as the header name. */
+  const { nameMalayalam, ...rest } = site;
+  assert.match(nameMalayalam, /^[ഀ-ൿ\s]+$/);
+  assert.doesNotMatch(JSON.stringify({ landings, site: rest }), /[ഀ-ൿ]/, "Malayalam text");
   assert.match(everything, /2023amathews@gmail\.com/);
 });
 

@@ -27,25 +27,26 @@ const HARD_LIMIT_MS = 8000;
 export const rideOptInScript = `(function(){var r=document.documentElement;if(location.pathname!=="/"||!matchMedia(${JSON.stringify(RIDE_QUERY)}).matches)return;r.dataset.ride="on";function o(){if(!("rideReady"in r.dataset))delete r.dataset.ride}addEventListener("error",function(e){if(e.target&&e.target.tagName==="SCRIPT")o()},true);addEventListener("load",function(){setTimeout(o,${AFTER_LOAD_MS})});setTimeout(o,${HARD_LIMIT_MS})})()`;
 
 export const skyStops = [
-  "predawn",
+  "dawn",
   "sunrise",
   "gold",
   "bright",
   "amber",
+  "sunset",
   "dusk",
 ] as const;
 
 export type SkyStop = (typeof skyStops)[number];
 
 export const landingSky: Record<LandingId, SkyStop> = {
-  shore: "predawn",
-  boatman: "predawn",
+  shore: "dawn",
+  boatman: "dawn",
   source: "sunrise",
   canal: "gold",
   water: "bright",
   lake: "bright",
   channels: "amber",
-  market: "amber",
+  market: "sunset",
   harbor: "dusk",
 };
 
@@ -126,6 +127,8 @@ const WHEEL_REARM_MS = 250;
 const WHEEL_PUSH_RATIO = 3;
 const WHEEL_PUSH_SIZE = 16;
 const WHEEL_LINE_PX = 16;
+/** Momentum has started to fade once it drops below this share of its peak. */
+const MOMENTUM_FADED = 0.9;
 /** A busy frame can hold up momentum for this long and still be one gesture. */
 const WHEEL_STALL_MS = 700;
 
@@ -158,12 +161,14 @@ function isSecondPush(gesture: WheelGesture, time: number, size: number) {
 
 /**
  * Events stopped mid-momentum, then came back at the level they had faded to.
- * The fade tells this apart from a mouse wheel, whose notches are all one size.
+ * The fade tells this apart from a mouse wheel, whose notches are all one size,
+ * so any fade counts, even one just past the peak: a busy frame can land there.
  */
 function isStalledMomentum(gesture: WheelGesture, time: number, size: number) {
   return (
     gesture.stepped &&
-    gesture.floor <= gesture.peak * 0.6 &&
+    gesture.floor < gesture.peak * MOMENTUM_FADED &&
+    size <= gesture.peak &&
     time - gesture.at <= WHEEL_STALL_MS &&
     size <= gesture.floor * 2 + 8
   );
@@ -243,22 +248,25 @@ export function skyOpacity(layer: number, world: number, order: LandingId[]) {
 /** The sky's height above the waterline, as a share of the viewport height. */
 const HORIZON_VH = 70;
 const SUN_RADIUS_VH = 8;
-/** The share of the route the sun has crossed starts after the Shore, in the dark. */
-const SUNRISE = 0.06;
-const DAYLIGHT = 0.92;
+/* The day starts before the Shore, so the sun is just up there, low over the
+   far palms, and is back under the water exactly at the Harbor. */
+const SUNRISE = -0.1416;
+const DAYLIGHT = 1 - SUNRISE;
 
 /**
- * One day along the route. The sun is below the water at the Shore, climbs to
- * its peak around Broad water, and has set by the Harbor.
+ * One day along the route. The sun is rising out of the water at the Shore, climbs to
+ * its peak around First canal, and has set by the Harbor.
  */
 export function sunPose(world: number, last: number) {
   const arc = clamp((clamp(world / last) - SUNRISE) / DAYLIGHT);
   const height = Math.sin(Math.PI * arc) ** 1.4;
   return {
-    xVw: 84 - 52 * arc,
+    /* Cards sit to either side, so the sun keeps to the open middle of the sky,
+       starting between the Shore card and the boat. */
+    xVw: 56 - 14 * arc,
     yVh: HORIZON_VH + SUN_RADIUS_VH - height * 62,
     /** How far the disc has paled from sunrise orange toward midday. */
-    pale: clamp((height - 0.35) / 0.4),
+    pale: clamp((height - 0.6) / 0.3),
     /** Light on the water, gone once the sun is down. */
     glitter: Math.round(clamp(height * 3) * 1000) / 1000,
   };
@@ -294,8 +302,8 @@ export function poleAngle(world: number) {
 
 /** Space between stops on the route map, in pixels. */
 export const ROUTE_STEP = 64;
-export const ROUTE_HEIGHT = 58;
-const ROUTE_WAVE = [3, -3, 4, -2, 3, -4, 2, -3, 2];
+export const ROUTE_HEIGHT = 44;
+const ROUTE_WAVE = [2, -2, 3, -1, 2, -3, 1, -2, 1];
 
 /** A point on the route map's river. Stops are `ROUTE_STEP` apart. */
 export function routePoint(world: number) {
@@ -306,14 +314,14 @@ export function routePoint(world: number) {
   const eased = t * t * (3 - 2 * t);
   return {
     x: ROUTE_STEP / 2 + world * ROUTE_STEP,
-    y: 44 + ROUTE_WAVE[index] + (ROUTE_WAVE[next] - ROUTE_WAVE[index]) * eased,
+    y: 22 + ROUTE_WAVE[index] + (ROUTE_WAVE[next] - ROUTE_WAVE[index]) * eased,
   };
 }
 
-const READ_BASE_MS = 2000;
-const READ_PER_WORD_MS = 260;
-const READ_MIN_MS = 5000;
-const READ_MAX_MS = 15000;
+const READ_BASE_MS = 1000;
+const READ_PER_WORD_MS = 130;
+const READ_MIN_MS = 2500;
+const READ_MAX_MS = 7500;
 
 /** How long the guided ride stays at a card, from how much there is to read. */
 export function readingTime(words: number) {

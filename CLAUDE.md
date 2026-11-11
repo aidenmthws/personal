@@ -6,7 +6,7 @@ A personal portfolio site themed as a boat ride down a Kerala backwater. The res
 
 The MVP and the living-river pass have shipped: all nine landings with resume content, the Ride, Dry Land (`/dry-land`), Harbor contact, the stacked page, and on top of those a per-landing scene kit with people and reflections, a sun that crosses the sky, arrival events, an illustrated route map, a guided ride started by Cast off, and two interactions (the Broad water net and Spice market skill lighting).
 
-Do not build these yet (add-ons, in priority order): left-rail boat and top-left route map on phones, Before/After toggle, lamp and "currently" line, project links, easter eggs, custom domain, Malayalam text. Sound, WebGL water, and the Sort the cargo demo were considered and rejected: sound adds little for a recruiter, WebGL breaks the flat style and the Lighthouse target, and the demo did not make its link to the Freddie Mac work clear.
+Do not build these yet (add-ons, in priority order): left-rail boat and top-left route map on phones, Before/After toggle, lamp and "currently" line, project links, easter eggs, custom domain. Sound, WebGL water, and the Sort the cargo demo were considered and rejected: sound adds little for a recruiter, WebGL breaks the flat style and the Lighthouse target, and the demo did not make its link to the Freddie Mac work clear.
 
 ## Stack
 
@@ -51,7 +51,7 @@ This is Next.js 16. Check the bundled guides in `node_modules/next/dist/docs/` b
 - Publish the email `2023amathews@gmail.com` and the LinkedIn link. Do not publish the phone number. Leave out GitHub and project links until they exist.
 - The Agentic Decision Evaluation Harness is in progress: mark it that way and show no results.
 - Do not publish internal system names, ticket content, or screenshots from Freddie Mac or Juume AI. Any demo data must be fictional.
-- No Malayalam text in the MVP.
+- Malayalam appears only as the header name, shown on hover and focus and hidden from assistive tech, with `lang="ml"`.
 - Hero line: "I build backend systems and AI tooling that make messy data easier to use." Share description: "Software engineer building APIs, observability, and LLM tooling." Page title: "Aiden Mathews | Software engineer building APIs, observability, and LLM tooling."
 
 ## Done means

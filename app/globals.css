@@ -115,8 +115,9 @@
   }
 }
 
-/* The stacked page keeps a sticky header, so anchors and focus stop below it. */
-html:has(#ride):not([data-ride]) {
+/* The stacked Ride and Dry Land keep a sticky header, so anchors and focus
+   stop below it. */
+html:not([data-ride]) {
   scroll-padding-top: 4.75rem;
 }
 
@@ -133,11 +134,11 @@ html:has(#ride):not([data-ride]) {
     );
   }
 
-  .sky-predawn {
-    --sky-top: #a9bcc4;
-    --sky-bottom: #e9e4d8;
-    --water-top: #9fb5b3;
-    --water-bottom: #6f9290;
+  .sky-dawn {
+    --sky-top: #e9967c;
+    --sky-bottom: #fcd8ab;
+    --water-top: #eab79f;
+    --water-bottom: #6f9690;
   }
 
   .sky-sunrise {
@@ -166,6 +167,15 @@ html:has(#ride):not([data-ride]) {
     --sky-bottom: #f6d79a;
     --water-top: #3f8074;
     --water-bottom: #1f5f58;
+  }
+
+  /* The evening between amber and night: the sky deepens to rose overhead and
+     the water darkens, so the Harbor's night arrives by degrees. */
+  .sky-sunset {
+    --sky-top: #8f4f55;
+    --sky-bottom: #f0a060;
+    --water-top: #a8695a;
+    --water-bottom: #24504f;
   }
 
   .sky-dusk {
@@ -277,6 +287,79 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+/* The karimeen spends most of the loop under water, then leaps and is gone,
+   and its splash spreads as it lands. */
+@keyframes leap {
+  0%,
+  62% {
+    opacity: 0;
+    transform: translate3d(-14px, 12px, 0);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(-4px, -10px, 0);
+  }
+  80% {
+    opacity: 1;
+    transform: translate3d(8px, -6px, 0);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: translate3d(16px, 10px, 0);
+  }
+}
+
+/* The snake boat glides slowly, its crew's paddles dipping together. */
+@keyframes glide {
+  from {
+    transform: translate3d(24px, 0, 0);
+  }
+  to {
+    transform: translate3d(-24px, 0, 0);
+  }
+}
+
+@keyframes row {
+  from {
+    transform: translate3d(3px, -1px, 0);
+  }
+  to {
+    transform: translate3d(-3px, 1px, 0);
+  }
+}
+
+/* A float that sits still, then dips twice when something nibbles. */
+@keyframes nibble {
+  0%,
+  70%,
+  84%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  74% {
+    transform: translate3d(0, 3px, 0);
+  }
+  80% {
+    transform: translate3d(0, 2px, 0);
+  }
+}
+
+@keyframes splash {
+  0%,
+  84% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
 /* Scene loops run only on the full Ride, whose off-screen scenes are hidden. */
 @media (prefers-reduced-motion: no-preference) {
   [data-ride] .sway {
@@ -303,6 +386,28 @@ html:has(#ride):not([data-ride]) {
     animation: falling 2.8s linear infinite;
   }
 
+  [data-ride] .leap {
+    animation: leap 7s ease-out infinite;
+  }
+
+  [data-ride] .glide {
+    animation: glide 30s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .row {
+    animation: row 1.4s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .bobber {
+    animation: nibble 6s ease-in-out infinite;
+  }
+
+  [data-ride] .splash {
+    animation: splash 7s ease-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
   .cloud-drift {
     animation: cloud-drift 70s ease-in-out infinite alternate;
   }
@@ -319,6 +424,55 @@ html:has(#ride):not([data-ride]) {
     animation: wake-ring 3s ease-out infinite;
     transform-box: fill-box;
     transform-origin: center;
+  }
+}
+
+/* Dry Land's strip of backwater. Its loops run without the Ride, since the
+   strip is the only art on the page. */
+@keyframes canoe-drift {
+  from {
+    transform: translate3d(-60px, 0, 0);
+  }
+  to {
+    transform: translate3d(60px, 0, 0);
+  }
+}
+
+@keyframes birds-cross {
+  from {
+    transform: translate3d(-120px, 0, 0);
+  }
+  to {
+    transform: translate3d(1700px, -40px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .horizon .sway {
+    animation: sway 8s ease-in-out infinite alternate;
+  }
+
+  .horizon .ripples {
+    animation: ripple-drift 7s ease-in-out infinite alternate;
+  }
+
+  .horizon .h-drift {
+    animation: canoe-drift 36s ease-in-out infinite alternate;
+  }
+
+  .horizon .h-bob {
+    animation: boat-bob 4s ease-in-out infinite;
+  }
+
+  .horizon .h-birds {
+    animation: birds-cross 60s linear infinite;
+  }
+}
+
+/* Under reduced motion nothing moves, so the pause button has nothing to do. */
+@media (prefers-reduced-motion: reduce) {
+  .horizon button {
+    display: none;
   }
 }
 
@@ -392,37 +546,196 @@ html:has(#ride):not([data-ride]) {
   opacity: 0.55;
 }
 
-/* The net dips to the water and comes back with the catch. */
-.catch-fish {
+/* At Broad water the boatman trades the oar for a cast net. */
+.boat-net,
+.net-fish,
+.net-fly,
+.net-rope,
+.net-splash {
   opacity: 0;
 }
 
-[data-net="down"] .catch-fish {
+[data-boat][data-at="water"] .boat-net,
+[data-boat][data-net="down"] .net-fish {
   opacity: 1;
 }
 
-@keyframes net-haul {
+[data-boat][data-at="water"] [data-pole] {
+  opacity: 0;
+}
+
+/* The throw, 1.6 s: a quick swing back, the cast, the net spreads in the air
+   and lands at the halfway mark, and is hauled back along its rope with the
+   catch. Every transform is relative to where the net lands. The card's
+   results land on the same beats (see net-catch.tsx). */
+@keyframes net-swing {
   0%,
   100% {
     transform: rotate(0deg);
   }
-  45%,
+  12% {
+    transform: rotate(30deg);
+  }
+  24% {
+    transform: rotate(-52deg);
+  }
+  34% {
+    transform: rotate(-20deg);
+  }
   58% {
-    transform: rotate(-24deg);
+    transform: rotate(-12deg);
+  }
+  84% {
+    transform: rotate(14deg);
+  }
+}
+
+@keyframes net-bundle {
+  0%,
+  22%,
+  90%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  86% {
+    opacity: 0;
+  }
+}
+
+@keyframes net-fly {
+  0%,
+  23% {
+    opacity: 0;
+    transform: translate(-342px, -98px) scale(0.15);
+  }
+  26% {
+    opacity: 1;
+    transform: translate(-320px, -118px) scale(0.25);
+    animation-timing-function: ease-out;
+  }
+  38% {
+    transform: translate(-180px, -170px) scale(0.8);
+    animation-timing-function: ease-in;
+  }
+  50%,
+  58% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+    animation-timing-function: ease-in;
+  }
+  86% {
+    opacity: 1;
+    transform: translate(-301px, -86px) scale(0.2);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: translate(-301px, -86px) scale(0.2);
+  }
+}
+
+@keyframes net-rope {
+  0%,
+  49% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50%,
+  58% {
+    opacity: 0.8;
+    transform: scale(1);
+    animation-timing-function: ease-in;
+  }
+  86% {
+    opacity: 0.8;
+    transform: scale(0.12);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: scale(0.12);
+  }
+}
+
+@keyframes net-splash {
+  0%,
+  49% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  52% {
+    opacity: 0.9;
+  }
+  72%,
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* A result rises into the card as its fish flips in beside it. */
+@keyframes catch-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+}
+
+@keyframes fish-flip {
+  0% {
+    opacity: 0;
+    transform: translate3d(-6px, -10px, 0) rotate(-40deg) scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, 1px, 0) rotate(12deg) scale(1.05);
+  }
+  100% {
+    transform: none;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .catch-fish {
-    transition: opacity 0.4s ease-out;
+  .boat-net,
+  [data-pole] {
+    transition: opacity 0.3s ease-out;
   }
 
-  [data-net="down"] .catch-fish {
-    transition-delay: 1.3s;
+  .net-fish {
+    transition: opacity 0.2s ease-out;
   }
 
-  [data-net="down"] .net-arm {
-    animation: net-haul 1.8s ease-in-out;
+  [data-boat][data-net="down"] .net-fish {
+    transition-delay: 1.4s;
+  }
+
+  [data-boat][data-net="down"] .net-hold {
+    animation: net-swing 1.6s ease-in-out;
+  }
+
+  [data-boat][data-net="down"] .net-bundle {
+    animation: net-bundle 1.6s linear;
+  }
+
+  [data-boat][data-net="down"] .net-fly {
+    animation: net-fly 1.6s ease-in-out;
+  }
+
+  [data-boat][data-net="down"] .net-rope {
+    animation: net-rope 1.6s ease-in-out;
+  }
+
+  [data-boat][data-net="down"] .net-splash {
+    animation: net-splash 1.6s ease-out;
+  }
+
+  .catch-in {
+    animation: catch-in 0.35s ease-out var(--beat, 0ms) backwards;
+  }
+
+  .catch-in .catch-fish {
+    animation: fish-flip 0.45s ease-out var(--beat, 0ms) backwards;
   }
 }
 
@@ -441,6 +754,44 @@ html:has(#ride):not([data-ride]) {
   opacity: 0;
 }
 
+/* The ride button shows play, pause, or start again. */
+.tour-toggle svg {
+  display: none;
+}
+
+.tour-toggle[data-state="play"] .tour-play,
+.tour-toggle[data-state="pause"] .tour-pause,
+.tour-toggle[data-state="again"] .tour-again {
+  display: block;
+}
+
+/* Icon-only controls name themselves on hover and focus. */
+.bar-tip {
+  opacity: 0;
+}
+
+button:hover > .bar-tip,
+button:focus-visible > .bar-tip {
+  opacity: 1;
+}
+
+/* After a few seconds without input the bar fades to its river and stops.
+   Pointing at it or tabbing into it brings it straight back. */
+[data-route-bar] .bar-fade,
+[data-route-bar] nav,
+[data-route-bar] .route-name {
+  transition: opacity 0.5s ease;
+}
+
+[data-ride] [data-route-bar][data-idle]:not(:hover, :focus-within) .bar-fade,
+[data-ride] [data-route-bar][data-idle]:not(:hover, :focus-within) .route-name {
+  opacity: 0;
+}
+
+[data-ride] [data-route-bar][data-idle]:not(:hover, :focus-within) nav {
+  opacity: 0.6;
+}
+
 @utility border-keyline {
   border-width: 1.5px;
 }
@@ -453,6 +804,13 @@ html:has(#ride):not([data-ride]) {
     var(--kasavu-gold) 0 4px,
     transparent 4px 8px
   );
+}
+
+/* Dry Land's route: a narrow river that winds down the page past each stop. */
+@utility river-line {
+  width: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='96' viewBox='0 0 12 96'%3E%3Cpath d='M6 0C12 24 0 24 6 48S0 72 6 96' fill='none' stroke='%231f7a74' stroke-width='2.5'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
 }
 
 /* Scene art. The width is 1600 units, so every layer shares one scale and the
@@ -503,4 +861,60 @@ html:has(#ride):not([data-ride]) {
 /* Until the script runs, neighboring scenes wait off to the right. */
 [data-ride] [data-scene] {
   transform: translate3d(calc(var(--landing) * 100vw), 0, 0);
+}
+
+/* The header's name turns to Malayalam on hover and focus: the English rises
+   away as the Malayalam rises into its place. Fraunces has no Malayalam, so
+   that line names the platforms' Malayalam faces. */
+.name-swap-in {
+  font-family: "Noto Serif Malayalam", "Malayalam MN", "Malayalam Sangam MN", "Nirmala UI", "Kartika", var(--font-display);
+  opacity: 0;
+  transform: translate3d(0, 0.5em, 0);
+}
+
+.group:hover .name-swap-out,
+.group:focus-visible .name-swap-out {
+  opacity: 0;
+  transform: translate3d(0, -0.5em, 0);
+}
+
+.group:hover .name-swap-in,
+.group:focus-visible .name-swap-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .name-swap-out,
+  .name-swap-in {
+    transition:
+      opacity 0.3s ease-out,
+      transform 0.3s ease-out;
+  }
+
+  .group:hover .name-swap-in,
+  .group:focus-visible .name-swap-in {
+    transition-delay: 0.06s;
+  }
+}
+
+/* The header's name steps aside while the page shows the name itself. Hidden,
+   it leaves the tab order as well. */
+[data-header-name][data-hidden] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-header-name] {
+    transition:
+      opacity 0.25s ease-out,
+      visibility 0s linear 0s;
+  }
+
+  [data-header-name][data-hidden] {
+    transition:
+      opacity 0.25s ease-out,
+      visibility 0s linear 0.25s;
+  }
 }

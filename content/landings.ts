@@ -43,7 +43,7 @@ export type Landing = {
   role?: string;
   location?: string;
   dates?: string;
-  /** At most 45 words and one number, for the Ride card. */
+  /** At most 45 words, for the Ride card. The headline metric shows the number, so the summary leaves it out. */
   summary: string;
   /** Full resume bullets, for Dry Land. */
   bullets: string[];
@@ -66,6 +66,8 @@ const shareDescription =
 
 export const site = {
   name: "Aiden Mathews",
+  /** The name in Malayalam, shown in the header on hover and focus. */
+  nameMalayalam: "എയ്ഡൻ മാത്യൂസ്",
   url: "https://aidenmathews.vercel.app",
   heroLine,
   shareDescription,
@@ -73,9 +75,8 @@ export const site = {
   dryLandPageTitle: "Dry Land | Aiden Mathews",
   location: "Northern Virginia",
   email: "2023amathews@gmail.com",
-  emailLabel: "Email 2023amathews@gmail.com",
   linkedin: {
-    label: "LinkedIn: linkedin.com/in/aiden-mathews",
+    label: "LinkedIn",
     href: "https://www.linkedin.com/in/aiden-mathews",
   },
   resume: {
@@ -106,8 +107,8 @@ export const site = {
   ride: {
     hint: "Cast off for a guided ride, or scroll or use the arrow keys.",
     routeLabel: "Route map",
-    pause: "Pause water",
-    play: "Play water",
+    pause: "Pause motion",
+    play: "Play motion",
     tour: {
       play: "Cast off",
       pause: "Pause ride",
@@ -115,15 +116,14 @@ export const site = {
     },
   },
   net: {
-    lower: "Lower the net",
-    hint: "See the other two results.",
-    raise: "Empty the basket",
+    cast: "See the catch",
+    hint: "Throw the net to bring in all three results.",
+    empty: "Empty the net",
     label: "The catch",
   },
   spices: {
     hint: "Point at a skill, or tap it, to light its landings on the route map.",
     usedAt: "used at",
-    offRoute: "on my resume, but not tied to one landing.",
   },
   copyEmail: {
     action: "Copy email",
@@ -222,7 +222,7 @@ export const landings: Landing[] = [
     org: "Virginia Tech",
     role: "B.S. in Computer Science",
     summary:
-      "I study computer science at Virginia Tech, with a 3.72 GPA.",
+      "I study computer science at Virginia Tech.",
     bullets: ["GPA 3.72"],
     metrics: [{ value: "3.72", label: "GPA" }],
     skills: [],
@@ -247,7 +247,7 @@ export const landings: Landing[] = [
     location: "New York",
     dates: "Sep 2024 to Jan 2025",
     summary:
-      "I led the Bunchful.news migration from WordPress to React with React Router and Firebase real-time updates, for a 40% faster load.",
+      "I led the Bunchful.news migration from WordPress to React with React Router and Firebase real-time updates.",
     bullets: [
       "Led the Bunchful.news migration from WordPress to React with React Router and Firebase real-time updates (40% faster load).",
       "Built responsive React and CSS components (100% cross-browser and device compatibility, mobile page speed up 22 points).",
@@ -259,7 +259,7 @@ export const landings: Landing[] = [
       { value: "22 points", label: "mobile page speed up" },
       { value: "85%", label: "coverage" },
     ],
-    skills: ["React", "Firebase", "HTML/CSS"],
+    skills: ["React", "Firebase", "HTML/CSS", "Tailwind", "JavaScript"],
     scene: "canal",
   },
   {
@@ -271,7 +271,7 @@ export const landings: Landing[] = [
     location: "Reston",
     dates: "Jun 2025 to Jun 2026",
     summary:
-      "I built log analytics and PII detection with Temporal, DuckDB, Postgres, and GCS, with 93% of PII detected, plus a Go (Gin) analytics API and a Langfuse tracing stack on Google Cloud.",
+      "I built log analytics and PII detection with Temporal, DuckDB, Postgres, and GCS, plus a Go (Gin) analytics API and a Langfuse tracing stack on Google Cloud.",
     bullets: [
       "Go (Gin) analytics API for gateway usage, token consumption, and performance metrics.",
       "Temporal, DuckDB, Postgres, and GCS for log analytics and PII detection (35% lower API latency, 93% of PII detected).",
@@ -311,6 +311,11 @@ export const landings: Landing[] = [
       "GCP",
       "Langfuse",
       "Terraform",
+      "SQL",
+      "ClickHouse",
+      "Docker",
+      "Git",
+      "Agile/Scrum",
     ],
     scene: "water",
   },
@@ -323,7 +328,7 @@ export const landings: Landing[] = [
     location: "McLean",
     dates: "May 2026 to Aug 2026",
     summary:
-      "I built a Node.js MCP server that groups customer enhancement requests with LLM categorization, for 40% less manual triage across hundreds of tickets.",
+      "I built a Node.js MCP server that groups customer enhancement requests with LLM categorization.",
     bullets: [
       "AI-assisted workflows, agent skills, and a Node.js MCP server that groups customer enhancement requests with LLM categorization (40% less manual triage across hundreds of tickets).",
       "Java Spring Boot and MongoDB backend for a portal used by 50+ internal stakeholders.",
@@ -331,12 +336,23 @@ export const landings: Landing[] = [
       "Bruno and Jenkins checks (25% fewer environment-related deployment failures).",
     ],
     metrics: [
-      { value: "40%", label: "less manual triage" },
+      { value: "40%", label: "less manual triage across hundreds of tickets" },
       { value: "50+", label: "internal stakeholders" },
       { value: "30%", label: "less review time per request" },
       { value: "25%", label: "fewer environment-related deployment failures" },
     ],
-    skills: ["Node.js", "MCP", "Java", "Spring Boot", "MongoDB", "Angular"],
+    skills: [
+      "Node.js",
+      "MCP",
+      "Java",
+      "Spring Boot",
+      "MongoDB",
+      "Angular",
+      "C++",
+      "C#",
+      "Redis",
+      "CI/CD",
+    ],
     scene: "lake",
   },
   {
@@ -347,7 +363,15 @@ export const landings: Landing[] = [
       "Two side projects: an MCP-based harness comparing Jev against Claude, still in progress, and a legal document analyzer.",
     bullets: [],
     metrics: [],
-    skills: ["React", "FastAPI", "OpenAI API", "Python", "MCP"],
+    skills: [
+      "React",
+      "FastAPI",
+      "OpenAI API",
+      "Python",
+      "MCP",
+      "Vercel",
+      "AWS",
+    ],
     scene: "channels",
     projects: [
       {

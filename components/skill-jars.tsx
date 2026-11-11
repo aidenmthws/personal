@@ -7,7 +7,7 @@ type SkillJarsProps = {
   /** For each skill, the index of every landing that used it. */
   stops: Record<string, number[]>;
   landingTitles: string[];
-  labels: { hint: string; usedAt: string; offRoute: string };
+  labels: { hint: string; usedAt: string };
 };
 
 const stepKeys: Record<string, number> = {
@@ -57,11 +57,9 @@ export function SkillJars({ groups, stops, landingTitles, labels }: SkillJarsPro
   }
 
   const places = active ? stops[active.skill].map((stop) => landingTitles[stop]) : [];
-  const status = !active
-    ? labels.hint
-    : places.length > 0
-      ? `${active.skill}: ${labels.usedAt} ${places.join(", ")}.`
-      : `${active.skill}: ${labels.offRoute}`;
+  const status = active
+    ? `${active.skill}: ${labels.usedAt} ${places.join(", ")}.`
+    : labels.hint;
 
   return (
     <div ref={root} className="flex flex-col gap-2">

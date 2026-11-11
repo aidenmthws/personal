@@ -205,10 +205,11 @@ test("the sky reaches each stop at its landing and ends at dusk", () => {
       (_, layer) => skyOpacity(layer, world, order) === 1,
     );
 
-  assert.equal(skyStops[visibleTop(0)], "predawn");
-  assert.equal(skyStops[visibleTop(1)], "predawn");
+  assert.equal(skyStops[visibleTop(0)], "dawn");
+  assert.equal(skyStops[visibleTop(1)], "dawn");
   assert.equal(skyStops[visibleTop(2)], "sunrise");
   assert.equal(skyStops[visibleTop(4)], "bright");
+  assert.equal(skyStops[visibleTop(7)], "sunset");
   assert.equal(skyStops[visibleTop(8)], "dusk");
 });
 
@@ -282,15 +283,16 @@ test("a running Ride is never switched off by the fallback", () => {
   assert.equal(dataset.ride, "on");
 });
 
-test("the sun is under the water at both ends of the day and highest midway", () => {
+test("the sun rises at the Shore, sets by the Harbor, and is highest midway", () => {
   const horizon = 70;
-  assert.ok(sunPose(0, 8).yVh - 8 >= horizon, "dark at the Shore");
+  const shore = sunPose(0, 8).yVh;
+  assert.ok(shore < horizon && shore > horizon - 16, "low over the water at the Shore");
   assert.ok(sunPose(8, 8).yVh - 8 >= horizon, "set at the Harbor");
-  assert.equal(sunPose(0, 8).glitter, 0);
+  assert.ok(sunPose(0, 8).glitter > 0);
   assert.equal(sunPose(8, 8).glitter, 0);
 
   const heights = order.map((_, world) => sunPose(world, 8).yVh);
-  assert.equal(heights.indexOf(Math.min(...heights)), 4);
+  assert.equal(heights.indexOf(Math.min(...heights)), 3);
 });
 
 test("the sun crosses the sky in one direction", () => {
@@ -340,14 +342,14 @@ test("the route map's marker reaches every stop and stays on the river", () => {
   assert.equal(routePoint(0).x, 32);
   assert.equal(routePoint(8).x, 32 + 8 * 64);
   for (let world = 0; world <= 8; world += 0.1) {
-    assert.ok(Math.abs(routePoint(world).y - 44) <= 4);
+    assert.ok(Math.abs(routePoint(world).y - 22) <= 3);
   }
 });
 
 test("longer cards hold the guided ride longer, within limits", () => {
   assert.ok(readingTime(40) > readingTime(20));
-  assert.equal(readingTime(1), 5000);
-  assert.equal(readingTime(500), 15000);
+  assert.equal(readingTime(1), 2500);
+  assert.equal(readingTime(500), 7500);
 });
 
 function steps(events: [number, number][]) {
@@ -371,6 +373,32 @@ test("a stall in the middle of a flick's momentum is still one gesture", () => {
   const afterStall: [number, number][] = [[last[0] + 354, last[1]], [last[0] + 370, last[1]]];
 
   assert.equal(steps([...rise, ...fade, ...afterStall]), 1);
+});
+
+test("a stall just after a flick's peak is still one gesture", () => {
+  const rise: [number, number][] = [[0, 10], [16, 35], [32, 60], [48, 85]];
+  const early: [number, number][] = Array.from({ length: 8 }, (_, frame) => [
+    64 + frame * 16,
+    Math.round(85 * Math.exp(-frame / 16)),
+  ]);
+  const last = early[early.length - 1];
+  const resumed: [number, number][] = Array.from({ length: 30 }, (_, frame) => [
+    last[0] + 200 + frame * 16,
+    Math.max(1, Math.round(last[1] * Math.exp(-frame / 16))),
+  ]);
+
+  assert.equal(steps([...rise, ...early, ...resumed]), 1);
+});
+
+test("two flicks with a pause between them are two steps", () => {
+  const flick = (start: number): [number, number][] => [
+    [start, 10], [start + 16, 35], [start + 32, 60], [start + 48, 85],
+    ...Array.from({ length: 60 }, (_, frame): [number, number] => [
+      start + 64 + frame * 16,
+      Math.max(1, Math.round(85 * Math.exp(-frame / 16))),
+    ]),
+  ];
+  assert.equal(steps([...flick(0), ...flick(2200)]), 2);
 });
 
 test("mouse wheel notches stay separate steps however far apart", () => {

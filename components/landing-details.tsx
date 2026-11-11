@@ -1,5 +1,4 @@
 import { ContactLinks } from "@/components/contact-links";
-import { ResumeLink } from "@/components/resume-link";
 import { TagList } from "@/components/tag-list";
 import { site, type Landing as LandingContent } from "@/content/landings";
 
@@ -61,12 +60,7 @@ export function LandingDetails({ landing }: { landing: LandingContent }) {
         </div>
       ))}
 
-      {landing.id === "harbor" && (
-        <>
-          <ContactLinks />
-          <ResumeLink variant="outline" />
-        </>
-      )}
+      {landing.id === "harbor" && <ContactLinks />}
     </>
   );
 }

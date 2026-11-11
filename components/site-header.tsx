@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { HeaderName } from "@/components/header-name";
+import { NameSwap } from "@/components/name-swap";
 import { site } from "@/content/landings";
 
 type SiteVersion = "ride" | "dry-land";
@@ -36,9 +38,20 @@ const toggleStyles =
  */
 export function SiteHeader({ current }: { current?: SiteVersion }) {
   const isRide = current === "ride";
+  const name = (
+    <Link
+      href="/"
+      prefetch={false}
+      className="group inline-flex min-h-11 items-center font-display text-body whitespace-nowrap text-foreground no-underline md:text-lead"
+    >
+      <NameSwap />
+    </Link>
+  );
 
+  /* Both versions keep the header in reach, so the switch between them is
+     always one click away. */
   return (
-    <header className={isRide ? "sticky top-0 z-50 h-19 bg-background" : ""}>
+    <header className={current ? "sticky top-0 z-50 h-19 bg-background" : ""}>
       <div
         className={`mx-auto flex w-full max-w-4xl items-center justify-between gap-4 px-4 py-4 md:px-6 ${
           isRide ? "ride:max-w-none ride:px-[max(2rem,6vw)]" : ""
@@ -49,13 +62,9 @@ export function SiteHeader({ current }: { current?: SiteVersion }) {
             {link.label}
           </a>
         ))}
-        <Link
-          href="/"
-          prefetch={false}
-          className="inline-flex min-h-11 items-center font-display text-body whitespace-nowrap text-foreground no-underline md:text-lead"
-        >
-          {site.name}
-        </Link>
+        {/* On the two versions the page opens on my name, so the header's
+            copy steps aside while that one is in view. */}
+        {current ? <HeaderName>{name}</HeaderName> : name}
         <nav aria-label={site.nav.label}>
           <ul className="flex gap-1 md:gap-2">
             {versions.map((version) => (
