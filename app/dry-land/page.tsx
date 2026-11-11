@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { DryLandHorizon } from "@/components/dry-land-horizon";
 import { LandingDetails, LandingMeta } from "@/components/landing-details";
+import { NameSwap } from "@/components/name-swap";
 import { ResumeLink } from "@/components/resume-link";
 import { RouteGlyph } from "@/components/ride/route-glyphs";
 import { SiteHeader } from "@/components/site-header";
@@ -22,7 +23,9 @@ export default function DryLandPage() {
       <main id="main" className="flex-1">
         <div className="mx-auto w-full max-w-4xl px-4 md:px-6">
           <Landing id={shore.id} className="py-12">
-            <Landing.Title as="h1">{shore.dryTitle}</Landing.Title>
+            <Landing.Title as="h1">
+              <NameSwap />
+            </Landing.Title>
             <p className="mt-4 max-w-2xl text-lead">{shore.summary}</p>
             <p className="mt-2 text-label text-muted-foreground">{shore.location}</p>
             <div className="mt-6">

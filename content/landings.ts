@@ -66,6 +66,8 @@ const shareDescription =
 
 export const site = {
   name: "Aiden Mathews",
+  /** The name in Malayalam, shown in the header on hover and focus. */
+  nameMalayalam: "എയ്ഡൻ മാത്യൂസ്",
   url: "https://aidenmathews.vercel.app",
   heroLine,
   shareDescription,

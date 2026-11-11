@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { LandingCardBody } from "@/components/landing-card-body";
 import { LandingMeta } from "@/components/landing-details";
+import { NameSwap } from "@/components/name-swap";
 import { Boat } from "@/components/ride/boat";
 import { RideController } from "@/components/ride/ride-controller";
 import { RouteMap } from "@/components/ride/route-map";
@@ -63,7 +64,7 @@ export default function RidePage() {
                 >
                   <Card.Header>
                     <Landing.Title as={isShore ? "h1" : "h2"}>
-                      {landing.dryTitle}
+                      {isShore ? <NameSwap /> : landing.dryTitle}
                     </Landing.Title>
                     {!isShore && <LandingMeta landing={landing} />}
                   </Card.Header>

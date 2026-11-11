@@ -126,7 +126,10 @@ test("every result in the net comes from the resume text", () => {
 test("nothing off limits is published", () => {
   assert.doesNotMatch(everything, /\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}/, "phone");
   assert.doesNotMatch(everything, /github\.com/i, "GitHub link");
-  assert.doesNotMatch(everything, /[ഀ-ൿ]/, "Malayalam text");
+  /* Malayalam appears only as the header name. */
+  const { nameMalayalam, ...rest } = site;
+  assert.match(nameMalayalam, /^[ഀ-ൿ\s]+$/);
+  assert.doesNotMatch(JSON.stringify({ landings, site: rest }), /[ഀ-ൿ]/, "Malayalam text");
   assert.match(everything, /2023amathews@gmail\.com/);
 });
 

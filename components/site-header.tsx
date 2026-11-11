@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { NameSwap } from "@/components/name-swap";
 import { site } from "@/content/landings";
 
 type SiteVersion = "ride" | "dry-land";
@@ -52,9 +53,9 @@ export function SiteHeader({ current }: { current?: SiteVersion }) {
         <Link
           href="/"
           prefetch={false}
-          className="inline-flex min-h-11 items-center font-display text-body whitespace-nowrap text-foreground no-underline md:text-lead"
+          className="group inline-flex min-h-11 items-center font-display text-body whitespace-nowrap text-foreground no-underline md:text-lead"
         >
-          {site.name}
+          <NameSwap />
         </Link>
         <nav aria-label={site.nav.label}>
           <ul className="flex gap-1 md:gap-2">

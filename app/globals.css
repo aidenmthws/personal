@@ -861,3 +861,38 @@ button:focus-visible > .bar-tip {
 [data-ride] [data-scene] {
   transform: translate3d(calc(var(--landing) * 100vw), 0, 0);
 }
+
+/* The header's name turns to Malayalam on hover and focus: the English rises
+   away as the Malayalam rises into its place. Fraunces has no Malayalam, so
+   that line names the platforms' Malayalam faces. */
+.name-swap-in {
+  font-family: "Noto Serif Malayalam", "Malayalam MN", "Malayalam Sangam MN", "Nirmala UI", "Kartika", var(--font-display);
+  opacity: 0;
+  transform: translate3d(0, 0.5em, 0);
+}
+
+.group:hover .name-swap-out,
+.group:focus-visible .name-swap-out {
+  opacity: 0;
+  transform: translate3d(0, -0.5em, 0);
+}
+
+.group:hover .name-swap-in,
+.group:focus-visible .name-swap-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .name-swap-out,
+  .name-swap-in {
+    transition:
+      opacity 0.3s ease-out,
+      transform 0.3s ease-out;
+  }
+
+  .group:hover .name-swap-in,
+  .group:focus-visible .name-swap-in {
+    transition-delay: 0.06s;
+  }
+}
