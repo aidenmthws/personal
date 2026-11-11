@@ -134,6 +134,28 @@ export function Lilies({ pads, leaf, flower }: { pads: [number, number, number][
   );
 }
 
+/** A floating clump of water hyacinth, the backwaters' commonest weed, for the fore layer. */
+export function Hyacinth({ x, y, leaf, flower }: { x: number; y: number; leaf: string; flower: string }) {
+  const leaves: [number, number, number][] = [
+    [-30, 2, 13],
+    [-12, -6, 15],
+    [8, -2, 14],
+    [26, 3, 12],
+    [-2, 6, 12],
+  ];
+  return (
+    <g transform={`translate(${x} ${y})`} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round">
+      {leaves.map(([cx, cy, r]) => (
+        <ellipse key={cx} cx={cx} cy={cy} rx={r} ry={r * 0.62} fill={leaf} />
+      ))}
+      <g fill={flower}>
+        <path d="M-14 -8L-17 -30Q-12 -36 -8 -30L-10 -8Z" />
+        <path d="M4 -6L4 -24Q8 -30 12 -24L9 -6Z" />
+      </g>
+    </g>
+  );
+}
+
 /** A long ridge through [x, height] points, for the Ghats. */
 export function Ridge({ points, fill }: { points: [number, number][]; fill: string }) {
   const at = ([x, height]: [number, number]) => `${x} ${WATERLINE - height}`;

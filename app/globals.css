@@ -309,6 +309,25 @@ html:has(#ride):not([data-ride]) {
   }
 }
 
+/* The snake boat glides slowly, its crew's paddles dipping together. */
+@keyframes glide {
+  from {
+    transform: translate3d(24px, 0, 0);
+  }
+  to {
+    transform: translate3d(-24px, 0, 0);
+  }
+}
+
+@keyframes row {
+  from {
+    transform: translate3d(3px, -1px, 0);
+  }
+  to {
+    transform: translate3d(-3px, 1px, 0);
+  }
+}
+
 /* A float that sits still, then dips twice when something nibbles. */
 @keyframes nibble {
   0%,
@@ -368,6 +387,14 @@ html:has(#ride):not([data-ride]) {
 
   [data-ride] .leap {
     animation: leap 7s ease-out infinite;
+  }
+
+  [data-ride] .glide {
+    animation: glide 30s ease-in-out infinite alternate;
+  }
+
+  [data-ride] .row {
+    animation: row 1.4s ease-in-out infinite alternate;
   }
 
   [data-ride] .bobber {

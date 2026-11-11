@@ -83,35 +83,56 @@ export function Jetty({
 }
 
 /**
- * A cantilevered fishing net seen from the side, reaching left over the water.
- * `net-arm` pivots on the fulcrum, so the net can be lowered.
+ * A whitewashed church with a bell tower over its gable and lower roofs to
+ * each side. Wrap it in a stroke to outline it.
  */
-export function FishingNet({ x, base, scale = 1 }: { x: number; base: number; scale?: number }) {
+export function Church({ x, base, wall, shade }: { x: number; base: number; wall: string; shade: string }) {
   return (
-    <g transform={`translate(${x} ${base}) scale(${scale})`} fill="none" strokeLinecap="round">
-      <path d="M-34 0L-4 -118M62 0L0 -118" stroke="#6F5237" strokeWidth="9" />
-      <rect x="-70" y="-6" width="190" height="10" fill="#6F5237" stroke={OUTLINE} strokeWidth="2" />
-      <g className="net-arm" style={{ transformOrigin: "0px -118px" }}>
-        <path d="M120 -60L-250 -318" stroke="#6F5237" strokeWidth="9" />
-        <path d="M-430 -198L-250 -318L-70 -198" stroke="#6F5237" strokeWidth="5" />
-        <path
-          d="M-430 -198Q-250 90 -70 -198Z"
-          fill="#F3EDE0"
-          fillOpacity="0.72"
-          stroke={OUTLINE}
-          strokeWidth="2"
-        />
-        <g stroke={OUTLINE} strokeWidth="1.25" strokeOpacity="0.55">
-          <path d="M-385 -198L-340 -112M-340 -198L-296 -72M-295 -198L-262 -58M-250 -198L-228 -58M-205 -198L-195 -72M-160 -198L-160 -112M-115 -198L-130 -140" />
-          <path d="M-398 -160Q-250 -126 -102 -160M-360 -118Q-250 -88 -140 -118M-310 -80Q-250 -66 -190 -80" />
-        </g>
-        <path d="M-250 -318L-250 -198M-250 -318L-340 -198M-250 -318L-160 -198" stroke={OUTLINE} strokeWidth="1.5" />
-        <path d="M-250 -318L128 -60" stroke={OUTLINE} strokeWidth="1.5" />
-        <g fill="#8A7A66" stroke={OUTLINE} strokeWidth="2">
-          <circle cx="120" cy="-42" r="11" />
-          <circle cx="96" cy="-52" r="8" />
-        </g>
+    <g>
+      <path d={`M${x - 46} ${base}V${base - 30}L${x - 20} ${base - 44}H${x + 20}L${x + 46} ${base - 30}V${base}Z`} fill={shade} />
+      <path d={`M${x - 24} ${base}V${base - 46}L${x} ${base - 62}L${x + 24} ${base - 46}V${base}Z`} fill={wall} />
+      <path d={`M${x - 8} ${base - 52}V${base - 86}L${x} ${base - 96}L${x + 8} ${base - 86}V${base - 52}Z`} fill={wall} />
+      <path d={`M${x} ${base - 96}V${base - 110}M${x - 5} ${base - 105}H${x + 5}`} stroke={wall} strokeWidth="2.5" />
+      <path d={`M${x - 7} ${base}V${base - 16}Q${x} ${base - 25} ${x + 7} ${base - 16}V${base}Z`} fill={shade} />
+      <path d={`M${x - 3} ${base - 74}Q${x} ${base - 80} ${x + 3} ${base - 74}V${base - 68}H${x - 3}Z`} fill={shade} />
+    </g>
+  );
+}
+
+/**
+ * A chundan vallam, the long snake boat, with a crew rowing in time and a
+ * helmsman at the raised stern. Its paddles dip on `row`, and the boat
+ * glides on `glide`.
+ */
+export function SnakeBoat({ x, base, length }: { x: number; base: number; length: number }) {
+  const stern = x + length;
+  const rowers = Array.from({ length: 13 }, (_, index) => Math.round(x + 34 + index * ((length - 96) / 12)));
+  return (
+    <g className="glide ambient">
+      <g className="row ambient" stroke="#6f5237" strokeWidth="2.5" strokeLinecap="round">
+        {rowers.map((rx) => (
+          <path key={rx} d={`M${rx + 3} ${base - 14}L${rx - 9} ${base + 4}`} />
+        ))}
       </g>
+      {rowers.map((rx, index) => (
+        <g key={rx}>
+          <rect x={rx - 3} y={base - 20} width="7" height="10" fill="#f3ede0" />
+          <circle cx={rx + 0.5} cy={base - 24} r="3.6" fill="#5a3a28" />
+          {index % 3 === 0 && <path d={`M${rx - 3} ${base - 26}h7`} stroke="#b4492b" strokeWidth="2" />}
+        </g>
+      ))}
+      <path d={`M${stern - 36} ${base - 14}L${stern - 52} ${base - 60}`} stroke="#6f5237" strokeWidth="3" strokeLinecap="round" />
+      <rect x={stern - 40} y={base - 34} width="8" height="18" fill="#f3ede0" />
+      <circle cx={stern - 36} cy={base - 39} r="4.2" fill="#5a3a28" />
+      <path
+        d={`M${x} ${base - 8}Q${x + length * 0.5} ${base + 6} ${stern - 26} ${base - 10}Q${stern - 4} ${base - 22} ${stern + 6} ${base - 70}Q${stern - 2} ${base - 34} ${stern - 30} ${base - 16}Q${x + length * 0.5} ${base - 8} ${x + 6} ${base - 12}Z`}
+        fill="#24201c"
+        stroke={OUTLINE}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d={`M${x + 12} ${base - 9}Q${x + length * 0.5} ${base + 1} ${stern - 28} ${base - 12}`} fill="none" stroke="#c8a24a" strokeWidth="2" />
+      <circle cx={stern + 6} cy={base - 72} r="3" fill="#c8a24a" />
     </g>
   );
 }

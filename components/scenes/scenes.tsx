@@ -6,6 +6,7 @@ import {
   Forest,
   GroveLine,
   Hill,
+  Hyacinth,
   Lilies,
   Mist,
   Palm,
@@ -22,12 +23,13 @@ import {
   Basket,
   Bunting,
   Canoe,
-  FishingNet,
+  Church,
   Footbridge,
   House,
   Houseboat,
   Jetty,
   Lamp,
+  SnakeBoat,
   Stall,
   Veranda,
   Waterfall,
@@ -323,36 +325,33 @@ function WaterScene() {
       name="water"
       far={
         <>
-          <Hill x={0} width={700} height={50} fill={tint.far} />
-          <Hill x={620} width={980} height={70} fill={tint.far} />
-          <GroveLine x={0} width={1600} base={base} height={70} fill="#79b39b" seed={6} />
+          {/* The wide lake, its far shore low and hazy. */}
+          <Hill x={0} width={900} height={34} fill={tint.far} />
+          <Hill x={760} width={840} height={46} fill={tint.far} />
+          <GroveLine x={0} width={1600} base={base} height={56} fill="#79b39b" seed={6} />
         </>
       }
       mid={
         <>
           <Bank x={0} width={560} height={30} fill={tint.bank} lip={tint.lip} seed={2} />
           <Palm x={200} base={top(30)} height={170} tint={tint} />
-          <Bank x={1160} width={440} height={50} fill={tint.bank} lip={tint.lip} seed={5} />
-          <FishingNet x={1520} base={top(50)} scale={0.72} />
-          <Palm x={1570} base={top(50)} height={250} lean={-36} tint={tint} sway="sway" />
-          <FishingNet x={1270} base={top(50)} />
-          <Figure x={1340} base={top(44)} pose="reach" cloth="#f3ede0" wrap="#b4492b" />
-          <Figure x={1390} base={top(44)} scale={0.95} cloth="#1f7a74" wrap="#f3ede0" />
-          <g data-catch>
-            <g className="catch-fish" fill="#c7d6d2" stroke="#14221f" strokeWidth="1.5">
-              <path d="M1450 562q14 -12 30 0l8 -7v14l-8 -7q-16 12 -30 0Z" />
-              <path d="M1458 548q12 -10 26 0l7 -6v12l-7 -6q-14 10 -26 0Z" />
-            </g>
-            <Basket x={1446} base={top(46)} size={46} />
+          <SnakeBoat x={1010} base={628} length={300} />
+          {/* An island church among the palms, as on the lake's shores. */}
+          <Bank x={1300} width={300} height={44} fill={tint.bank} lip={tint.lip} seed={5} />
+          <Palm x={1370} base={top(44)} height={220} lean={-26} tint={tint} sway="sway" />
+          <g stroke="#14221f" strokeWidth="2" strokeLinejoin="round">
+            <Church x={1470} base={top(44)} wall={tint.wall} shade={tint.roof} />
           </g>
+          <Palm x={1566} base={top(44)} height={250} lean={-30} tint={tint} sway="sway" />
           <BirdFlock birds={[[720, 200], [770, 150], [830, 214], [660, 142]]} color="#14221f" />
         </>
       }
       fore={
         <>
           <Ripples color="#d6efe2" lines={[[120, 60, 150], [640, 120, 130], [1100, 50, 170], [1340, 170, 120]]} />
-          <Canoe x={1040} base={150} width={150} />
-          <Karimeen x={1290} y={84} ripple="#d6efe2" />
+          <Hyacinth x={330} y={160} leaf={tint.leaf} flower="#a98bc9" />
+          <Hyacinth x={1430} y={214} leaf={tint.leaf} flower="#a98bc9" />
+          <Karimeen x={1230} y={96} ripple="#d6efe2" />
         </>
       }
       frame={<FrameFronds side="right" fill={tint.shade} />}
