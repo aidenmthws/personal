@@ -115,8 +115,9 @@
   }
 }
 
-/* The stacked page keeps a sticky header, so anchors and focus stop below it. */
-html:has(#ride):not([data-ride]) {
+/* The stacked Ride and Dry Land keep a sticky header, so anchors and focus
+   stop below it. */
+html:not([data-ride]) {
   scroll-padding-top: 4.75rem;
 }
 
@@ -894,5 +895,26 @@ button:focus-visible > .bar-tip {
   .group:hover .name-swap-in,
   .group:focus-visible .name-swap-in {
     transition-delay: 0.06s;
+  }
+}
+
+/* The header's name steps aside while the page shows the name itself. Hidden,
+   it leaves the tab order as well. */
+[data-header-name][data-hidden] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-header-name] {
+    transition:
+      opacity 0.25s ease-out,
+      visibility 0s linear 0s;
+  }
+
+  [data-header-name][data-hidden] {
+    transition:
+      opacity 0.25s ease-out,
+      visibility 0s linear 0.25s;
   }
 }
