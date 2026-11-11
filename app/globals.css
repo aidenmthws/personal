@@ -92,6 +92,16 @@
     background-color: var(--background);
   }
 
+  /* On wide screens with a mouse or trackpad, the type and controls run a step
+     smaller, so the scenes carry the page. A percentage keeps the visitor's own
+     font-size setting in charge. Touch screens keep the full size, and with it
+     44 px targets. */
+  @media (min-width: 1024px) and (pointer: fine) {
+    html {
+      font-size: 87.5%;
+    }
+  }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
@@ -246,12 +256,45 @@ html:not([data-ride]) {
   }
 }
 
-@keyframes ripple-drift {
+/* Water flows downstream: each ripple drifts on, brightening and fading, and
+   the long currents under them move further and slower. */
+@keyframes ripple-flow {
+  0% {
+    opacity: 0;
+    transform: translate3d(-18px, 0, 0);
+  }
+  35%,
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(26px, 0, 0);
+  }
+}
+
+@keyframes current-flow {
+  0% {
+    opacity: 0;
+    transform: translate3d(-70px, 0, 0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(70px, 0, 0);
+  }
+}
+
+/* Reflections waver as the surface moves. The whole layer moves, so the
+   masked reflection is never repainted. */
+@keyframes waver {
   from {
-    transform: translate3d(-8px, 0, 0);
+    transform: translate3d(-3px, 0, 0) scaleY(1);
   }
   to {
-    transform: translate3d(8px, 0, 0);
+    transform: translate3d(3px, 0, 0) scaleY(1.025);
   }
 }
 
@@ -370,8 +413,17 @@ html:not([data-ride]) {
     animation: mist-drift 28s ease-in-out infinite alternate;
   }
 
-  [data-ride] .ripples {
-    animation: ripple-drift 7s ease-in-out infinite alternate;
+  [data-ride] .ripple {
+    animation: ripple-flow 8s ease-in-out infinite;
+  }
+
+  [data-ride] .current {
+    animation: current-flow 15s linear infinite;
+  }
+
+  [data-ride] .waver {
+    animation: waver 5s ease-in-out infinite alternate;
+    transform-origin: top;
   }
 
   [data-ride] .ducks {
@@ -452,8 +504,8 @@ html:not([data-ride]) {
     animation: sway 8s ease-in-out infinite alternate;
   }
 
-  .horizon .ripples {
-    animation: ripple-drift 7s ease-in-out infinite alternate;
+  .horizon .ripple {
+    animation: ripple-flow 8s ease-in-out infinite;
   }
 
   .horizon .h-drift {

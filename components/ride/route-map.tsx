@@ -3,6 +3,7 @@ import { RouteGlyph } from "@/components/ride/route-glyphs";
 import { landings, site } from "@/content/landings";
 import { ROUTE_HEIGHT, ROUTE_STEP, routePoint } from "@/lib/ride";
 
+/** The river runs from the first stop to the last, and no further. */
 function riverPath() {
   const stops = landings.map((_, index) => routePoint(index));
   const body = stops
@@ -13,7 +14,7 @@ function riverPath() {
       return `C${midX} ${before.y} ${midX} ${point.y} ${point.x} ${point.y}`;
     })
     .join("");
-  return `M0 ${stops[0].y}L${stops[0].x} ${stops[0].y}${body}L${ROUTE_STEP * landings.length} ${stops[stops.length - 1].y}`;
+  return `M${stops[0].x} ${stops[0].y}${body}`;
 }
 
 /** A small label that names an icon-only control on hover and focus. */
@@ -57,6 +58,9 @@ export function RouteMap() {
           >
             <path d={riverPath()} fill="none" stroke="#1f7a74" strokeWidth="3" strokeLinecap="round" />
           </svg>
+          {/* On the Ride each stop is ROUTE_STEP by ROUTE_HEIGHT in pixels, not
+              rem, so the dots, the river, and the boat marker stay in line
+              whatever the root font size. */}
           <ol className="route-stops relative flex max-w-55 flex-wrap justify-center min-[420px]:max-w-none ride:flex-nowrap">
             {landings.map((landing, index) => (
               <li key={landing.id} className="relative">
@@ -64,7 +68,7 @@ export function RouteMap() {
                   href={`#${landing.id}`}
                   data-route-dot={index}
                   aria-current={index === 0 ? "location" : undefined}
-                  className="route-stop group relative flex size-11 items-center justify-center text-muted-foreground no-underline aria-[current=location]:text-accent ride:w-16"
+                  className="route-stop group relative flex size-11 items-center justify-center text-muted-foreground no-underline aria-[current=location]:text-accent ride:h-[44px] ride:w-[64px]"
                 >
                   <span className="rounded-full p-0.5 group-data-lit:bg-border group-data-lit:text-foreground ride:hidden">
                     <RouteGlyph id={landing.id} />

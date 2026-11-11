@@ -70,9 +70,14 @@ export function DryLandHorizon({ pauseLabel, playLabel }: { pauseLabel: string; 
             <Figure x={760} base={base - 2} scale={0.6} pose="reach" cloth="#e4dccb" />
           </g>
         </g>
-        <g className="ripples ambient">
-          {ripples.map(([x, y, width]) => (
-            <path key={x} d={`M${x} ${y}h${width}`} stroke="#f3ede0" strokeWidth="3" strokeLinecap="round" opacity="0.6" />
+        <g stroke="#f3ede0" strokeWidth="3" strokeLinecap="round" opacity="0.6">
+          {ripples.map(([x, y, width], index) => (
+            <path
+              key={x}
+              className="ripple ambient"
+              style={{ animationDelay: `${-index * 2.3}s`, animationDuration: `${7 + (index % 3) * 1.6}s` }}
+              d={`M${x} ${y}h${width}`}
+            />
           ))}
         </g>
         <g stroke="#fbeec8" strokeWidth="3" strokeLinecap="round">
