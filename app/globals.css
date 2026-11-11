@@ -92,6 +92,16 @@
     background-color: var(--background);
   }
 
+  /* On wide screens with a mouse or trackpad, the type and controls run a step
+     smaller, so the scenes carry the page. A percentage keeps the visitor's own
+     font-size setting in charge. Touch screens keep the full size, and with it
+     44 px targets. */
+  @media (min-width: 1024px) and (pointer: fine) {
+    html {
+      font-size: 87.5%;
+    }
+  }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
