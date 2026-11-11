@@ -160,7 +160,7 @@ test.describe("the guided ride", () => {
     await expectDocked(page, "water", 4);
 
     await toggle(page).click();
-    await page.locator("#water").getByRole("button", { name: "Lower the net" }).click();
+    await page.locator("#water").getByRole("button", { name: "See the catch" }).click();
     await expect(toggle(page)).toHaveAccessibleName("Cast off");
     await expectDocked(page, "water", 4);
   });
@@ -168,7 +168,7 @@ test.describe("the guided ride", () => {
   test("a mouse left at rest never holds the ride, but pointing at a control does", async ({ page }) => {
     await page.goto("/#water");
     await readyToRide(page);
-    const net = page.locator("#water").getByRole("button", { name: "Lower the net" });
+    const net = page.locator("#water").getByRole("button", { name: "See the catch" });
     await expect.poll(() => net.evaluate((el) => getComputedStyle(el.closest("[data-card]")!).opacity)).toBe("1");
     const box = (await net.boundingBox())!;
     await page.locator('[data-route-dot="3"]').click();
@@ -250,13 +250,13 @@ test.describe("the living river", () => {
     await page.goto("/#water");
     await readyToRide(page);
 
-    const button = page.locator("#water").getByRole("button", { name: "Lower the net" });
+    const button = page.locator("#water").getByRole("button", { name: "See the catch" });
     await button.focus();
     await page.keyboard.press("Enter");
 
     await expect(page.locator("#water details")).toHaveCount(3);
     await expect(page.locator("#water")).toHaveAttribute("data-net", "down");
-    await expect(page.locator("#water").getByRole("button", { name: "Empty the basket" })).toBeFocused();
+    await expect(page.locator("#water").getByRole("button", { name: "Empty the net" })).toBeFocused();
   });
 
   test("a skill lights its landings, and arrow keys stay among the jars", async ({ page }) => {

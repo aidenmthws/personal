@@ -114,9 +114,9 @@ export const site = {
     },
   },
   net: {
-    lower: "Lower the net",
-    hint: "See the other two results.",
-    raise: "Empty the basket",
+    cast: "See the catch",
+    hint: "Throw the net to bring in all three results.",
+    empty: "Empty the net",
     label: "The catch",
   },
   spices: {

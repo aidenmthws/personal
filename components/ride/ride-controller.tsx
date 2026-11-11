@@ -183,6 +183,12 @@ export function RideController() {
       sections[arrived]?.removeAttribute("data-arrived");
       arrived = landing;
       sections[arrived]?.setAttribute("data-arrived", "on");
+      /* The boat is shared, so it carries where it is docked: at Broad water
+         the boatman holds a net instead of the oar. */
+      if (boat) {
+        if (arrived === -1) delete boat.dataset.at;
+        else boat.dataset.at = order[arrived];
+      }
     }
 
     function paintStage(world: number, velocity = 0) {

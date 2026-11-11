@@ -545,37 +545,196 @@ html:has(#ride):not([data-ride]) {
   opacity: 0.55;
 }
 
-/* The net dips to the water and comes back with the catch. */
-.catch-fish {
+/* At Broad water the boatman trades the oar for a cast net. */
+.boat-net,
+.net-fish,
+.net-fly,
+.net-rope,
+.net-splash {
   opacity: 0;
 }
 
-[data-net="down"] .catch-fish {
+[data-boat][data-at="water"] .boat-net,
+[data-boat][data-net="down"] .net-fish {
   opacity: 1;
 }
 
-@keyframes net-haul {
+[data-boat][data-at="water"] [data-pole] {
+  opacity: 0;
+}
+
+/* The throw, 1.6 s: a quick swing back, the cast, the net spreads in the air
+   and lands at the halfway mark, and is hauled back along its rope with the
+   catch. Every transform is relative to where the net lands. The card's
+   results land on the same beats (see net-catch.tsx). */
+@keyframes net-swing {
   0%,
   100% {
     transform: rotate(0deg);
   }
-  45%,
+  12% {
+    transform: rotate(30deg);
+  }
+  24% {
+    transform: rotate(-52deg);
+  }
+  34% {
+    transform: rotate(-20deg);
+  }
   58% {
-    transform: rotate(-24deg);
+    transform: rotate(-12deg);
+  }
+  84% {
+    transform: rotate(14deg);
+  }
+}
+
+@keyframes net-bundle {
+  0%,
+  22%,
+  90%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  86% {
+    opacity: 0;
+  }
+}
+
+@keyframes net-fly {
+  0%,
+  23% {
+    opacity: 0;
+    transform: translate(-342px, -98px) scale(0.15);
+  }
+  26% {
+    opacity: 1;
+    transform: translate(-320px, -118px) scale(0.25);
+    animation-timing-function: ease-out;
+  }
+  38% {
+    transform: translate(-180px, -170px) scale(0.8);
+    animation-timing-function: ease-in;
+  }
+  50%,
+  58% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+    animation-timing-function: ease-in;
+  }
+  86% {
+    opacity: 1;
+    transform: translate(-301px, -86px) scale(0.2);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: translate(-301px, -86px) scale(0.2);
+  }
+}
+
+@keyframes net-rope {
+  0%,
+  49% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50%,
+  58% {
+    opacity: 0.8;
+    transform: scale(1);
+    animation-timing-function: ease-in;
+  }
+  86% {
+    opacity: 0.8;
+    transform: scale(0.12);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: scale(0.12);
+  }
+}
+
+@keyframes net-splash {
+  0%,
+  49% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  52% {
+    opacity: 0.9;
+  }
+  72%,
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* A result rises into the card as its fish flips in beside it. */
+@keyframes catch-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+}
+
+@keyframes fish-flip {
+  0% {
+    opacity: 0;
+    transform: translate3d(-6px, -10px, 0) rotate(-40deg) scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, 1px, 0) rotate(12deg) scale(1.05);
+  }
+  100% {
+    transform: none;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .catch-fish {
-    transition: opacity 0.4s ease-out;
+  .boat-net,
+  [data-pole] {
+    transition: opacity 0.3s ease-out;
   }
 
-  [data-net="down"] .catch-fish {
-    transition-delay: 1.3s;
+  .net-fish {
+    transition: opacity 0.2s ease-out;
   }
 
-  [data-net="down"] .net-arm {
-    animation: net-haul 1.8s ease-in-out;
+  [data-boat][data-net="down"] .net-fish {
+    transition-delay: 1.4s;
+  }
+
+  [data-boat][data-net="down"] .net-hold {
+    animation: net-swing 1.6s ease-in-out;
+  }
+
+  [data-boat][data-net="down"] .net-bundle {
+    animation: net-bundle 1.6s linear;
+  }
+
+  [data-boat][data-net="down"] .net-fly {
+    animation: net-fly 1.6s ease-in-out;
+  }
+
+  [data-boat][data-net="down"] .net-rope {
+    animation: net-rope 1.6s ease-in-out;
+  }
+
+  [data-boat][data-net="down"] .net-splash {
+    animation: net-splash 1.6s ease-out;
+  }
+
+  .catch-in {
+    animation: catch-in 0.35s ease-out var(--beat, 0ms) backwards;
+  }
+
+  .catch-in .catch-fish {
+    animation: fish-flip 0.45s ease-out var(--beat, 0ms) backwards;
   }
 }
 
